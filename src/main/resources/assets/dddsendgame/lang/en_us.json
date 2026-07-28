@@ -1,0 +1,25 @@
+{
+  "itemGroup.dddsendgame": "Example Mod Tab",
+  "block.dddsendgame.example_block": "Example Block",
+  "item.dddsendgame.example_item": "Example Item",
+  "item.dddsendgame.endgame_test_stick": "Endgame Test Stick",
+  "item.dddsendgame.endgame_test_stick.lore": "Generated from one million of every loaded recipe output item.",
+  "block.dddsendgame.endgame_template": "Endgame Template",
+  "container.dddsendgame.endgame_template": "Endgame Template",
+  "container.dddsendgame.endgame_template.deposit": "Deposit",
+  "container.dddsendgame.endgame_template.result": "Result",
+  "container.dddsendgame.endgame_template.progress": "Progress",
+  "container.dddsendgame.endgame_template.search": "Search item name...",
+  "container.dddsendgame.endgame_template.sort.name": "Name",
+  "container.dddsendgame.endgame_template.sort.progress": "Progress",
+  "container.dddsendgame.endgame_template.sort.asc": "Asc",
+  "container.dddsendgame.endgame_template.sort.desc": "Desc",
+
+  "dddsendgame.configuration.title": "ddd's endgame Configs",
+  "dddsendgame.configuration.section.dddsendgame.common.toml": "ddd's endgame Configs",
+  "dddsendgame.configuration.section.dddsendgame.common.toml.title": "ddd's endgame Configs",
+  "dddsendgame.configuration.items": "Item List",
+  "dddsendgame.configuration.logDirtBlock": "Log Dirt Block",
+  "dddsendgame.configuration.magicNumberIntroduction": "Magic Number Text",
+  "dddsendgame.configuration.magicNumber": "Magic Number"
+}
