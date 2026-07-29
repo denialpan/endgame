@@ -1,5 +1,6 @@
 package com.ddd.endgame;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -22,6 +23,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTemplateMenu> {
     private static final ResourceLocation ATLAS = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/gui/atlas.png");
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getIntegerInstance(Locale.US);
+    private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.0000000");
 
     private static final int TEMPLATE_WIDTH = 176;
     private static final int TEMPLATE_HEIGHT = 176;
@@ -341,6 +343,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
             guiGraphics.renderTooltip(this.font, List.of(
                     Component.literal("Total progress"),
                     Component.literal(NUMBER_FORMAT.format(totalContributed) + " / " + NUMBER_FORMAT.format(this.cachedTotalRequired)),
+                    Component.literal(formatPercent(totalContributed, this.cachedTotalRequired) + "% complete"),
                     Component.literal(NUMBER_FORMAT.format(this.cachedTotalRemaining) + " remaining")
             ), Optional.empty(), mouseX, mouseY);
             return;
@@ -352,6 +355,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
             tooltip.add(Component.empty());
             tooltip.add(Component.literal("Endgame progress").withStyle(ChatFormatting.GRAY));
             tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.contributed()) + " / " + NUMBER_FORMAT.format(dddsendgame.ENDGAME_ITEM_REQUIREMENT)).withStyle(ChatFormatting.DARK_GRAY));
+            tooltip.add(Component.literal(formatPercent(hovered.contributed(), dddsendgame.ENDGAME_ITEM_REQUIREMENT) + "% complete").withStyle(ChatFormatting.DARK_GRAY));
             tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.remaining()) + " remaining").withStyle(ChatFormatting.DARK_GRAY));
             guiGraphics.renderTooltip(this.font, tooltip, hovered.stack().getTooltipImage(), mouseX, mouseY);
         }
@@ -408,6 +412,10 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
 
     private static double progress(long contributed, long required) {
         return required <= 0L ? 0.0D : Mth.clamp((double)contributed / (double)required, 0.0D, 1.0D);
+    }
+
+    private static String formatPercent(long contributed, long required) {
+        return PERCENT_FORMAT.format(progress(contributed, required) * 100.0D);
     }
 
     private enum SortMode {

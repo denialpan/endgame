@@ -1,5 +1,7 @@
 package com.ddd.endgame;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -88,18 +90,13 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
 
         Map<ResourceLocation, Item> recipeItems = new LinkedHashMap<>();
         for (RecipeHolder<?> holder : this.level.getRecipeManager().getRecipes()) {
-            ItemStack result = holder.value().getResultItem(this.level.registryAccess());
-            if (holder.value().isSpecial()
-                    || result.isEmpty()
-                    || result.is(dddsendgame.ENDGAME_TEST_STICK.get())
-                    || result.is(dddsendgame.ENDGAME_TEMPLATE_ITEM.get())) {
+            Object recipe = holder.value();
+            addModernIndustrializationMachineOutputs(recipeItems, recipe);
+            if (holder.value().isSpecial()) {
                 continue;
             }
 
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(result.getItem());
-            if (itemId != null) {
-                recipeItems.putIfAbsent(itemId, result.getItem());
-            }
+            addRecipeOutputItem(recipeItems, holder.value().getResultItem(this.level.registryAccess()));
         }
 
         List<ResourceLocation> sorted = new ArrayList<>(recipeItems.keySet());
@@ -117,6 +114,43 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         if (changed) {
             dddsendgame.LOGGER.info("Endgame template at {} tracks {} recipe output items", this.worldPosition, this.remaining.size());
             this.setChangedAndSync();
+        }
+    }
+
+    private static void addRecipeOutputItem(Map<ResourceLocation, Item> recipeItems, ItemStack result) {
+        if (result.isEmpty()
+                || result.is(dddsendgame.ENDGAME_TEST_STICK.get())
+                || result.is(dddsendgame.ENDGAME_TEMPLATE_ITEM.get())) {
+            return;
+        }
+
+        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(result.getItem());
+        if (itemId != null) {
+            recipeItems.putIfAbsent(itemId, result.getItem());
+        }
+    }
+
+    private static void addModernIndustrializationMachineOutputs(Map<ResourceLocation, Item> recipeItems, Object recipe) {
+        if (!"aztech.modern_industrialization.machines.recipe.MachineRecipe".equals(recipe.getClass().getName())) {
+            return;
+        }
+
+        try {
+            Field itemOutputsField = recipe.getClass().getField("itemOutputs");
+            Object itemOutputs = itemOutputsField.get(recipe);
+            if (!(itemOutputs instanceof Iterable<?> outputs)) {
+                return;
+            }
+
+            for (Object output : outputs) {
+                Method getStack = output.getClass().getMethod("getStack");
+                Object stack = getStack.invoke(output);
+                if (stack instanceof ItemStack itemStack) {
+                    addRecipeOutputItem(recipeItems, itemStack);
+                }
+            }
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+            dddsendgame.LOGGER.debug("Unable to inspect Modern Industrialization machine recipe {}", recipe, exception);
         }
     }
 
