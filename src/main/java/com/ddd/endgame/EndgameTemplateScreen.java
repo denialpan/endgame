@@ -6,9 +6,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -22,42 +24,40 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getIntegerInstance(Locale.US);
 
     private static final int TEMPLATE_WIDTH = 176;
-    private static final int TEMPLATE_HEIGHT = 170;
+    private static final int TEMPLATE_HEIGHT = 176;
     private static final int SEARCH_X = 8;
-    private static final int SEARCH_Y = 41;
+    private static final int SEARCH_Y = 28;
     private static final int SEARCH_WIDTH = 160;
     private static final int SEARCH_HEIGHT = 9;
     private static final int TOTAL_BAR_X = 8;
     private static final int TOTAL_BAR_Y = 20;
     private static final int TOTAL_BAR_WIDTH = 160;
     private static final int TOTAL_BAR_HEIGHT = 4;
-    private static final int GRADIENT_U = 8;
-    private static final int GRADIENT_V = 180;
-    private static final int CHECKBOX_U = 8;
-    private static final int CHECKBOX_V = 188;
-    private static final int CHECKBOX_SIZE = 6;
-    private static final int SCROLL_THUMB_U = 8;
-    private static final int SCROLL_THUMB_V = 197;
+    private static final int GRADIENT_U = 0;
+    private static final int GRADIENT_V = 193;
+    private static final int SCROLL_THUMB_U = 0;
+    private static final int SCROLL_THUMB_V = 177;
     private static final int SCROLL_THUMB_WIDTH = 12;
     private static final int SCROLL_THUMB_HEIGHT = 15;
-    private static final int NAME_CHECK_X = 8;
-    private static final int PROGRESS_CHECK_X = 50;
-    private static final int ASCENDING_CHECK_X = 92;
-    private static final int CHECK_Y = 31;
-    private static final int CHECK_HIT_HEIGHT = 8;
-    private static final int NAME_HIT_WIDTH = 36;
-    private static final int PROGRESS_HIT_WIDTH = 39;
-    private static final int ASCENDING_HIT_WIDTH = 74;
+    private static final int BUTTON_U = 176;
+    private static final int BUTTON_SIZE = 18;
+    private static final int SORT_NUMBER_V = 0;
+    private static final int DIRECTION_ASCENDING_V = 22;
+    private static final int SORT_NAME_V = 44;
+    private static final int DIRECTION_DESCENDING_V = 66;
+    private static final int BUTTON_X = -21;
+    private static final int SORT_BUTTON_Y = 5;
+    private static final int DIRECTION_BUTTON_Y = 27;
     private static final int GRID_X = 7;
-    private static final int GRID_Y = 55;
+    private static final int GRID_Y = 43;
     private static final int GRID_COLUMNS = 8;
-    private static final int GRID_ROWS = 6;
+    private static final int GRID_ROWS = 7;
     private static final int GRID_CELL = 18;
     private static final int VISIBLE_ITEMS = GRID_COLUMNS * GRID_ROWS;
     private static final int SCROLLBAR_X = 152;
-    private static final int SCROLLBAR_Y = 55;
+    private static final int SCROLLBAR_Y = 43;
     private static final int SCROLLBAR_WIDTH = 16;
-    private static final int SCROLLBAR_HEIGHT = 108;
+    private static final int SCROLLBAR_HEIGHT = 126;
     private static final int SCROLLBAR_BOTTOM_PADDING = 2;
 
     private int scrollRow;
@@ -76,7 +76,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
     public EndgameTemplateScreen(EndgameTemplateMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = TEMPLATE_WIDTH;
-        this.imageHeight = 194;
+        this.imageHeight = TEMPLATE_HEIGHT;
         this.titleLabelX = 7;
         this.titleLabelY = 6;
     }
@@ -120,7 +120,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
         }
 
         drawTotalProgress(guiGraphics, x, y);
-        drawCheckedBoxes(guiGraphics, x, y);
+        drawSortButtons(guiGraphics, x, y);
         drawRequirementGrid(guiGraphics, x, y, this.sortedRows());
         drawScrollbar(guiGraphics, x, y);
     }
@@ -168,15 +168,11 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0) {
-            if (isMouseOver(mouseX, mouseY, NAME_CHECK_X, CHECK_Y, NAME_HIT_WIDTH, CHECK_HIT_HEIGHT)) {
-                selectSortMode(SortMode.NAME);
+            if (isMouseOver(mouseX, mouseY, BUTTON_X, SORT_BUTTON_Y, BUTTON_SIZE, BUTTON_SIZE)) {
+                selectSortMode(this.sortMode == SortMode.NAME ? SortMode.PROGRESS : SortMode.NAME);
                 return true;
             }
-            if (isMouseOver(mouseX, mouseY, PROGRESS_CHECK_X, CHECK_Y, PROGRESS_HIT_WIDTH, CHECK_HIT_HEIGHT)) {
-                selectSortMode(SortMode.PROGRESS);
-                return true;
-            }
-            if (isMouseOver(mouseX, mouseY, ASCENDING_CHECK_X, CHECK_Y, ASCENDING_HIT_WIDTH, CHECK_HIT_HEIGHT)) {
+            if (isMouseOver(mouseX, mouseY, BUTTON_X, DIRECTION_BUTTON_Y, BUTTON_SIZE, BUTTON_SIZE)) {
                 this.sortAscending = !this.sortAscending;
                 this.scrollRow = 0;
                 return true;
@@ -184,6 +180,11 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
             if (maxScrollRows() > 0 && isMouseOver(mouseX, mouseY, SCROLLBAR_X, SCROLLBAR_Y, SCROLLBAR_WIDTH, SCROLLBAR_HEIGHT)) {
                 this.draggingScrollbar = true;
                 updateScrollFromMouse(mouseY);
+                return true;
+            }
+            RowData clicked = hoveredGridRow((int)mouseX, (int)mouseY);
+            if (clicked != null) {
+                openJeiRecipes(clicked.stack());
                 return true;
             }
         }
@@ -269,12 +270,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
     }
 
     private void selectSortMode(SortMode mode) {
-        if (this.sortMode == mode) {
-            this.sortAscending = !this.sortAscending;
-        } else {
-            this.sortMode = mode;
-            this.sortAscending = true;
-        }
+        this.sortMode = mode;
         this.scrollRow = 0;
         this.cachedRequirementsRevision = Integer.MIN_VALUE;
     }
@@ -309,20 +305,9 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
         }
     }
 
-    private void drawCheckedBoxes(GuiGraphics guiGraphics, int x, int y) {
-        if (this.sortMode == SortMode.NAME) {
-            drawCheck(guiGraphics, x + NAME_CHECK_X, y + CHECK_Y);
-        }
-        if (this.sortMode == SortMode.PROGRESS) {
-            drawCheck(guiGraphics, x + PROGRESS_CHECK_X, y + CHECK_Y);
-        }
-        if (this.sortAscending) {
-            drawCheck(guiGraphics, x + ASCENDING_CHECK_X, y + CHECK_Y);
-        }
-    }
-
-    private void drawCheck(GuiGraphics guiGraphics, int x, int y) {
-        guiGraphics.blit(ATLAS, x + 1, y + 1, CHECKBOX_U, CHECKBOX_V, CHECKBOX_SIZE, CHECKBOX_SIZE);
+    private void drawSortButtons(GuiGraphics guiGraphics, int x, int y) {
+        guiGraphics.blit(ATLAS, x + BUTTON_X, y + SORT_BUTTON_Y, BUTTON_U, this.sortMode == SortMode.NAME ? SORT_NAME_V : SORT_NUMBER_V, BUTTON_SIZE, BUTTON_SIZE);
+        guiGraphics.blit(ATLAS, x + BUTTON_X, y + DIRECTION_BUTTON_Y, BUTTON_U, this.sortAscending ? DIRECTION_ASCENDING_V : DIRECTION_DESCENDING_V, BUTTON_SIZE, BUTTON_SIZE);
     }
 
     private void drawRequirementGrid(GuiGraphics guiGraphics, int x, int y, List<RowData> rows) {
@@ -363,11 +348,41 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
 
         RowData hovered = hoveredGridRow(mouseX, mouseY);
         if (hovered != null) {
-            guiGraphics.renderTooltip(this.font, List.of(
-                    hovered.stack().getHoverName(),
-                    Component.literal(NUMBER_FORMAT.format(hovered.contributed()) + " / " + NUMBER_FORMAT.format(dddsendgame.ENDGAME_ITEM_REQUIREMENT)),
-                    Component.literal(NUMBER_FORMAT.format(hovered.remaining()) + " remaining")
-            ), Optional.empty(), mouseX, mouseY);
+            List<Component> tooltip = new ArrayList<>(Screen.getTooltipFromItem(Minecraft.getInstance(), hovered.stack()));
+            tooltip.add(Component.empty());
+            tooltip.add(Component.literal("Endgame progress").withStyle(ChatFormatting.GRAY));
+            tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.contributed()) + " / " + NUMBER_FORMAT.format(dddsendgame.ENDGAME_ITEM_REQUIREMENT)).withStyle(ChatFormatting.DARK_GRAY));
+            tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.remaining()) + " remaining").withStyle(ChatFormatting.DARK_GRAY));
+            guiGraphics.renderTooltip(this.font, tooltip, hovered.stack().getTooltipImage(), mouseX, mouseY);
+        }
+    }
+
+    private static void openJeiRecipes(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return;
+        }
+
+        try {
+            Class<?> internalClass = Class.forName("mezz.jei.common.Internal");
+            Object runtime = internalClass.getMethod("getJeiRuntime").invoke(null);
+            if (runtime == null) {
+                return;
+            }
+
+            Object helpers = runtime.getClass().getMethod("getJeiHelpers").invoke(runtime);
+            Object focusFactory = helpers.getClass().getMethod("getFocusFactory").invoke(helpers);
+            Object recipesGui = runtime.getClass().getMethod("getRecipesGui").invoke(runtime);
+            Class<?> roleClass = Class.forName("mezz.jei.api.recipe.RecipeIngredientRole");
+            Class<?> typeClass = Class.forName("mezz.jei.api.ingredients.IIngredientType");
+            Class<?> vanillaTypesClass = Class.forName("mezz.jei.api.constants.VanillaTypes");
+            Object outputRole = Enum.valueOf((Class<? extends Enum>)roleClass.asSubclass(Enum.class), "OUTPUT");
+            Object itemStackType = vanillaTypesClass.getField("ITEM_STACK").get(null);
+            Object focus = focusFactory.getClass()
+                    .getMethod("createFocus", roleClass, typeClass, Object.class)
+                    .invoke(focusFactory, outputRole, itemStackType, stack.copy());
+            recipesGui.getClass().getMethod("show", List.class).invoke(recipesGui, List.of(focus));
+        } catch (ReflectiveOperationException | RuntimeException ignored) {
+            // JEI is optional; clicks are a no-op if it is not installed or its runtime is unavailable.
         }
     }
 
