@@ -12,6 +12,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -54,13 +55,13 @@ public class dddsendgame {
     public static final DeferredBlock<EndgameTemplateBlock> ENDGAME_TEMPLATE_BLOCK = BLOCKS.registerBlock(
             "endgame_template",
             EndgameTemplateBlock::new,
-            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(50.0F, 1200.0F).requiresCorrectToolForDrops()
+            BlockBehaviour.Properties.ofFullCopy(Blocks.OBSIDIAN)
     );
     public static final DeferredItem<BlockItem> ENDGAME_TEMPLATE_ITEM = ITEMS.registerSimpleBlockItem("endgame_template", ENDGAME_TEMPLATE_BLOCK);
     public static final DeferredBlock<EndgameTemplateInputBlock> ENDGAME_TEMPLATE_INPUT_BLOCK = BLOCKS.registerBlock(
             "endgame_template_input",
             EndgameTemplateInputBlock::new,
-            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(50.0F, 1200.0F).requiresCorrectToolForDrops()
+            BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
     );
     public static final DeferredItem<BlockItem> ENDGAME_TEMPLATE_INPUT_ITEM = ITEMS.registerSimpleBlockItem("endgame_template_input", ENDGAME_TEMPLATE_INPUT_BLOCK);
 

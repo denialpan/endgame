@@ -3,7 +3,9 @@ package com.ddd.endgame;
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
@@ -41,6 +43,21 @@ public class EndgameTemplateBlock extends BaseEntityBlock {
     }
 
     @Override
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        if (!level.isClientSide && !player.isCreative() && level.getBlockEntity(pos) instanceof EndgameTemplateBlockEntity blockEntity) {
+            popResource(level, pos, savedControllerStack(blockEntity, (ServerLevel)level));
+        }
+
+        return super.playerWillDestroy(level, pos, state, player);
+    }
+
+    @Override
+    public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
+        player.awardStat(Stats.BLOCK_MINED.get(this));
+        player.causeFoodExhaustion(0.005F);
+    }
+
+    @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         open(level, pos, player);
         return InteractionResult.sidedSuccess(level.isClientSide);
@@ -57,5 +74,11 @@ public class EndgameTemplateBlock extends BaseEntityBlock {
             blockEntity.initializeRequirementsFromRecipes();
             serverPlayer.openMenu(blockEntity, buffer -> buffer.writeBlockPos(pos));
         }
+    }
+
+    private static ItemStack savedControllerStack(EndgameTemplateBlockEntity blockEntity, ServerLevel level) {
+        ItemStack stack = new ItemStack(dddsendgame.ENDGAME_TEMPLATE_ITEM.get());
+        blockEntity.saveToItem(stack, level.registryAccess());
+        return stack;
     }
 }

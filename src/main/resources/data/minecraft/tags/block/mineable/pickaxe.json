@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "dddsendgame:endgame_template",
+    "dddsendgame:endgame_template_input"
+  ]
+}
