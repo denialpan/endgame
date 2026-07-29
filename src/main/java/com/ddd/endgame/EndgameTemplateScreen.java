@@ -36,6 +36,10 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
     private static final int CHECKBOX_U = 8;
     private static final int CHECKBOX_V = 188;
     private static final int CHECKBOX_SIZE = 6;
+    private static final int SCROLL_THUMB_U = 8;
+    private static final int SCROLL_THUMB_V = 197;
+    private static final int SCROLL_THUMB_WIDTH = 12;
+    private static final int SCROLL_THUMB_HEIGHT = 15;
     private static final int NAME_CHECK_X = 8;
     private static final int PROGRESS_CHECK_X = 50;
     private static final int ASCENDING_CHECK_X = 92;
@@ -46,12 +50,18 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
     private static final int ASCENDING_HIT_WIDTH = 74;
     private static final int GRID_X = 7;
     private static final int GRID_Y = 55;
-    private static final int GRID_COLUMNS = 9;
+    private static final int GRID_COLUMNS = 8;
     private static final int GRID_ROWS = 6;
     private static final int GRID_CELL = 18;
     private static final int VISIBLE_ITEMS = GRID_COLUMNS * GRID_ROWS;
+    private static final int SCROLLBAR_X = 152;
+    private static final int SCROLLBAR_Y = 55;
+    private static final int SCROLLBAR_WIDTH = 16;
+    private static final int SCROLLBAR_HEIGHT = 108;
+    private static final int SCROLLBAR_BOTTOM_PADDING = 2;
 
     private int scrollRow;
+    private boolean draggingScrollbar;
     private SortMode sortMode = SortMode.NAME;
     private boolean sortAscending = true;
     private EditBox searchBox;
@@ -112,6 +122,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
         drawTotalProgress(guiGraphics, x, y);
         drawCheckedBoxes(guiGraphics, x, y);
         drawRequirementGrid(guiGraphics, x, y, this.sortedRows());
+        drawScrollbar(guiGraphics, x, y);
     }
 
     @Override
@@ -170,9 +181,29 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
                 this.scrollRow = 0;
                 return true;
             }
+            if (maxScrollRows() > 0 && isMouseOver(mouseX, mouseY, SCROLLBAR_X, SCROLLBAR_Y, SCROLLBAR_WIDTH, SCROLLBAR_HEIGHT)) {
+                this.draggingScrollbar = true;
+                updateScrollFromMouse(mouseY);
+                return true;
+            }
         }
 
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (this.draggingScrollbar) {
+            updateScrollFromMouse(mouseY);
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        this.draggingScrollbar = false;
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     private EndgameTemplateBlockEntity currentTemplate() {
@@ -257,6 +288,19 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
         return Math.max(0, totalRows - GRID_ROWS);
     }
 
+    private void updateScrollFromMouse(double mouseY) {
+        int maxScroll = maxScrollRows();
+        if (maxScroll <= 0) {
+            this.scrollRow = 0;
+            return;
+        }
+
+        double trackTop = this.topPos + SCROLLBAR_Y;
+        double travel = SCROLLBAR_HEIGHT - SCROLL_THUMB_HEIGHT - SCROLLBAR_BOTTOM_PADDING;
+        double ratio = Mth.clamp((mouseY - trackTop - SCROLL_THUMB_HEIGHT / 2.0D) / travel, 0.0D, 1.0D);
+        this.scrollRow = Mth.clamp((int)Math.round(ratio * maxScroll), 0, maxScroll);
+    }
+
     private void drawTotalProgress(GuiGraphics guiGraphics, int x, int y) {
         long totalContributed = Math.max(0L, this.cachedTotalRequired - this.cachedTotalRemaining);
         int filled = (int)Math.round(TOTAL_BAR_WIDTH * progress(totalContributed, this.cachedTotalRequired));
@@ -294,6 +338,16 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
             int rowNumber = index / GRID_COLUMNS;
             guiGraphics.renderItem(row.stack(), x + GRID_X + column * GRID_CELL + 1, y + GRID_Y + rowNumber * GRID_CELL + 1);
         }
+    }
+
+    private void drawScrollbar(GuiGraphics guiGraphics, int x, int y) {
+        int maxScroll = maxScrollRows();
+        int thumbY = y + SCROLLBAR_Y;
+        if (maxScroll > 0) {
+            int travel = SCROLLBAR_HEIGHT - SCROLL_THUMB_HEIGHT - SCROLLBAR_BOTTOM_PADDING;
+            thumbY += travel * this.scrollRow / maxScroll;
+        }
+        guiGraphics.blit(ATLAS, x + SCROLLBAR_X + 4, thumbY + 1, SCROLL_THUMB_U, SCROLL_THUMB_V, SCROLL_THUMB_WIDTH, SCROLL_THUMB_HEIGHT);
     }
 
     private void renderAtlasTooltips(GuiGraphics guiGraphics, int mouseX, int mouseY) {
