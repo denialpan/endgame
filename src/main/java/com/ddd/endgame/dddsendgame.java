@@ -57,9 +57,17 @@ public class dddsendgame {
             BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(50.0F, 1200.0F).requiresCorrectToolForDrops()
     );
     public static final DeferredItem<BlockItem> ENDGAME_TEMPLATE_ITEM = ITEMS.registerSimpleBlockItem("endgame_template", ENDGAME_TEMPLATE_BLOCK);
+    public static final DeferredBlock<EndgameTemplateInputBlock> ENDGAME_TEMPLATE_INPUT_BLOCK = BLOCKS.registerBlock(
+            "endgame_template_input",
+            EndgameTemplateInputBlock::new,
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(50.0F, 1200.0F).requiresCorrectToolForDrops()
+    );
+    public static final DeferredItem<BlockItem> ENDGAME_TEMPLATE_INPUT_ITEM = ITEMS.registerSimpleBlockItem("endgame_template_input", ENDGAME_TEMPLATE_INPUT_BLOCK);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameTemplateBlockEntity>> ENDGAME_TEMPLATE_BLOCK_ENTITY =
             BLOCK_ENTITY_TYPES.register("endgame_template", () -> BlockEntityType.Builder.of(EndgameTemplateBlockEntity::new, ENDGAME_TEMPLATE_BLOCK.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameTemplateInputBlockEntity>> ENDGAME_TEMPLATE_INPUT_BLOCK_ENTITY =
+            BLOCK_ENTITY_TYPES.register("endgame_template_input", () -> BlockEntityType.Builder.of(EndgameTemplateInputBlockEntity::new, ENDGAME_TEMPLATE_INPUT_BLOCK.get()).build(null));
 
     public static final DeferredHolder<MenuType<?>, MenuType<EndgameTemplateMenu>> ENDGAME_TEMPLATE_MENU =
             MENU_TYPES.register("endgame_template", () -> IMenuTypeExtension.create(EndgameTemplateMenu::new));
@@ -72,6 +80,7 @@ public class dddsendgame {
                 output.accept(EXAMPLE_ITEM.get());
                 output.accept(EXAMPLE_BLOCK_ITEM.get());
                 output.accept(ENDGAME_TEMPLATE_ITEM.get());
+                output.accept(ENDGAME_TEMPLATE_INPUT_ITEM.get());
                 output.accept(EndgameTestRecipe.createResult(parameters.holders()));
             }).build());
 
@@ -101,6 +110,16 @@ public class dddsendgame {
                 ENDGAME_TEMPLATE_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.fluidHandler()
         );
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                ENDGAME_TEMPLATE_INPUT_BLOCK_ENTITY.get(),
+                (blockEntity, side) -> blockEntity.itemHandler()
+        );
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                ENDGAME_TEMPLATE_INPUT_BLOCK_ENTITY.get(),
+                (blockEntity, side) -> blockEntity.fluidHandler()
+        );
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -118,6 +137,7 @@ public class dddsendgame {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             event.accept(EXAMPLE_BLOCK_ITEM);
             event.accept(ENDGAME_TEMPLATE_ITEM);
+            event.accept(ENDGAME_TEMPLATE_INPUT_ITEM);
         }
     }
 

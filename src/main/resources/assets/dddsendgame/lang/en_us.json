@@ -5,6 +5,7 @@
   "item.dddsendgame.endgame_test_stick": "Endgame Test Stick",
   "item.dddsendgame.endgame_test_stick.lore": "Generated from one million of every loaded recipe output item.",
   "block.dddsendgame.endgame_template": "Endgame Template",
+  "block.dddsendgame.endgame_template_input": "Endgame Template Input",
   "container.dddsendgame.endgame_template": "Endgame Template",
   "container.dddsendgame.endgame_template.deposit": "Deposit",
   "container.dddsendgame.endgame_template.result": "Result",

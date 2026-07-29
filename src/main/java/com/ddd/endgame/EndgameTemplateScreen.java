@@ -78,6 +78,8 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
     private int cachedRequirementsRevision = Integer.MIN_VALUE;
     private long cachedTotalRequired;
     private long cachedTotalRemaining;
+    private int cachedCompletedStacks;
+    private int cachedTotalStacks;
 
     public EndgameTemplateScreen(EndgameTemplateMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -241,12 +243,16 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
         List<EndgameRequirement> requirements = template == null ? List.of() : template.requirements();
         List<RowData> rows = new ArrayList<>(requirements.size());
         long totalRemaining = 0L;
+        int completedStacks = 0;
         for (EndgameRequirement requirement : requirements) {
             ItemStack stack = requirement.displayStack();
             FluidStack fluidStack = requirement.displayFluid();
             String name = requirement.displayName().getString();
             long remaining = requirement.remaining();
             totalRemaining += remaining;
+            if (requirement.complete()) {
+                completedStacks++;
+            }
             if (!searchText.isEmpty() && !name.toLowerCase(Locale.ROOT).contains(searchText)) {
                 continue;
             }
@@ -270,6 +276,8 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
         this.cachedRequirementsRevision = revision;
         this.cachedTotalRequired = (long)requirements.size() * dddsendgame.ENDGAME_ITEM_REQUIREMENT;
         this.cachedTotalRemaining = totalRemaining;
+        this.cachedCompletedStacks = completedStacks;
+        this.cachedTotalStacks = requirements.size();
         this.scrollRow = Math.min(this.scrollRow, maxScrollRows(rows.size()));
         return this.cachedRows;
     }
@@ -378,6 +386,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
                     Component.literal("Total progress"),
                     Component.literal(NUMBER_FORMAT.format(totalContributed) + " / " + NUMBER_FORMAT.format(this.cachedTotalRequired)),
                     Component.literal(formatPercent(totalContributed, this.cachedTotalRequired) + "% complete"),
+                    Component.literal("Stacks: " + NUMBER_FORMAT.format(this.cachedCompletedStacks) + " / " + NUMBER_FORMAT.format(this.cachedTotalStacks) + " complete"),
                     Component.literal(NUMBER_FORMAT.format(this.cachedTotalRemaining) + " remaining")
             ), Optional.empty(), mouseX, mouseY);
             return;
@@ -392,6 +401,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
             tooltip.add(Component.literal(hovered.fluid() ? "Endgame fluid progress" : "Endgame progress").withStyle(ChatFormatting.GRAY));
             tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.contributed()) + " / " + NUMBER_FORMAT.format(dddsendgame.ENDGAME_ITEM_REQUIREMENT) + (hovered.fluid() ? " mB" : "")).withStyle(ChatFormatting.DARK_GRAY));
             tooltip.add(Component.literal(formatPercent(hovered.contributed(), dddsendgame.ENDGAME_ITEM_REQUIREMENT) + "% complete").withStyle(ChatFormatting.DARK_GRAY));
+            tooltip.add(Component.literal("Stacks: " + NUMBER_FORMAT.format(this.cachedCompletedStacks) + " / " + NUMBER_FORMAT.format(this.cachedTotalStacks) + " complete").withStyle(ChatFormatting.DARK_GRAY));
             tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.remaining()) + (hovered.fluid() ? " mB" : "") + " remaining").withStyle(ChatFormatting.DARK_GRAY));
             guiGraphics.renderTooltip(this.font, tooltip, hovered.fluid() ? Optional.empty() : hovered.stack().getTooltipImage(), mouseX, mouseY);
         }
