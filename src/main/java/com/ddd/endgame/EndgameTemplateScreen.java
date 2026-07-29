@@ -13,12 +13,16 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTemplateMenu> {
     private static final ResourceLocation ATLAS = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/gui/atlas.png");
@@ -186,7 +190,9 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
             }
             RowData clicked = hoveredGridRow((int)mouseX, (int)mouseY);
             if (clicked != null) {
-                openJeiRecipes(clicked.stack());
+                if (!clicked.fluid()) {
+                    openJeiRecipes(clicked.stack());
+                }
                 return true;
             }
         }
@@ -237,13 +243,14 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
         long totalRemaining = 0L;
         for (EndgameRequirement requirement : requirements) {
             ItemStack stack = requirement.displayStack();
-            String name = stack.getHoverName().getString();
+            FluidStack fluidStack = requirement.displayFluid();
+            String name = requirement.displayName().getString();
             long remaining = requirement.remaining();
             totalRemaining += remaining;
             if (!searchText.isEmpty() && !name.toLowerCase(Locale.ROOT).contains(searchText)) {
                 continue;
             }
-            rows.add(new RowData(stack, name, requirement.itemId().toString(), remaining));
+            rows.add(new RowData(stack, fluidStack, name, requirement.id().toString(), requirement.fluid(), remaining));
         }
 
         Comparator<RowData> comparator = switch (this.sortMode) {
@@ -323,8 +330,35 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
             RowData row = rows.get(rowIndex);
             int column = index % GRID_COLUMNS;
             int rowNumber = index / GRID_COLUMNS;
-            guiGraphics.renderItem(row.stack(), x + GRID_X + column * GRID_CELL + 1, y + GRID_Y + rowNumber * GRID_CELL + 1);
+            int itemX = x + GRID_X + column * GRID_CELL + 1;
+            int itemY = y + GRID_Y + rowNumber * GRID_CELL + 1;
+            if (row.fluid()) {
+                drawFluidIcon(guiGraphics, row.fluidStack(), itemX, itemY);
+            } else {
+                guiGraphics.renderItem(row.stack(), itemX, itemY);
+            }
         }
+    }
+
+    private static void drawFluidIcon(GuiGraphics guiGraphics, FluidStack fluidStack, int x, int y) {
+        if (fluidStack.isEmpty()) {
+            return;
+        }
+
+        IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(fluidStack.getFluid());
+        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(extensions.getStillTexture(fluidStack));
+        int color = extensions.getTintColor(fluidStack);
+        float red = ((color >> 16) & 0xFF) / 255.0F;
+        float green = ((color >> 8) & 0xFF) / 255.0F;
+        float blue = (color & 0xFF) / 255.0F;
+        float alpha = ((color >> 24) & 0xFF) / 255.0F;
+        if (alpha <= 0.0F) {
+            alpha = 1.0F;
+        }
+
+        guiGraphics.setColor(red, green, blue, alpha);
+        guiGraphics.blit(x, y, 0, 16, 16, sprite);
+        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     private void drawScrollbar(GuiGraphics guiGraphics, int x, int y) {
@@ -351,13 +385,15 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
 
         RowData hovered = hoveredGridRow(mouseX, mouseY);
         if (hovered != null) {
-            List<Component> tooltip = new ArrayList<>(Screen.getTooltipFromItem(Minecraft.getInstance(), hovered.stack()));
+            List<Component> tooltip = hovered.fluid()
+                    ? new ArrayList<>(List.of(Component.literal(hovered.name())))
+                    : new ArrayList<>(Screen.getTooltipFromItem(Minecraft.getInstance(), hovered.stack()));
             tooltip.add(Component.empty());
-            tooltip.add(Component.literal("Endgame progress").withStyle(ChatFormatting.GRAY));
-            tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.contributed()) + " / " + NUMBER_FORMAT.format(dddsendgame.ENDGAME_ITEM_REQUIREMENT)).withStyle(ChatFormatting.DARK_GRAY));
+            tooltip.add(Component.literal(hovered.fluid() ? "Endgame fluid progress" : "Endgame progress").withStyle(ChatFormatting.GRAY));
+            tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.contributed()) + " / " + NUMBER_FORMAT.format(dddsendgame.ENDGAME_ITEM_REQUIREMENT) + (hovered.fluid() ? " mB" : "")).withStyle(ChatFormatting.DARK_GRAY));
             tooltip.add(Component.literal(formatPercent(hovered.contributed(), dddsendgame.ENDGAME_ITEM_REQUIREMENT) + "% complete").withStyle(ChatFormatting.DARK_GRAY));
-            tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.remaining()) + " remaining").withStyle(ChatFormatting.DARK_GRAY));
-            guiGraphics.renderTooltip(this.font, tooltip, hovered.stack().getTooltipImage(), mouseX, mouseY);
+            tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.remaining()) + (hovered.fluid() ? " mB" : "") + " remaining").withStyle(ChatFormatting.DARK_GRAY));
+            guiGraphics.renderTooltip(this.font, tooltip, hovered.fluid() ? Optional.empty() : hovered.stack().getTooltipImage(), mouseX, mouseY);
         }
     }
 
@@ -423,7 +459,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
         PROGRESS
     }
 
-    private record RowData(ItemStack stack, String name, String itemId, long remaining) {
+    private record RowData(ItemStack stack, FluidStack fluidStack, String name, String itemId, boolean fluid, long remaining) {
         long contributed() {
             return dddsendgame.ENDGAME_ITEM_REQUIREMENT - this.remaining;
         }

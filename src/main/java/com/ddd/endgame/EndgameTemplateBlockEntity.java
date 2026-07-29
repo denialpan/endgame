@@ -29,13 +29,19 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 
 public class EndgameTemplateBlockEntity extends BlockEntity implements Container, MenuProvider {
     private static final int SLOT_INPUT = 0;
     private static final int SLOT_OUTPUT = 1;
     private final LinkedHashMap<ResourceLocation, Long> remaining = new LinkedHashMap<>();
+    private final LinkedHashMap<ResourceLocation, Long> fluidRemaining = new LinkedHashMap<>();
     private final IItemHandler itemHandler = new TemplateItemHandler();
+    private final IFluidHandler fluidHandler = new TemplateFluidHandler();
     private List<EndgameRequirement> cachedRequirements = List.of();
     private boolean requirementsDirty = true;
     private int requirementsRevision;
@@ -46,13 +52,21 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
 
     public List<EndgameRequirement> requirements() {
         if (this.requirementsDirty) {
-            this.cachedRequirements = this.remaining.entrySet().stream()
+            List<EndgameRequirement> requirements = new ArrayList<>();
+            this.remaining.entrySet().stream()
                     .map(entry -> BuiltInRegistries.ITEM.getOptional(entry.getKey())
-                            .map(item -> new EndgameRequirement(entry.getKey(), item, entry.getValue()))
+                            .map(item -> EndgameRequirement.item(entry.getKey(), item, entry.getValue()))
                             .orElse(null))
-                    .filter(requirement -> requirement != null && requirement.item() != Items.AIR)
-                    .sorted(Comparator.comparing(EndgameRequirement::complete).thenComparing(requirement -> requirement.itemId().toString()))
-                    .toList();
+                    .filter(requirement -> requirement != null && !requirement.displayStack().is(Items.AIR))
+                    .forEach(requirements::add);
+            this.fluidRemaining.entrySet().stream()
+                    .map(entry -> BuiltInRegistries.FLUID.getOptional(entry.getKey())
+                            .map(fluid -> EndgameRequirement.fluid(entry.getKey(), fluid, entry.getValue()))
+                            .orElse(null))
+                    .filter(requirement -> requirement != null && requirement.fluid() && BuiltInRegistries.FLUID.get(requirement.id()) != Fluids.EMPTY)
+                    .forEach(requirements::add);
+            requirements.sort(Comparator.comparing(EndgameRequirement::complete).thenComparing(requirement -> requirement.id().toString()));
+            this.cachedRequirements = List.copyOf(requirements);
             this.requirementsDirty = false;
         }
 
@@ -60,23 +74,31 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
     }
 
     public long totalRemaining() {
-        return this.remaining.values().stream().mapToLong(Long::longValue).sum();
+        return this.remaining.values().stream().mapToLong(Long::longValue).sum()
+                + this.fluidRemaining.values().stream().mapToLong(Long::longValue).sum();
     }
 
     public long totalRequired() {
-        return (long)this.remaining.size() * dddsendgame.ENDGAME_ITEM_REQUIREMENT;
+        return (long)(this.remaining.size() + this.fluidRemaining.size()) * dddsendgame.ENDGAME_ITEM_REQUIREMENT;
     }
 
     public int completedRequirementCount() {
-        return (int)this.remaining.values().stream().filter(count -> count <= 0L).count();
+        return (int)this.remaining.values().stream().filter(count -> count <= 0L).count()
+                + (int)this.fluidRemaining.values().stream().filter(count -> count <= 0L).count();
     }
 
     public boolean isComplete() {
-        return !this.remaining.isEmpty() && this.remaining.values().stream().allMatch(count -> count <= 0L);
+        return (!this.remaining.isEmpty() || !this.fluidRemaining.isEmpty())
+                && this.remaining.values().stream().allMatch(count -> count <= 0L)
+                && this.fluidRemaining.values().stream().allMatch(count -> count <= 0L);
     }
 
     public IItemHandler itemHandler() {
         return this.itemHandler;
+    }
+
+    public IFluidHandler fluidHandler() {
+        return this.fluidHandler;
     }
 
     public int requirementsRevision() {
@@ -89,9 +111,12 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         }
 
         Map<ResourceLocation, Item> recipeItems = new LinkedHashMap<>();
+        Map<ResourceLocation, Fluid> recipeFluids = new LinkedHashMap<>();
+        addRecipeFluid(recipeFluids, Fluids.WATER);
+        addRecipeFluid(recipeFluids, Fluids.LAVA);
         for (RecipeHolder<?> holder : this.level.getRecipeManager().getRecipes()) {
             Object recipe = holder.value();
-            addModernIndustrializationMachineOutputs(recipeItems, recipe);
+            addModernIndustrializationMachineOutputs(recipeItems, recipeFluids, recipe);
             if (holder.value().isSpecial()) {
                 continue;
             }
@@ -111,8 +136,18 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
             }
         }
 
+        List<ResourceLocation> sortedFluids = new ArrayList<>(recipeFluids.keySet());
+        sortedFluids.sort(ResourceLocation::compareTo);
+        for (ResourceLocation fluidId : sortedFluids) {
+            if (!this.fluidRemaining.containsKey(fluidId)) {
+                this.fluidRemaining.put(fluidId, dddsendgame.ENDGAME_ITEM_REQUIREMENT);
+                this.markRequirementsDirty();
+                changed = true;
+            }
+        }
+
         if (changed) {
-            dddsendgame.LOGGER.info("Endgame template at {} tracks {} recipe output items", this.worldPosition, this.remaining.size());
+            dddsendgame.LOGGER.info("Endgame template at {} tracks {} recipe output items and {} fluids", this.worldPosition, this.remaining.size(), this.fluidRemaining.size());
             this.setChangedAndSync();
         }
     }
@@ -130,7 +165,18 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         }
     }
 
-    private static void addModernIndustrializationMachineOutputs(Map<ResourceLocation, Item> recipeItems, Object recipe) {
+    private static void addRecipeFluid(Map<ResourceLocation, Fluid> recipeFluids, Fluid fluid) {
+        if (fluid == Fluids.EMPTY) {
+            return;
+        }
+
+        ResourceLocation fluidId = BuiltInRegistries.FLUID.getKey(fluid);
+        if (fluidId != null) {
+            recipeFluids.putIfAbsent(fluidId, fluid);
+        }
+    }
+
+    private static void addModernIndustrializationMachineOutputs(Map<ResourceLocation, Item> recipeItems, Map<ResourceLocation, Fluid> recipeFluids, Object recipe) {
         if (!"aztech.modern_industrialization.machines.recipe.MachineRecipe".equals(recipe.getClass().getName())) {
             return;
         }
@@ -138,15 +184,25 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         try {
             Field itemOutputsField = recipe.getClass().getField("itemOutputs");
             Object itemOutputs = itemOutputsField.get(recipe);
-            if (!(itemOutputs instanceof Iterable<?> outputs)) {
-                return;
+            if (itemOutputs instanceof Iterable<?> itemOutputEntries) {
+                for (Object output : itemOutputEntries) {
+                    Method getStack = output.getClass().getMethod("getStack");
+                    Object stack = getStack.invoke(output);
+                    if (stack instanceof ItemStack itemStack) {
+                        addRecipeOutputItem(recipeItems, itemStack);
+                    }
+                }
             }
 
-            for (Object output : outputs) {
-                Method getStack = output.getClass().getMethod("getStack");
-                Object stack = getStack.invoke(output);
-                if (stack instanceof ItemStack itemStack) {
-                    addRecipeOutputItem(recipeItems, itemStack);
+            Field fluidOutputsField = recipe.getClass().getField("fluidOutputs");
+            Object fluidOutputs = fluidOutputsField.get(recipe);
+            if (fluidOutputs instanceof Iterable<?> fluidOutputEntries) {
+                for (Object output : fluidOutputEntries) {
+                    Method fluid = output.getClass().getMethod("fluid");
+                    Object fluidOutput = fluid.invoke(output);
+                    if (fluidOutput instanceof Fluid outputFluid) {
+                        addRecipeFluid(recipeFluids, outputFluid);
+                    }
                 }
             }
         } catch (ReflectiveOperationException | RuntimeException exception) {
@@ -186,13 +242,35 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
     }
 
     private void resetRequirements() {
-        if (this.remaining.isEmpty()) {
+        if (this.remaining.isEmpty() && this.fluidRemaining.isEmpty()) {
             return;
         }
 
         this.remaining.replaceAll((itemId, count) -> dddsendgame.ENDGAME_ITEM_REQUIREMENT);
+        this.fluidRemaining.replaceAll((fluidId, count) -> dddsendgame.ENDGAME_ITEM_REQUIREMENT);
         this.markRequirementsDirty();
         this.setChangedAndSync();
+    }
+
+    private int acceptFluidContribution(FluidStack stack, IFluidHandler.FluidAction action) {
+        if (stack.isEmpty() || this.level == null || this.level.isClientSide) {
+            return 0;
+        }
+
+        this.initializeRequirementsFromRecipes();
+        ResourceLocation fluidId = BuiltInRegistries.FLUID.getKey(stack.getFluid());
+        Long current = this.fluidRemaining.get(fluidId);
+        if (current == null || current <= 0L) {
+            return 0;
+        }
+
+        int accepted = (int)Math.min((long)stack.getAmount(), current);
+        if (action.execute()) {
+            this.fluidRemaining.put(fluidId, current - accepted);
+            this.markRequirementsDirty();
+            this.setChangedAndSync();
+        }
+        return accepted;
     }
 
     @Override
@@ -260,6 +338,7 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         this.remaining.clear();
+        this.fluidRemaining.clear();
 
         ListTag requirements = tag.getList("Requirements", net.minecraft.nbt.Tag.TAG_COMPOUND);
         for (int index = 0; index < requirements.size(); index++) {
@@ -267,6 +346,15 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
             ResourceLocation itemId = ResourceLocation.tryParse(requirement.getString("Item"));
             if (itemId != null) {
                 this.remaining.put(itemId, requirement.getLong("Remaining"));
+            }
+        }
+
+        ListTag fluidRequirements = tag.getList("FluidRequirements", net.minecraft.nbt.Tag.TAG_COMPOUND);
+        for (int index = 0; index < fluidRequirements.size(); index++) {
+            CompoundTag requirement = fluidRequirements.getCompound(index);
+            ResourceLocation fluidId = ResourceLocation.tryParse(requirement.getString("Fluid"));
+            if (fluidId != null) {
+                this.fluidRemaining.put(fluidId, requirement.getLong("Remaining"));
             }
         }
 
@@ -286,6 +374,16 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         }
 
         tag.put("Requirements", requirements);
+
+        ListTag fluidRequirements = new ListTag();
+        for (Map.Entry<ResourceLocation, Long> entry : this.fluidRemaining.entrySet()) {
+            CompoundTag requirement = new CompoundTag();
+            requirement.putString("Fluid", entry.getKey().toString());
+            requirement.putLong("Remaining", entry.getValue());
+            fluidRequirements.add(requirement);
+        }
+
+        tag.put("FluidRequirements", fluidRequirements);
     }
 
     @Nullable
@@ -382,6 +480,52 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         private void validateSlot(int slot) {
             if (slot < 0 || slot >= getSlots()) {
                 throw new RuntimeException("Slot " + slot + " is not in valid range - [0," + getSlots() + ")");
+            }
+        }
+    }
+
+    private class TemplateFluidHandler implements IFluidHandler {
+        @Override
+        public int getTanks() {
+            return 1;
+        }
+
+        @Override
+        public FluidStack getFluidInTank(int tank) {
+            validateTank(tank);
+            return FluidStack.EMPTY;
+        }
+
+        @Override
+        public int getTankCapacity(int tank) {
+            validateTank(tank);
+            return Integer.MAX_VALUE;
+        }
+
+        @Override
+        public boolean isFluidValid(int tank, FluidStack stack) {
+            validateTank(tank);
+            return EndgameTemplateBlockEntity.this.acceptFluidContribution(stack, FluidAction.SIMULATE) > 0;
+        }
+
+        @Override
+        public int fill(FluidStack resource, FluidAction action) {
+            return EndgameTemplateBlockEntity.this.acceptFluidContribution(resource, action);
+        }
+
+        @Override
+        public FluidStack drain(FluidStack resource, FluidAction action) {
+            return FluidStack.EMPTY;
+        }
+
+        @Override
+        public FluidStack drain(int maxDrain, FluidAction action) {
+            return FluidStack.EMPTY;
+        }
+
+        private void validateTank(int tank) {
+            if (tank != 0) {
+                throw new RuntimeException("Tank " + tank + " is not in valid range - [0,1)");
             }
         }
     }

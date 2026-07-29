@@ -96,6 +96,11 @@ public class dddsendgame {
                 ENDGAME_TEMPLATE_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.itemHandler()
         );
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                ENDGAME_TEMPLATE_BLOCK_ENTITY.get(),
+                (blockEntity, side) -> blockEntity.fluidHandler()
+        );
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
