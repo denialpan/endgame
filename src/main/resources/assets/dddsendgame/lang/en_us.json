@@ -10,6 +10,7 @@
   "container.dddsendgame.endgame_template.result": "Result",
   "container.dddsendgame.endgame_template.progress": "Progress",
   "container.dddsendgame.endgame_template.search": "Search item name...",
+  "container.dddsendgame.endgame_template.search.short": "search",
   "container.dddsendgame.endgame_template.sort.name": "Name",
   "container.dddsendgame.endgame_template.sort.progress": "Progress",
   "container.dddsendgame.endgame_template.sort.asc": "Asc",

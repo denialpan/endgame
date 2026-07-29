@@ -8,7 +8,6 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -18,7 +17,6 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
-import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -34,13 +32,11 @@ import net.neoforged.neoforge.items.IItemHandler;
 public class EndgameTemplateBlockEntity extends BlockEntity implements Container, MenuProvider {
     private static final int SLOT_INPUT = 0;
     private static final int SLOT_OUTPUT = 1;
-    private final NonNullList<ItemStack> items = NonNullList.withSize(2, ItemStack.EMPTY);
     private final LinkedHashMap<ResourceLocation, Long> remaining = new LinkedHashMap<>();
     private final IItemHandler itemHandler = new TemplateItemHandler();
     private List<EndgameRequirement> cachedRequirements = List.of();
     private boolean requirementsDirty = true;
     private int requirementsRevision;
-    private boolean outputClaimed;
 
     public EndgameTemplateBlockEntity(BlockPos pos, BlockState blockState) {
         super(dddsendgame.ENDGAME_TEMPLATE_BLOCK_ENTITY.get(), pos, blockState);
@@ -140,7 +136,6 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         this.remaining.put(itemId, current - accepted);
         this.markRequirementsDirty();
         stack.shrink(accepted);
-        this.ensureResult();
         this.setChangedAndSync();
         return accepted;
     }
@@ -156,10 +151,14 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         return current == null || current <= 0L ? 0 : (int)Math.min((long)stack.getCount(), current);
     }
 
-    private void ensureResult() {
-        if (this.isComplete() && !this.outputClaimed && this.items.get(SLOT_OUTPUT).isEmpty() && this.level != null) {
-            this.items.set(SLOT_OUTPUT, EndgameTestRecipe.createResult(this.level.registryAccess()));
+    private void resetRequirements() {
+        if (this.remaining.isEmpty()) {
+            return;
         }
+
+        this.remaining.replaceAll((itemId, count) -> dddsendgame.ENDGAME_ITEM_REQUIREMENT);
+        this.markRequirementsDirty();
+        this.setChangedAndSync();
     }
 
     @Override
@@ -171,51 +170,32 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
         this.initializeRequirementsFromRecipes();
-        this.ensureResult();
         return new EndgameTemplateMenu(containerId, playerInventory, this);
     }
 
     @Override
     public int getContainerSize() {
-        return this.items.size();
+        return 0;
     }
 
     @Override
     public boolean isEmpty() {
-        return this.items.stream().allMatch(ItemStack::isEmpty);
+        return true;
     }
 
     @Override
     public ItemStack getItem(int slot) {
-        if (slot == SLOT_OUTPUT) {
-            this.ensureResult();
-        }
-        return this.items.get(slot);
+        return ItemStack.EMPTY;
     }
 
     @Override
     public ItemStack removeItem(int slot, int amount) {
-        if (slot == SLOT_OUTPUT) {
-            this.ensureResult();
-        }
-
-        ItemStack removed = ContainerHelper.removeItem(this.items, slot, amount);
-        if (!removed.isEmpty()) {
-            if (slot == SLOT_OUTPUT && this.items.get(SLOT_OUTPUT).isEmpty()) {
-                this.outputClaimed = true;
-            }
-            this.setChangedAndSync();
-        }
-        return removed;
+        return ItemStack.EMPTY;
     }
 
     @Override
     public ItemStack removeItemNoUpdate(int slot) {
-        ItemStack removed = ContainerHelper.takeItem(this.items, slot);
-        if (slot == SLOT_OUTPUT && !removed.isEmpty()) {
-            this.outputClaimed = true;
-        }
-        return removed;
+        return ItemStack.EMPTY;
     }
 
     @Override
@@ -223,9 +203,6 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         if (slot == SLOT_INPUT) {
             ItemStack remainingStack = stack.copy();
             this.acceptContribution(remainingStack);
-            this.items.set(SLOT_INPUT, remainingStack);
-        } else if (slot == SLOT_OUTPUT) {
-            this.items.set(SLOT_OUTPUT, stack);
         }
         this.setChangedAndSync();
     }
@@ -237,9 +214,6 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
 
     @Override
     public void clearContent() {
-        for (int slot = 0; slot < this.items.size(); slot++) {
-            this.items.set(slot, ItemStack.EMPTY);
-        }
         this.setChangedAndSync();
     }
 
@@ -262,8 +236,6 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
             }
         }
 
-        this.outputClaimed = tag.getBoolean("OutputClaimed");
-        ContainerHelper.loadAllItems(tag, this.items, registries);
         this.markRequirementsDirty();
     }
 
@@ -280,8 +252,6 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         }
 
         tag.put("Requirements", requirements);
-        tag.putBoolean("OutputClaimed", this.outputClaimed);
-        ContainerHelper.saveAllItems(tag, this.items, registries);
     }
 
     @Nullable
@@ -319,10 +289,10 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         @Override
         public ItemStack getStackInSlot(int slot) {
             validateSlot(slot);
-            if (slot == SLOT_OUTPUT) {
-                EndgameTemplateBlockEntity.this.ensureResult();
+            if (slot == SLOT_OUTPUT && EndgameTemplateBlockEntity.this.level != null && EndgameTemplateBlockEntity.this.isComplete()) {
+                return EndgameTestRecipe.createResult(EndgameTemplateBlockEntity.this.level.registryAccess());
             }
-            return EndgameTemplateBlockEntity.this.items.get(slot).copy();
+            return ItemStack.EMPTY;
         }
 
         @Override
@@ -352,16 +322,13 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
                 return ItemStack.EMPTY;
             }
 
-            EndgameTemplateBlockEntity.this.ensureResult();
-            ItemStack output = EndgameTemplateBlockEntity.this.items.get(SLOT_OUTPUT);
-            if (output.isEmpty()) {
+            if (EndgameTemplateBlockEntity.this.level == null || !EndgameTemplateBlockEntity.this.isComplete()) {
                 return ItemStack.EMPTY;
             }
 
-            int extracted = Math.min(amount, output.getCount());
-            ItemStack result = output.copyWithCount(extracted);
+            ItemStack result = EndgameTestRecipe.createResult(EndgameTemplateBlockEntity.this.level.registryAccess());
             if (!simulate) {
-                EndgameTemplateBlockEntity.this.removeItem(SLOT_OUTPUT, extracted);
+                EndgameTemplateBlockEntity.this.resetRequirements();
             }
             return result;
         }

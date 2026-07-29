@@ -9,14 +9,11 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class EndgameTemplateMenu extends AbstractContainerMenu {
-    private static final int TEMPLATE_SLOT_COUNT = 2;
-    private static final int PLAYER_INVENTORY_START = TEMPLATE_SLOT_COUNT;
-    private static final int PLAYER_INVENTORY_END = PLAYER_INVENTORY_START + 36;
+    private static final int TEMPLATE_SLOT_COUNT = 0;
     private final Container container;
     private final BlockPos pos;
     @Nullable
@@ -36,29 +33,6 @@ public class EndgameTemplateMenu extends AbstractContainerMenu {
         this.container = target.container();
         this.pos = target.pos();
         this.blockEntity = target.blockEntity();
-
-        this.addSlot(new Slot(this.container, 0, 26, 35) {
-            @Override
-            public boolean mayPlace(ItemStack stack) {
-                return EndgameTemplateMenu.this.container.canPlaceItem(this.getSlotIndex(), stack);
-            }
-        });
-        this.addSlot(new Slot(this.container, 1, 134, 35) {
-            @Override
-            public boolean mayPlace(ItemStack stack) {
-                return false;
-            }
-        });
-
-        for (int row = 0; row < 3; row++) {
-            for (int column = 0; column < 9; column++) {
-                this.addSlot(new Slot(playerInventory, column + row * 9 + 9, 48 + column * 18, 194 + row * 18));
-            }
-        }
-
-        for (int column = 0; column < 9; column++) {
-            this.addSlot(new Slot(playerInventory, column, 48 + column * 18, 252));
-        }
     }
 
     public BlockPos pos() {
@@ -72,40 +46,7 @@ public class EndgameTemplateMenu extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        ItemStack original = ItemStack.EMPTY;
-        Slot slot = this.slots.get(index);
-        if (slot == null || !slot.hasItem()) {
-            return ItemStack.EMPTY;
-        }
-
-        ItemStack stack = slot.getItem();
-        original = stack.copy();
-
-        if (index == 1) {
-            if (!this.moveItemStackTo(stack, PLAYER_INVENTORY_START, PLAYER_INVENTORY_END, true)) {
-                return ItemStack.EMPTY;
-            }
-            slot.onTake(player, stack);
-        } else if (index >= PLAYER_INVENTORY_START) {
-            if (this.blockEntity != null) {
-                int accepted = this.blockEntity.acceptContribution(stack);
-                if (accepted <= 0) {
-                    return ItemStack.EMPTY;
-                }
-            } else if (!this.moveItemStackTo(stack, 0, 1, false)) {
-                return ItemStack.EMPTY;
-            }
-        } else if (!this.moveItemStackTo(stack, PLAYER_INVENTORY_START, PLAYER_INVENTORY_END, false)) {
-            return ItemStack.EMPTY;
-        }
-
-        if (stack.isEmpty()) {
-            slot.setByPlayer(ItemStack.EMPTY);
-        } else {
-            slot.setChanged();
-        }
-
-        return original;
+        return ItemStack.EMPTY;
     }
 
     @Override
