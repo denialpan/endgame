@@ -26,7 +26,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
     private static final int TEMPLATE_WIDTH = 176;
     private static final int TEMPLATE_HEIGHT = 176;
     private static final int SEARCH_X = 8;
-    private static final int SEARCH_Y = 28;
+    private static final int SEARCH_Y = 30;
     private static final int SEARCH_WIDTH = 160;
     private static final int SEARCH_HEIGHT = 9;
     private static final int TOTAL_BAR_X = 8;
