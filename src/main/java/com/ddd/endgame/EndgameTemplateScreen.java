@@ -127,6 +127,11 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
             guiGraphics.drawString(this.font, Component.translatable("container.dddsendgame.endgame_template.search.short"), x + SEARCH_X + 2, y + SEARCH_Y + 1, 0xFFB0B0B0, false);
         }
 
+        if (this.hasNetworkConflict()) {
+            drawNetworkConflict(guiGraphics, x, y);
+            return;
+        }
+
         drawTotalProgress(guiGraphics, x, y);
         drawSortButtons(guiGraphics, x, y);
         drawRequirementGrid(guiGraphics, x, y, this.sortedRows());
@@ -185,17 +190,19 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
                 this.scrollRow = 0;
                 return true;
             }
-            if (maxScrollRows() > 0 && isMouseOver(mouseX, mouseY, SCROLLBAR_X, SCROLLBAR_Y, SCROLLBAR_WIDTH, SCROLLBAR_HEIGHT)) {
-                this.draggingScrollbar = true;
-                updateScrollFromMouse(mouseY);
-                return true;
-            }
-            RowData clicked = hoveredGridRow((int)mouseX, (int)mouseY);
-            if (clicked != null) {
-                if (!clicked.fluid()) {
-                    openJeiRecipes(clicked.stack());
+            if (!this.hasNetworkConflict()) {
+                if (maxScrollRows() > 0 && isMouseOver(mouseX, mouseY, SCROLLBAR_X, SCROLLBAR_Y, SCROLLBAR_WIDTH, SCROLLBAR_HEIGHT)) {
+                    this.draggingScrollbar = true;
+                    updateScrollFromMouse(mouseY);
+                    return true;
                 }
-                return true;
+                RowData clicked = hoveredGridRow((int)mouseX, (int)mouseY);
+                if (clicked != null) {
+                    if (!clicked.fluid()) {
+                        openJeiRecipes(clicked.stack());
+                    }
+                    return true;
+                }
             }
         }
 
@@ -227,6 +234,16 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
         }
 
         return this.menu.blockEntity();
+    }
+
+    private boolean hasNetworkConflict() {
+        EndgameTemplateBlockEntity template = this.currentTemplate();
+        return template != null && template.hasMultipleConnectedControllers();
+    }
+
+    private int connectedInputCount() {
+        EndgameTemplateBlockEntity template = this.currentTemplate();
+        return template == null ? 0 : template.connectedInputCount();
     }
 
     private List<RowData> sortedRows() {
@@ -327,6 +344,11 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
         guiGraphics.blit(ATLAS, x + BUTTON_X, y + DIRECTION_BUTTON_Y, BUTTON_U, this.sortAscending ? DIRECTION_ASCENDING_V : DIRECTION_DESCENDING_V, BUTTON_SIZE, BUTTON_SIZE);
     }
 
+    private void drawNetworkConflict(GuiGraphics guiGraphics, int x, int y) {
+        Component message = Component.literal("multiple controllers detected");
+        guiGraphics.drawString(this.font, message, x + TEMPLATE_WIDTH / 2 - this.font.width(message) / 2, y + TEMPLATE_HEIGHT / 2 - this.font.lineHeight / 2, 0xFFFF3333, false);
+    }
+
     private void drawRequirementGrid(GuiGraphics guiGraphics, int x, int y, List<RowData> rows) {
         int start = this.scrollRow * GRID_COLUMNS;
         for (int index = 0; index < VISIBLE_ITEMS; index++) {
@@ -380,6 +402,10 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
     }
 
     private void renderAtlasTooltips(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        if (this.hasNetworkConflict()) {
+            return;
+        }
+
         long totalContributed = Math.max(0L, this.cachedTotalRequired - this.cachedTotalRemaining);
         if (isMouseOver(mouseX, mouseY, TOTAL_BAR_X, TOTAL_BAR_Y, TOTAL_BAR_WIDTH, TOTAL_BAR_HEIGHT)) {
             guiGraphics.renderTooltip(this.font, List.of(
@@ -387,6 +413,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
                     Component.literal(NUMBER_FORMAT.format(totalContributed) + " / " + NUMBER_FORMAT.format(this.cachedTotalRequired)),
                     Component.literal(formatPercent(totalContributed, this.cachedTotalRequired) + "% complete"),
                     Component.literal("Stacks: " + NUMBER_FORMAT.format(this.cachedCompletedStacks) + " / " + NUMBER_FORMAT.format(this.cachedTotalStacks) + " complete"),
+                    Component.literal("Inputs: " + NUMBER_FORMAT.format(this.connectedInputCount()) + " connected"),
                     Component.literal(NUMBER_FORMAT.format(this.cachedTotalRemaining) + " remaining")
             ), Optional.empty(), mouseX, mouseY);
             return;
@@ -402,6 +429,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
             tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.contributed()) + " / " + NUMBER_FORMAT.format(dddsendgame.ENDGAME_ITEM_REQUIREMENT) + (hovered.fluid() ? " mB" : "")).withStyle(ChatFormatting.DARK_GRAY));
             tooltip.add(Component.literal(formatPercent(hovered.contributed(), dddsendgame.ENDGAME_ITEM_REQUIREMENT) + "% complete").withStyle(ChatFormatting.DARK_GRAY));
             tooltip.add(Component.literal("Stacks: " + NUMBER_FORMAT.format(this.cachedCompletedStacks) + " / " + NUMBER_FORMAT.format(this.cachedTotalStacks) + " complete").withStyle(ChatFormatting.DARK_GRAY));
+            tooltip.add(Component.literal("Inputs: " + NUMBER_FORMAT.format(this.connectedInputCount()) + " connected").withStyle(ChatFormatting.DARK_GRAY));
             tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.remaining()) + (hovered.fluid() ? " mB" : "") + " remaining").withStyle(ChatFormatting.DARK_GRAY));
             guiGraphics.renderTooltip(this.font, tooltip, hovered.fluid() ? Optional.empty() : hovered.stack().getTooltipImage(), mouseX, mouseY);
         }

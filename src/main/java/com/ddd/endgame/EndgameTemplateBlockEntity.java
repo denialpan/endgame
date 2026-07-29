@@ -105,6 +105,18 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         return this.requirementsRevision;
     }
 
+    public EndgameTemplateNetwork.Status networkStatus() {
+        return this.level == null ? new EndgameTemplateNetwork.Status(this.worldPosition, 1, 0) : EndgameTemplateNetwork.fromController(this.level, this.worldPosition);
+    }
+
+    public int connectedInputCount() {
+        return this.networkStatus().inputCount();
+    }
+
+    public boolean hasMultipleConnectedControllers() {
+        return this.networkStatus().hasMultipleControllers();
+    }
+
     public void initializeRequirementsFromRecipes() {
         if (this.level == null || this.level.isClientSide) {
             return;
@@ -211,7 +223,7 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
     }
 
     public int acceptContribution(ItemStack stack) {
-        if (stack.isEmpty() || this.level == null || this.level.isClientSide) {
+        if (stack.isEmpty() || this.level == null || this.level.isClientSide || this.hasMultipleConnectedControllers()) {
             return 0;
         }
 
@@ -231,7 +243,7 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
     }
 
     public int acceptedContributionCount(ItemStack stack) {
-        if (stack.isEmpty()) {
+        if (stack.isEmpty() || this.hasMultipleConnectedControllers()) {
             return 0;
         }
 
@@ -253,7 +265,7 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
     }
 
     private int acceptFluidContribution(FluidStack stack, IFluidHandler.FluidAction action) {
-        if (stack.isEmpty() || this.level == null || this.level.isClientSide) {
+        if (stack.isEmpty() || this.level == null || this.level.isClientSide || this.hasMultipleConnectedControllers()) {
             return 0;
         }
 
@@ -331,7 +343,7 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
 
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
-        return slot == SLOT_INPUT && this.remaining.getOrDefault(BuiltInRegistries.ITEM.getKey(stack.getItem()), 0L) > 0L;
+        return slot == SLOT_INPUT && !this.hasMultipleConnectedControllers() && this.remaining.getOrDefault(BuiltInRegistries.ITEM.getKey(stack.getItem()), 0L) > 0L;
     }
 
     @Override

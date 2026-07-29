@@ -1,10 +1,7 @@
 package com.ddd.endgame;
 
-import java.util.HashSet;
-import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -35,30 +32,8 @@ public class EndgameTemplateInputBlockEntity extends BlockEntity {
             return null;
         }
 
-        return this.findConnectedTemplate(this.worldPosition, new HashSet<>());
-    }
-
-    @Nullable
-    private EndgameTemplateBlockEntity findConnectedTemplate(BlockPos origin, Set<BlockPos> visited) {
-        if (!visited.add(origin)) {
-            return null;
-        }
-
-        for (Direction direction : Direction.values()) {
-            BlockPos adjacentPos = origin.relative(direction);
-            BlockEntity adjacent = this.level.getBlockEntity(adjacentPos);
-            if (adjacent instanceof EndgameTemplateBlockEntity template) {
-                return template;
-            }
-            if (adjacent instanceof EndgameTemplateInputBlockEntity input) {
-                EndgameTemplateBlockEntity template = input.findConnectedTemplate(adjacentPos, visited);
-                if (template != null) {
-                    return template;
-                }
-            }
-        }
-
-        return null;
+        EndgameTemplateNetwork.Status status = EndgameTemplateNetwork.fromInput(this.level, this.worldPosition);
+        return status.hasMultipleControllers() ? null : status.singleController(this.level);
     }
 
     private class InputItemHandler implements IItemHandler {
