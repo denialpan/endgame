@@ -1,6 +1,13 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube",
+  "render_type": "minecraft:translucent",
   "textures": {
-    "all": "minecraft:block/crying_obsidian"
+    "particle": "dddsendgame:block/endgame_template_north",
+    "north": "dddsendgame:block/endgame_template_north",
+    "south": "dddsendgame:block/endgame_template_south",
+    "east": "dddsendgame:block/endgame_template_east",
+    "west": "dddsendgame:block/endgame_template_west",
+    "up": "dddsendgame:block/endgame_template_up",
+    "down": "dddsendgame:block/endgame_template_down"
   }
 }

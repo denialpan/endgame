@@ -1,6 +1,13 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube",
+  "render_type": "minecraft:translucent",
   "textures": {
-    "all": "minecraft:block/respawn_anchor_side0"
+    "particle": "dddsendgame:block/endgame_template_input_north",
+    "north": "dddsendgame:block/endgame_template_input_north",
+    "south": "dddsendgame:block/endgame_template_input_south",
+    "east": "dddsendgame:block/endgame_template_input_east",
+    "west": "dddsendgame:block/endgame_template_input_west",
+    "up": "dddsendgame:block/endgame_template_input_up",
+    "down": "dddsendgame:block/endgame_template_input_down"
   }
 }
