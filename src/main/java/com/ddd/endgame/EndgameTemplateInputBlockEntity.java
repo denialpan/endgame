@@ -11,6 +11,7 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 public class EndgameTemplateInputBlockEntity extends BlockEntity {
     private static final int SLOT_INPUT = 0;
+    private static final int SLOT_OUTPUT = 1;
     private final IItemHandler itemHandler = new InputItemHandler();
     private final IFluidHandler fluidHandler = new InputFluidHandler();
 
@@ -39,12 +40,16 @@ public class EndgameTemplateInputBlockEntity extends BlockEntity {
     private class InputItemHandler implements IItemHandler {
         @Override
         public int getSlots() {
-            return 1;
+            return 2;
         }
 
         @Override
         public ItemStack getStackInSlot(int slot) {
             validateSlot(slot);
+            EndgameTemplateBlockEntity template = EndgameTemplateInputBlockEntity.this.connectedTemplate();
+            if (template != null && slot == SLOT_OUTPUT) {
+                return template.itemHandler().getStackInSlot(SLOT_OUTPUT);
+            }
             return ItemStack.EMPTY;
         }
 
@@ -66,25 +71,30 @@ public class EndgameTemplateInputBlockEntity extends BlockEntity {
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
             validateSlot(slot);
-            return ItemStack.EMPTY;
+            if (slot != SLOT_OUTPUT || amount <= 0) {
+                return ItemStack.EMPTY;
+            }
+
+            EndgameTemplateBlockEntity template = EndgameTemplateInputBlockEntity.this.connectedTemplate();
+            return template == null ? ItemStack.EMPTY : template.itemHandler().extractItem(SLOT_OUTPUT, amount, simulate);
         }
 
         @Override
         public int getSlotLimit(int slot) {
             validateSlot(slot);
-            return 64;
+            return slot == SLOT_INPUT ? 64 : 1;
         }
 
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
             validateSlot(slot);
             EndgameTemplateBlockEntity template = EndgameTemplateInputBlockEntity.this.connectedTemplate();
-            return template != null && template.itemHandler().isItemValid(SLOT_INPUT, stack);
+            return slot == SLOT_INPUT && template != null && template.itemHandler().isItemValid(SLOT_INPUT, stack);
         }
 
         private void validateSlot(int slot) {
-            if (slot != SLOT_INPUT) {
-                throw new RuntimeException("Slot " + slot + " is not in valid range - [0,1)");
+            if (slot < 0 || slot >= getSlots()) {
+                throw new RuntimeException("Slot " + slot + " is not in valid range - [0," + getSlots() + ")");
             }
         }
     }
