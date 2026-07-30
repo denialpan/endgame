@@ -53,15 +53,17 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
     public List<EndgameRequirement> requirements() {
         if (this.requirementsDirty) {
             List<EndgameRequirement> requirements = new ArrayList<>();
+            long itemRequirement = Config.itemRequirement();
+            long fluidRequirement = Config.fluidRequirementMb();
             this.remaining.entrySet().stream()
                     .map(entry -> BuiltInRegistries.ITEM.getOptional(entry.getKey())
-                            .map(item -> EndgameRequirement.item(entry.getKey(), item, entry.getValue()))
+                            .map(item -> EndgameRequirement.item(entry.getKey(), item, entry.getValue(), itemRequirement))
                             .orElse(null))
                     .filter(requirement -> requirement != null && !requirement.displayStack().is(Items.AIR))
                     .forEach(requirements::add);
             this.fluidRemaining.entrySet().stream()
                     .map(entry -> BuiltInRegistries.FLUID.getOptional(entry.getKey())
-                            .map(fluid -> EndgameRequirement.fluid(entry.getKey(), fluid, entry.getValue()))
+                            .map(fluid -> EndgameRequirement.fluid(entry.getKey(), fluid, entry.getValue(), fluidRequirement))
                             .orElse(null))
                     .filter(requirement -> requirement != null && requirement.fluid() && BuiltInRegistries.FLUID.get(requirement.id()) != Fluids.EMPTY)
                     .forEach(requirements::add);
@@ -79,7 +81,7 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
     }
 
     public long totalRequired() {
-        return (long)(this.remaining.size() + this.fluidRemaining.size()) * dddsendgame.ENDGAME_ITEM_REQUIREMENT;
+        return (long)this.remaining.size() * Config.itemRequirement() + (long)this.fluidRemaining.size() * Config.fluidRequirementMb();
     }
 
     public int completedRequirementCount() {
@@ -124,16 +126,20 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
 
         Map<ResourceLocation, Item> recipeItems = new LinkedHashMap<>();
         Map<ResourceLocation, Fluid> recipeFluids = new LinkedHashMap<>();
-        addRecipeFluid(recipeFluids, Fluids.WATER);
-        addRecipeFluid(recipeFluids, Fluids.LAVA);
-        for (RecipeHolder<?> holder : this.level.getRecipeManager().getRecipes()) {
-            Object recipe = holder.value();
-            addModernIndustrializationMachineOutputs(recipeItems, recipeFluids, recipe);
-            if (holder.value().isSpecial()) {
-                continue;
-            }
+        if (Config.DEBUG_STONE_ONLY.getAsBoolean()) {
+            recipeItems.put(BuiltInRegistries.ITEM.getKey(Items.STONE), Items.STONE);
+        } else {
+            addRecipeFluid(recipeFluids, Fluids.WATER);
+            addRecipeFluid(recipeFluids, Fluids.LAVA);
+            for (RecipeHolder<?> holder : this.level.getRecipeManager().getRecipes()) {
+                Object recipe = holder.value();
+                addModernIndustrializationMachineOutputs(recipeItems, recipeFluids, recipe);
+                if (holder.value().isSpecial()) {
+                    continue;
+                }
 
-            addRecipeOutputItem(recipeItems, holder.value().getResultItem(this.level.registryAccess()));
+                addRecipeOutputItem(recipeItems, holder.value().getResultItem(this.level.registryAccess()));
+            }
         }
 
         List<ResourceLocation> sorted = new ArrayList<>(recipeItems.keySet());
@@ -142,7 +148,7 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         boolean changed = false;
         for (ResourceLocation itemId : sorted) {
             if (!this.remaining.containsKey(itemId)) {
-                this.remaining.put(itemId, dddsendgame.ENDGAME_ITEM_REQUIREMENT);
+                this.remaining.put(itemId, Config.itemRequirement());
                 this.markRequirementsDirty();
                 changed = true;
             }
@@ -152,9 +158,25 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         sortedFluids.sort(ResourceLocation::compareTo);
         for (ResourceLocation fluidId : sortedFluids) {
             if (!this.fluidRemaining.containsKey(fluidId)) {
-                this.fluidRemaining.put(fluidId, dddsendgame.ENDGAME_ITEM_REQUIREMENT);
+                this.fluidRemaining.put(fluidId, Config.fluidRequirementMb());
                 this.markRequirementsDirty();
                 changed = true;
+            }
+        }
+
+        changed |= clampRequirementsToConfiguredAmounts();
+
+        if (Config.DEBUG_STONE_ONLY.getAsBoolean()) {
+            changed |= this.remaining.keySet().removeIf(itemId -> !recipeItems.containsKey(itemId));
+            changed |= !this.fluidRemaining.isEmpty();
+            this.fluidRemaining.clear();
+            ResourceLocation stoneId = BuiltInRegistries.ITEM.getKey(Items.STONE);
+            if (this.remaining.getOrDefault(stoneId, Config.itemRequirement()) > Config.itemRequirement()) {
+                this.remaining.put(stoneId, Config.itemRequirement());
+                changed = true;
+            }
+            if (changed) {
+                this.markRequirementsDirty();
             }
         }
 
@@ -162,6 +184,30 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
             dddsendgame.LOGGER.info("Endgame template at {} tracks {} recipe output items and {} fluids", this.worldPosition, this.remaining.size(), this.fluidRemaining.size());
             this.setChangedAndSync();
         }
+    }
+
+    private boolean clampRequirementsToConfiguredAmounts() {
+        boolean changed = false;
+        long itemRequirement = Config.itemRequirement();
+        for (Map.Entry<ResourceLocation, Long> entry : this.remaining.entrySet()) {
+            if (entry.getValue() > itemRequirement) {
+                entry.setValue(itemRequirement);
+                changed = true;
+            }
+        }
+
+        long fluidRequirement = Config.fluidRequirementMb();
+        for (Map.Entry<ResourceLocation, Long> entry : this.fluidRemaining.entrySet()) {
+            if (entry.getValue() > fluidRequirement) {
+                entry.setValue(fluidRequirement);
+                changed = true;
+            }
+        }
+
+        if (changed) {
+            this.markRequirementsDirty();
+        }
+        return changed;
     }
 
     private static void addRecipeOutputItem(Map<ResourceLocation, Item> recipeItems, ItemStack result) {
@@ -258,8 +304,8 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
             return;
         }
 
-        this.remaining.replaceAll((itemId, count) -> dddsendgame.ENDGAME_ITEM_REQUIREMENT);
-        this.fluidRemaining.replaceAll((fluidId, count) -> dddsendgame.ENDGAME_ITEM_REQUIREMENT);
+        this.remaining.replaceAll((itemId, count) -> Config.itemRequirement());
+        this.fluidRemaining.replaceAll((fluidId, count) -> Config.fluidRequirementMb());
         this.markRequirementsDirty();
         this.setChangedAndSync();
     }

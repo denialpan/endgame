@@ -36,7 +36,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
     private static final int SEARCH_WIDTH = 160;
     private static final int SEARCH_HEIGHT = 9;
     private static final int TOTAL_BAR_X = 8;
-    private static final int TOTAL_BAR_Y = 20;
+    private static final int TOTAL_BAR_Y = 21;
     private static final int TOTAL_BAR_WIDTH = 160;
     private static final int TOTAL_BAR_HEIGHT = 4;
     private static final int GRADIENT_U = 0;
@@ -259,6 +259,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
 
         List<EndgameRequirement> requirements = template == null ? List.of() : template.requirements();
         List<RowData> rows = new ArrayList<>(requirements.size());
+        long totalRequired = 0L;
         long totalRemaining = 0L;
         int completedStacks = 0;
         for (EndgameRequirement requirement : requirements) {
@@ -266,6 +267,8 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
             FluidStack fluidStack = requirement.displayFluid();
             String name = requirement.displayName().getString();
             long remaining = requirement.remaining();
+            long required = requirement.required();
+            totalRequired += required;
             totalRemaining += remaining;
             if (requirement.complete()) {
                 completedStacks++;
@@ -273,7 +276,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
             if (!searchText.isEmpty() && !name.toLowerCase(Locale.ROOT).contains(searchText)) {
                 continue;
             }
-            rows.add(new RowData(stack, fluidStack, name, requirement.id().toString(), requirement.fluid(), remaining));
+            rows.add(new RowData(stack, fluidStack, name, requirement.id().toString(), requirement.fluid(), remaining, required));
         }
 
         Comparator<RowData> comparator = switch (this.sortMode) {
@@ -291,7 +294,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
         this.cachedSortAscending = this.sortAscending;
         this.cachedSearchText = searchText;
         this.cachedRequirementsRevision = revision;
-        this.cachedTotalRequired = (long)requirements.size() * dddsendgame.ENDGAME_ITEM_REQUIREMENT;
+        this.cachedTotalRequired = totalRequired;
         this.cachedTotalRemaining = totalRemaining;
         this.cachedCompletedStacks = completedStacks;
         this.cachedTotalStacks = requirements.size();
@@ -426,8 +429,8 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
                     : new ArrayList<>(Screen.getTooltipFromItem(Minecraft.getInstance(), hovered.stack()));
             tooltip.add(Component.empty());
             tooltip.add(Component.literal(hovered.fluid() ? "Endgame fluid progress" : "Endgame progress").withStyle(ChatFormatting.GRAY));
-            tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.contributed()) + " / " + NUMBER_FORMAT.format(dddsendgame.ENDGAME_ITEM_REQUIREMENT) + (hovered.fluid() ? " mB" : "")).withStyle(ChatFormatting.DARK_GRAY));
-            tooltip.add(Component.literal(formatPercent(hovered.contributed(), dddsendgame.ENDGAME_ITEM_REQUIREMENT) + "% complete").withStyle(ChatFormatting.DARK_GRAY));
+            tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.contributed()) + " / " + NUMBER_FORMAT.format(hovered.required()) + (hovered.fluid() ? " mB" : "")).withStyle(ChatFormatting.DARK_GRAY));
+            tooltip.add(Component.literal(formatPercent(hovered.contributed(), hovered.required()) + "% complete").withStyle(ChatFormatting.DARK_GRAY));
             tooltip.add(Component.literal("Stacks: " + NUMBER_FORMAT.format(this.cachedCompletedStacks) + " / " + NUMBER_FORMAT.format(this.cachedTotalStacks) + " complete").withStyle(ChatFormatting.DARK_GRAY));
             tooltip.add(Component.literal("Inputs: " + NUMBER_FORMAT.format(this.connectedInputCount()) + " connected").withStyle(ChatFormatting.DARK_GRAY));
             tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.remaining()) + (hovered.fluid() ? " mB" : "") + " remaining").withStyle(ChatFormatting.DARK_GRAY));
@@ -497,9 +500,9 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
         PROGRESS
     }
 
-    private record RowData(ItemStack stack, FluidStack fluidStack, String name, String itemId, boolean fluid, long remaining) {
+    private record RowData(ItemStack stack, FluidStack fluidStack, String name, String itemId, boolean fluid, long remaining, long required) {
         long contributed() {
-            return dddsendgame.ENDGAME_ITEM_REQUIREMENT - this.remaining;
+            return this.required - this.remaining;
         }
     }
 }

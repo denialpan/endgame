@@ -23,5 +23,8 @@
   "dddsendgame.configuration.items": "Item List",
   "dddsendgame.configuration.logDirtBlock": "Log Dirt Block",
   "dddsendgame.configuration.magicNumberIntroduction": "Magic Number Text",
-  "dddsendgame.configuration.magicNumber": "Magic Number"
+  "dddsendgame.configuration.magicNumber": "Magic Number",
+  "dddsendgame.configuration.itemRequirement": "Item Requirement",
+  "dddsendgame.configuration.fluidRequirementMb": "Fluid Requirement (mB)",
+  "dddsendgame.configuration.debugStoneOnly": "Debug Stone Only"
 }

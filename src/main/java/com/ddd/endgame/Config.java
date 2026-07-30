@@ -25,6 +25,18 @@ public class Config {
             .comment("A magic number")
             .defineInRange("magicNumber", 42, 0, Integer.MAX_VALUE);
 
+    public static final ModConfigSpec.LongValue ITEM_REQUIREMENT = BUILDER
+            .comment("How many of each required item stack must be inserted into the endgame template.")
+            .defineInRange("itemRequirement", 1_048_576L, 1L, Long.MAX_VALUE);
+
+    public static final ModConfigSpec.LongValue FLUID_REQUIREMENT_MB = BUILDER
+            .comment("How many millibuckets of each required fluid must be inserted into the endgame template.")
+            .defineInRange("fluidRequirementMb", 1_048_576L, 1L, Long.MAX_VALUE);
+
+    public static final ModConfigSpec.BooleanValue DEBUG_STONE_ONLY = BUILDER
+            .comment("Debug mode: require only 20 minecraft:stone and ignore generated item/fluid recipe requirements.")
+            .define("debugStoneOnly", false);
+
     public static final ModConfigSpec.ConfigValue<String> MAGIC_NUMBER_INTRODUCTION = BUILDER
             .comment("What you want the introduction message to be for the magic number")
             .define("magicNumberIntroduction", "The magic number is... ");
@@ -35,6 +47,14 @@ public class Config {
             .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), () -> "", Config::validateItemName);
 
     static final ModConfigSpec SPEC = BUILDER.build();
+
+    public static long itemRequirement() {
+        return DEBUG_STONE_ONLY.getAsBoolean() ? 20L : ITEM_REQUIREMENT.get();
+    }
+
+    public static long fluidRequirementMb() {
+        return FLUID_REQUIREMENT_MB.get();
+    }
 
     private static boolean validateItemName(final Object obj) {
         return obj instanceof String itemName && BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(itemName));
