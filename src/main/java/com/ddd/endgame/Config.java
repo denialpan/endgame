@@ -37,6 +37,10 @@ public class Config {
             .comment("Debug mode: require only 20 minecraft:stone and ignore generated item/fluid recipe requirements.")
             .define("debugStoneOnly", false);
 
+    public static final ModConfigSpec.BooleanValue ENDGAME_STICK_GRANTS_CREATIVE = BUILDER
+            .comment("Whether holding the endgame stick in inventory sets the player to Creative mode.")
+            .define("endgameStickGrantsCreative", true);
+
     public static final ModConfigSpec.ConfigValue<String> MAGIC_NUMBER_INTRODUCTION = BUILDER
             .comment("What you want the introduction message to be for the magic number")
             .define("magicNumberIntroduction", "The magic number is... ");

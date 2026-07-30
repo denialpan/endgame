@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
@@ -15,6 +16,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.material.MapColor;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -28,6 +30,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -38,6 +41,7 @@ import org.slf4j.Logger;
 public class dddsendgame {
     public static final String MODID = "dddsendgame";
     public static final long ENDGAME_ITEM_REQUIREMENT = 1_048_576L;
+    private static final String ENDGAME_STICK_CREATIVE_KEY = MODID + ".endgame_stick_creative";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
@@ -145,5 +149,40 @@ public class dddsendgame {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("HELLO from server starting");
+    }
+
+    @SubscribeEvent
+    public void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+
+        boolean changedByStick = player.getPersistentData().getBoolean(ENDGAME_STICK_CREATIVE_KEY);
+        if (!Config.ENDGAME_STICK_GRANTS_CREATIVE.getAsBoolean()) {
+            if (changedByStick) {
+                if (player.isCreative()) {
+                    player.setGameMode(GameType.SURVIVAL);
+                }
+                player.getPersistentData().remove(ENDGAME_STICK_CREATIVE_KEY);
+            }
+            return;
+        }
+
+        boolean hasEndgameStick = player.getInventory().contains(stack -> stack.is(ENDGAME_TEST_STICK.get()));
+        if (hasEndgameStick) {
+            if (!player.isCreative()) {
+                if (player.setGameMode(GameType.CREATIVE)) {
+                    player.getPersistentData().putBoolean(ENDGAME_STICK_CREATIVE_KEY, true);
+                }
+            }
+            return;
+        }
+
+        if (changedByStick) {
+            if (player.isCreative()) {
+                player.setGameMode(GameType.SURVIVAL);
+            }
+            player.getPersistentData().remove(ENDGAME_STICK_CREATIVE_KEY);
+        }
     }
 }

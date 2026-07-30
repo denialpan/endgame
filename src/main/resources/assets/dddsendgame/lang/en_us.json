@@ -26,5 +26,6 @@
   "dddsendgame.configuration.magicNumber": "Magic Number",
   "dddsendgame.configuration.itemRequirement": "Item Requirement",
   "dddsendgame.configuration.fluidRequirementMb": "Fluid Requirement (mB)",
-  "dddsendgame.configuration.debugStoneOnly": "Debug Stone Only"
+  "dddsendgame.configuration.debugStoneOnly": "Debug Stone Only",
+  "dddsendgame.configuration.endgameStickGrantsCreative": "Endgame Stick Grants Creative"
 }
