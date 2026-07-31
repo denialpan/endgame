@@ -96,7 +96,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         GL11.glEnable(GL11.GL_STENCIL_TEST);
         RenderSystem.enableDepthTest();
         RenderSystem.disableCull();
-        RenderSystem.depthMask(false);
+        RenderSystem.depthMask(true);
         RenderSystem.colorMask(false, false, false, false);
         RenderSystem.stencilMask(0xFF);
         RenderSystem.stencilFunc(GL11.GL_ALWAYS, 1, 0xFF);
