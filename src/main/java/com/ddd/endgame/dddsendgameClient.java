@@ -8,9 +8,11 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.common.NeoForge;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = dddsendgame.MODID, dist = Dist.CLIENT)
@@ -29,6 +31,15 @@ public class dddsendgameClient {
         // Some client setup code
         dddsendgame.LOGGER.info("HELLO FROM CLIENT SETUP");
         dddsendgame.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+        NeoForge.EVENT_BUS.addListener(dddsendgameClient::onRenderLevelStage);
+    }
+
+    private static void onRenderLevelStage(RenderLevelStageEvent event) {
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
+            EndgamePortalBlockEntityRenderer.clearStencilMask();
+        } else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
+            EndgamePortalBlockEntityRenderer.renderSkyboxLayer(event);
+        }
     }
 
     @SubscribeEvent
