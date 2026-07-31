@@ -27,8 +27,10 @@ import java.util.List;
 import java.util.Set;
 
 public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements BlockEntityRenderer<T> {
-    private static final float MIN = 0.002F;
-    private static final float MAX = 0.998F;
+    private static final float BLOCK_MIN = 0.0F;
+    private static final float BLOCK_MAX = 1.0F;
+    private static final float DEPTH_MIN = 0.002F;
+    private static final float DEPTH_MAX = 0.998F;
     private static final float SKYBOX_SIZE = 96.0F;
     private static final Set<BlockPos> WINDOW_POSITIONS = new HashSet<>();
     private static boolean stencilEnabled;
@@ -76,7 +78,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         for (BlockPos window : windows) {
             poseStack.pushPose();
             poseStack.translate(window.getX() - cameraPosition.x, window.getY() - cameraPosition.y, window.getZ() - cameraPosition.z);
-            renderVisibleWindowFaces(window, cameraPosition, poseStack.last().pose());
+            renderVisibleWindowFaces(window, cameraPosition, poseStack.last().pose(), BLOCK_MIN, BLOCK_MAX);
             poseStack.popPose();
         }
 
@@ -115,34 +117,34 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         RenderSystem.colorMask(false, false, false, false);
         RenderSystem.setShader(GameRenderer::getPositionShader);
 
-        renderVisibleWindowFaces(blockPos, cameraPos, pose);
+        renderVisibleWindowFaces(blockPos, cameraPos, pose, DEPTH_MIN, DEPTH_MAX);
 
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.depthMask(true);
         RenderSystem.enableCull();
     }
 
-    private static void renderVisibleWindowFaces(BlockPos blockPos, Vec3 cameraPos, Matrix4f pose) {
+    private static void renderVisibleWindowFaces(BlockPos blockPos, Vec3 cameraPos, Matrix4f pose, float min, float max) {
         double cameraX = cameraPos.x - blockPos.getX();
         double cameraY = cameraPos.y - blockPos.getY();
         double cameraZ = cameraPos.z - blockPos.getZ();
-        if (cameraZ >= MIN) {
-            renderMaskFace(pose, MIN, MAX, MIN, MAX, MAX, MAX, MAX, MAX);
+        if (cameraZ >= min) {
+            renderMaskFace(pose, min, max, min, max, max, max, max, max);
         }
-        if (cameraZ <= MAX) {
-            renderMaskFace(pose, MIN, MAX, MAX, MIN, MIN, MIN, MIN, MIN);
+        if (cameraZ <= max) {
+            renderMaskFace(pose, min, max, max, min, min, min, min, min);
         }
-        if (cameraX >= MIN) {
-            renderMaskFace(pose, MAX, MAX, MAX, MIN, MIN, MAX, MAX, MIN);
+        if (cameraX >= min) {
+            renderMaskFace(pose, max, max, max, min, min, max, max, min);
         }
-        if (cameraX <= MAX) {
-            renderMaskFace(pose, MIN, MIN, MIN, MAX, MIN, MAX, MAX, MIN);
+        if (cameraX <= max) {
+            renderMaskFace(pose, min, min, min, max, min, max, max, min);
         }
-        if (cameraY <= MAX) {
-            renderMaskFace(pose, MIN, MAX, MIN, MIN, MIN, MIN, MAX, MAX);
+        if (cameraY <= max) {
+            renderMaskFace(pose, min, max, min, min, min, min, max, max);
         }
-        if (cameraY >= MIN) {
-            renderMaskFace(pose, MIN, MAX, MAX, MAX, MAX, MAX, MIN, MIN);
+        if (cameraY >= min) {
+            renderMaskFace(pose, min, max, max, max, max, max, min, min);
         }
     }
 
