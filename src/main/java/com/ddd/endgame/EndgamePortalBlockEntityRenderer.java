@@ -21,12 +21,17 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements BlockEntityRenderer<T> {
     private static final float MIN = 0.002F;
     private static final float MAX = 0.998F;
     private static final float SKYBOX_SIZE = 96.0F;
+    private static final Set<BlockPos> WINDOW_POSITIONS = new HashSet<>();
     private static boolean stencilEnabled;
-    private static boolean hasStencilMask;
 
     public EndgamePortalBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
     }
@@ -39,39 +44,50 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             return;
         }
 
-        renderWindowMask(blockEntity.getBlockPos(), minecraft.gameRenderer.getMainCamera().getPosition(), poseStack.last().pose());
+        WINDOW_POSITIONS.add(blockEntity.getBlockPos().immutable());
+        renderWindowDepthMask(blockEntity.getBlockPos(), minecraft.gameRenderer.getMainCamera().getPosition(), poseStack.last().pose());
     }
 
-    public static void clearStencilMask() {
+    public static void renderSkyboxLayer(RenderLevelStageEvent event) {
         if (!stencilEnabled) {
             ensureStencil(Minecraft.getInstance());
         }
-        if (!stencilEnabled) {
+        if (!stencilEnabled || WINDOW_POSITIONS.isEmpty()) {
             return;
         }
+
+        List<BlockPos> windows = new ArrayList<>(WINDOW_POSITIONS);
+        WINDOW_POSITIONS.clear();
 
         GL11.glEnable(GL11.GL_STENCIL_TEST);
         RenderSystem.stencilMask(0xFF);
         RenderSystem.clear(GL11.GL_STENCIL_BUFFER_BIT, Minecraft.ON_OSX);
-        GL11.glDisable(GL11.GL_STENCIL_TEST);
-        hasStencilMask = false;
-    }
 
-    public static void renderSkyboxLayer(RenderLevelStageEvent event) {
-        if (!stencilEnabled || !hasStencilMask) {
-            return;
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableCull();
+        RenderSystem.depthMask(false);
+        RenderSystem.colorMask(false, false, false, false);
+        RenderSystem.stencilFunc(GL11.GL_ALWAYS, 1, 0xFF);
+        RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
+        RenderSystem.setShader(GameRenderer::getPositionShader);
+
+        PoseStack poseStack = event.getPoseStack();
+        Vec3 cameraPosition = event.getCamera().getPosition();
+        for (BlockPos window : windows) {
+            poseStack.pushPose();
+            poseStack.translate(window.getX() - cameraPosition.x, window.getY() - cameraPosition.y, window.getZ() - cameraPosition.z);
+            renderVisibleWindowFaces(window, cameraPosition, poseStack.last().pose());
+            poseStack.popPose();
         }
 
-        GL11.glEnable(GL11.GL_STENCIL_TEST);
+        RenderSystem.colorMask(true, true, true, true);
         RenderSystem.stencilMask(0x00);
         RenderSystem.stencilFunc(GL11.GL_EQUAL, 1, 0xFF);
         RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
-        RenderSystem.disableCull();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
 
-        PoseStack poseStack = event.getPoseStack();
         poseStack.pushPose();
         renderSkyboxCube(poseStack.last().pose());
         poseStack.popPose();
@@ -92,15 +108,11 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         }
     }
 
-    private static void renderWindowMask(BlockPos blockPos, Vec3 cameraPos, Matrix4f pose) {
-        GL11.glEnable(GL11.GL_STENCIL_TEST);
+    private static void renderWindowDepthMask(BlockPos blockPos, Vec3 cameraPos, Matrix4f pose) {
         RenderSystem.enableDepthTest();
         RenderSystem.disableCull();
         RenderSystem.depthMask(true);
         RenderSystem.colorMask(false, false, false, false);
-        RenderSystem.stencilMask(0xFF);
-        RenderSystem.stencilFunc(GL11.GL_ALWAYS, 1, 0xFF);
-        RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
         RenderSystem.setShader(GameRenderer::getPositionShader);
 
         renderVisibleWindowFaces(blockPos, cameraPos, pose);
@@ -108,8 +120,6 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.depthMask(true);
         RenderSystem.enableCull();
-        GL11.glDisable(GL11.GL_STENCIL_TEST);
-        hasStencilMask = true;
     }
 
     private static void renderVisibleWindowFaces(BlockPos blockPos, Vec3 cameraPos, Matrix4f pose) {
