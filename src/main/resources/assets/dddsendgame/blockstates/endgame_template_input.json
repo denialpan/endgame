@@ -1,7 +1,16 @@
 {
   "variants": {
-    "": {
+    "axis=y": {
       "model": "dddsendgame:block/endgame_template_input"
+    },
+    "axis=z": {
+      "model": "dddsendgame:block/endgame_template_input",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "dddsendgame:block/endgame_template_input",
+      "x": 90,
+      "y": 90
     }
   }
 }

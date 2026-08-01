@@ -12,14 +12,13 @@ import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class EndgameTemplateBlock extends BaseEntityBlock {
+public class EndgameTemplateBlock extends HorizontalFacingEntityBlock {
     public static final MapCodec<EndgameTemplateBlock> CODEC = simpleCodec(EndgameTemplateBlock::new);
 
     public EndgameTemplateBlock(BlockBehaviour.Properties properties) {
@@ -27,7 +26,7 @@ public class EndgameTemplateBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
+    protected MapCodec<? extends HorizontalFacingEntityBlock> codec() {
         return CODEC;
     }
 
