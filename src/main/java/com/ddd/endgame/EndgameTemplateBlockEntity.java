@@ -124,6 +124,16 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
             return;
         }
 
+        boolean debugStone = Config.DEBUG_STONE_ONLY.getAsBoolean();
+        if (debugStone) {
+            ResourceLocation stoneId = BuiltInRegistries.ITEM.getKey(Items.STONE);
+            if (this.remaining.size() == 1 && this.remaining.containsKey(stoneId) && this.fluidRemaining.isEmpty()) {
+                return;
+            }
+        } else if (!this.remaining.isEmpty() || !this.fluidRemaining.isEmpty()) {
+            return;
+        }
+
         Map<ResourceLocation, Item> recipeItems = new LinkedHashMap<>();
         Map<ResourceLocation, Fluid> recipeFluids = new LinkedHashMap<>();
         if (Config.DEBUG_STONE_ONLY.getAsBoolean()) {
