@@ -1,6 +1,9 @@
 package com.ddd.endgame;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -8,6 +11,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
@@ -32,11 +36,25 @@ public class dddsendgameClient {
         dddsendgame.LOGGER.info("HELLO FROM CLIENT SETUP");
         dddsendgame.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
         NeoForge.EVENT_BUS.addListener(dddsendgameClient::onRenderLevelStage);
+        NeoForge.EVENT_BUS.addListener(dddsendgameClient::onRenderBlockHighlight);
     }
 
     private static void onRenderLevelStage(RenderLevelStageEvent event) {
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
             EndgamePortalBlockEntityRenderer.renderSkyboxLayer(event);
+        }
+    }
+
+    private static void onRenderBlockHighlight(RenderHighlightEvent.Block event) {
+        Level level = Minecraft.getInstance().level;
+        if (level == null) {
+            return;
+        }
+
+        BlockPos pos = event.getTarget().getBlockPos();
+        BlockState state = level.getBlockState(pos);
+        if (state.is(dddsendgame.ENDGAME_TEMPLATE_BLOCK.get()) || state.is(dddsendgame.ENDGAME_TEMPLATE_INPUT_BLOCK.get())) {
+            event.setCanceled(true);
         }
     }
 
