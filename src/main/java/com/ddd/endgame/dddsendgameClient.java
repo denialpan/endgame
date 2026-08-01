@@ -35,7 +35,7 @@ public class dddsendgameClient {
     }
 
     private static void onRenderLevelStage(RenderLevelStageEvent event) {
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
             EndgamePortalBlockEntityRenderer.renderSkyboxLayer(event);
         }
     }
