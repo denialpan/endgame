@@ -61,13 +61,19 @@ public class dddsendgame {
             EndgameTemplateBlock::new,
             BlockBehaviour.Properties.ofFullCopy(Blocks.OBSIDIAN)
     );
-    public static final DeferredItem<BlockItem> ENDGAME_TEMPLATE_ITEM = ITEMS.registerSimpleBlockItem("endgame_template", ENDGAME_TEMPLATE_BLOCK);
+    public static final DeferredItem<BlockItem> ENDGAME_TEMPLATE_ITEM = ITEMS.register(
+            "endgame_template",
+            () -> new EndgameTemplateBlockItem(ENDGAME_TEMPLATE_BLOCK.get(), new Item.Properties())
+    );
     public static final DeferredBlock<EndgameTemplateInputBlock> ENDGAME_TEMPLATE_INPUT_BLOCK = BLOCKS.registerBlock(
             "endgame_template_input",
             EndgameTemplateInputBlock::new,
             BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
     );
-    public static final DeferredItem<BlockItem> ENDGAME_TEMPLATE_INPUT_ITEM = ITEMS.registerSimpleBlockItem("endgame_template_input", ENDGAME_TEMPLATE_INPUT_BLOCK);
+    public static final DeferredItem<BlockItem> ENDGAME_TEMPLATE_INPUT_ITEM = ITEMS.register(
+            "endgame_template_input",
+            () -> new EndgameTemplateBlockItem(ENDGAME_TEMPLATE_INPUT_BLOCK.get(), new Item.Properties())
+    );
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameTemplateBlockEntity>> ENDGAME_TEMPLATE_BLOCK_ENTITY =
             BLOCK_ENTITY_TYPES.register("endgame_template", () -> BlockEntityType.Builder.of(EndgameTemplateBlockEntity::new, ENDGAME_TEMPLATE_BLOCK.get()).build(null));
@@ -102,6 +108,7 @@ public class dddsendgame {
         NeoForge.EVENT_BUS.register(this);
         modEventBus.addListener(this::addCreative);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        modContainer.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC);
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {

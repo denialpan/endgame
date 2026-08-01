@@ -1,5 +1,6 @@
 package com.ddd.endgame;
 
+import com.mojang.math.Axis;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -91,6 +92,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
 
         poseStack.pushPose();
+        applyConfiguredSkyboxRotation(poseStack, event.getPartialTick().getGameTimeDeltaPartialTick(false));
         renderSkyboxCube(poseStack.last().pose());
         poseStack.popPose();
 
@@ -108,6 +110,42 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             minecraft.getMainRenderTarget().enableStencil();
             stencilEnabled = minecraft.getMainRenderTarget().isStencilEnabled();
         }
+    }
+
+    public static void applyConfiguredSkyboxRotation(PoseStack poseStack) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.getTimer() == null) {
+            applyConfiguredSkyboxRotation(poseStack, 0.0F);
+            return;
+        }
+
+        applyConfiguredSkyboxRotation(poseStack, minecraft.getTimer().getGameTimeDeltaPartialTick(false));
+    }
+
+    private static void applyConfiguredSkyboxRotation(PoseStack poseStack, float partialTick) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.level == null) {
+            return;
+        }
+
+        double seconds = (minecraft.level.getGameTime() + partialTick) / 20.0D;
+        double pitchSpeed = Config.SKYBOX_PITCH_ROTATION_SPEED.get();
+        double yawSpeed = Config.SKYBOX_YAW_ROTATION_SPEED.get();
+        double rollSpeed = Config.SKYBOX_ROLL_ROTATION_SPEED.get();
+
+        if (pitchSpeed != 0.0D) {
+            poseStack.mulPose(Axis.XP.rotationDegrees(rotationDegrees(seconds, pitchSpeed)));
+        }
+        if (yawSpeed != 0.0D) {
+            poseStack.mulPose(Axis.YP.rotationDegrees(rotationDegrees(seconds, yawSpeed)));
+        }
+        if (rollSpeed != 0.0D) {
+            poseStack.mulPose(Axis.ZP.rotationDegrees(rotationDegrees(seconds, rollSpeed)));
+        }
+    }
+
+    private static float rotationDegrees(double seconds, double degreesPerSecond) {
+        return (float) ((seconds * degreesPerSecond) % 360.0D);
     }
 
     private static void renderWindowDepthMask(BlockPos blockPos, Vec3 cameraPos, Matrix4f pose) {

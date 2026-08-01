@@ -16,6 +16,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 // Demonstrates how to use Neo's config APIs
 public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    private static final ModConfigSpec.Builder CLIENT_BUILDER = new ModConfigSpec.Builder();
 
     public static final ModConfigSpec.BooleanValue LOG_DIRT_BLOCK = BUILDER
             .comment("Whether to log the dirt block on common setup")
@@ -50,7 +51,20 @@ public class Config {
             .comment("A list of items to log on common setup.")
             .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), () -> "", Config::validateItemName);
 
+    public static final ModConfigSpec.DoubleValue SKYBOX_PITCH_ROTATION_SPEED = CLIENT_BUILDER
+            .comment("Client-side visual pitch speed for the endgame template inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
+            .defineInRange("skyboxPitchRotationSpeedDegreesPerSecond", 0.1D, -360.0D, 360.0D);
+
+    public static final ModConfigSpec.DoubleValue SKYBOX_YAW_ROTATION_SPEED = CLIENT_BUILDER
+            .comment("Client-side visual yaw speed for the endgame template inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
+            .defineInRange("skyboxYawRotationSpeedDegreesPerSecond", 0.1D, -360.0D, 360.0D);
+
+    public static final ModConfigSpec.DoubleValue SKYBOX_ROLL_ROTATION_SPEED = CLIENT_BUILDER
+            .comment("Client-side visual roll speed for the endgame template inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
+            .defineInRange("skyboxRollRotationSpeedDegreesPerSecond", 0.1D, -360.0D, 360.0D);
+
     static final ModConfigSpec SPEC = BUILDER.build();
+    static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 
     public static long itemRequirement() {
         return DEBUG_STONE_ONLY.getAsBoolean() ? 20L : ITEM_REQUIREMENT.get();
