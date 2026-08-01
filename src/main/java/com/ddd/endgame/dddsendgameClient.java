@@ -53,9 +53,17 @@ public class dddsendgameClient {
 
         BlockPos pos = event.getTarget().getBlockPos();
         BlockState state = level.getBlockState(pos);
-        if (state.is(dddsendgame.ENDGAME_CONTROLLER_BLOCK.get()) || state.is(dddsendgame.ENDGAME_CONNECTOR_BLOCK.get())) {
+        if (isEndgameSkyboxBlock(state)) {
             event.setCanceled(true);
         }
+    }
+
+    private static boolean isEndgameSkyboxBlock(BlockState state) {
+        return state.is(dddsendgame.ENDGAME_CONTROLLER_BLOCK.get())
+                || state.is(dddsendgame.ENDGAME_CONNECTOR_BLOCK.get())
+                || state.is(dddsendgame.ENDGAME_SOLID_BLOCK.get())
+                || state.is(dddsendgame.ENDGAME_GLASS_BLOCK.get())
+                || state.is(dddsendgame.ENDGAME_FULL_GLASS_BLOCK.get());
     }
 
     @SubscribeEvent
@@ -67,5 +75,6 @@ public class dddsendgameClient {
     static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(dddsendgame.ENDGAME_CONTROLLER_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
         event.registerBlockEntityRenderer(dddsendgame.ENDGAME_CONNECTOR_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(dddsendgame.ENDGAME_DECORATIVE_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
     }
 }

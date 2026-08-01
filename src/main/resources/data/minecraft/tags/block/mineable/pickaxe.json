@@ -2,6 +2,9 @@
   "replace": false,
   "values": [
     "dddsendgame:endgame_controller",
-    "dddsendgame:endgame_connector"
+    "dddsendgame:endgame_connector",
+    "dddsendgame:endgame_solid_block",
+    "dddsendgame:endgame_glass",
+    "dddsendgame:endgame_full_glass"
   ]
 }

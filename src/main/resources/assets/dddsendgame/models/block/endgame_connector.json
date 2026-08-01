@@ -2,12 +2,12 @@
   "parent": "minecraft:block/cube",
   "render_type": "minecraft:translucent",
   "textures": {
-    "particle": "dddsendgame:block/endgame_connector_north",
-    "north": "dddsendgame:block/endgame_connector_north",
-    "south": "dddsendgame:block/endgame_connector_south",
-    "east": "dddsendgame:block/endgame_connector_east",
-    "west": "dddsendgame:block/endgame_connector_west",
-    "up": "dddsendgame:block/endgame_connector_up",
-    "down": "dddsendgame:block/endgame_connector_down"
+    "particle": "dddsendgame:block/endgame_gate",
+    "north": "dddsendgame:block/endgame_gate",
+    "south": "dddsendgame:block/endgame_gate",
+    "east": "dddsendgame:block/endgame_gate",
+    "west": "dddsendgame:block/endgame_gate",
+    "up": "dddsendgame:block/endgame_glass",
+    "down": "dddsendgame:block/endgame_glass"
   }
 }

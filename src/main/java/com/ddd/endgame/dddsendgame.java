@@ -65,11 +65,45 @@ public class dddsendgame {
             "endgame_connector",
             () -> new EndgameSkyboxBlockItem(ENDGAME_CONNECTOR_BLOCK.get(), new Item.Properties())
     );
+    public static final DeferredBlock<EndgameDecorativeBlock> ENDGAME_SOLID_BLOCK = BLOCKS.registerBlock(
+            "endgame_solid_block",
+            EndgameDecorativeBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
+    );
+    public static final DeferredItem<BlockItem> ENDGAME_SOLID_BLOCK_ITEM = ITEMS.register(
+            "endgame_solid_block",
+            () -> new EndgameSkyboxBlockItem(ENDGAME_SOLID_BLOCK.get(), new Item.Properties())
+    );
+    public static final DeferredBlock<EndgameDecorativeBlock> ENDGAME_GLASS_BLOCK = BLOCKS.registerBlock(
+            "endgame_glass",
+            EndgameDecorativeBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
+    );
+    public static final DeferredItem<BlockItem> ENDGAME_GLASS_ITEM = ITEMS.register(
+            "endgame_glass",
+            () -> new EndgameSkyboxBlockItem(ENDGAME_GLASS_BLOCK.get(), new Item.Properties())
+    );
+    public static final DeferredBlock<EndgameDecorativeBlock> ENDGAME_FULL_GLASS_BLOCK = BLOCKS.registerBlock(
+            "endgame_full_glass",
+            EndgameDecorativeBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
+    );
+    public static final DeferredItem<BlockItem> ENDGAME_FULL_GLASS_ITEM = ITEMS.register(
+            "endgame_full_glass",
+            () -> new EndgameSkyboxBlockItem(ENDGAME_FULL_GLASS_BLOCK.get(), new Item.Properties())
+    );
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameControllerBlockEntity>> ENDGAME_CONTROLLER_BLOCK_ENTITY =
             BLOCK_ENTITY_TYPES.register("endgame_controller", () -> BlockEntityType.Builder.of(EndgameControllerBlockEntity::new, ENDGAME_CONTROLLER_BLOCK.get()).build(null));
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameConnectorBlockEntity>> ENDGAME_CONNECTOR_BLOCK_ENTITY =
             BLOCK_ENTITY_TYPES.register("endgame_connector", () -> BlockEntityType.Builder.of(EndgameConnectorBlockEntity::new, ENDGAME_CONNECTOR_BLOCK.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameDecorativeBlockEntity>> ENDGAME_DECORATIVE_BLOCK_ENTITY =
+            BLOCK_ENTITY_TYPES.register("endgame_decorative", () -> BlockEntityType.Builder.of(
+                    EndgameDecorativeBlockEntity::new,
+                    ENDGAME_SOLID_BLOCK.get(),
+                    ENDGAME_GLASS_BLOCK.get(),
+                    ENDGAME_FULL_GLASS_BLOCK.get()
+            ).build(null));
 
     public static final DeferredHolder<MenuType<?>, MenuType<EndgameControllerMenu>> ENDGAME_CONTROLLER_MENU =
             MENU_TYPES.register("endgame_controller", () -> IMenuTypeExtension.create(EndgameControllerMenu::new));
@@ -81,6 +115,9 @@ public class dddsendgame {
             .displayItems((parameters, output) -> {
                 output.accept(ENDGAME_CONTROLLER_ITEM.get());
                 output.accept(ENDGAME_CONNECTOR_ITEM.get());
+                output.accept(ENDGAME_SOLID_BLOCK_ITEM.get());
+                output.accept(ENDGAME_GLASS_ITEM.get());
+                output.accept(ENDGAME_FULL_GLASS_ITEM.get());
                 output.accept(EndgameTestRecipe.createResult(parameters.holders()));
             }).build());
 
@@ -131,6 +168,9 @@ public class dddsendgame {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             event.accept(ENDGAME_CONTROLLER_ITEM);
             event.accept(ENDGAME_CONNECTOR_ITEM);
+            event.accept(ENDGAME_SOLID_BLOCK_ITEM);
+            event.accept(ENDGAME_GLASS_ITEM);
+            event.accept(ENDGAME_FULL_GLASS_ITEM);
         }
     }
 
