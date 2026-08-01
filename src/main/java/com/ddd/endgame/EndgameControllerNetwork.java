@@ -10,8 +10,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-public final class EndgameTemplateNetwork {
-    private EndgameTemplateNetwork() {
+public final class EndgameControllerNetwork {
+    private EndgameControllerNetwork() {
     }
 
     public static Status fromController(Level level, BlockPos controllerPos) {
@@ -40,9 +40,9 @@ public final class EndgameTemplateNetwork {
             for (Direction direction : Direction.values()) {
                 BlockPos adjacentPos = current.relative(direction);
                 BlockEntity adjacent = level.getBlockEntity(adjacentPos);
-                if (adjacent instanceof EndgameTemplateBlockEntity) {
+                if (adjacent instanceof EndgameControllerBlockEntity) {
                     controllers.add(adjacentPos);
-                } else if (adjacent instanceof EndgameTemplateInputBlockEntity && inputs.add(adjacentPos)) {
+                } else if (adjacent instanceof EndgameConnectorBlockEntity && inputs.add(adjacentPos)) {
                     queue.add(adjacentPos);
                 }
             }
@@ -52,7 +52,7 @@ public final class EndgameTemplateNetwork {
     private static void addAdjacentInputs(Level level, BlockPos pos, Set<BlockPos> inputs, Queue<BlockPos> queue) {
         for (Direction direction : Direction.values()) {
             BlockPos adjacentPos = pos.relative(direction);
-            if (level.getBlockEntity(adjacentPos) instanceof EndgameTemplateInputBlockEntity && inputs.add(adjacentPos)) {
+            if (level.getBlockEntity(adjacentPos) instanceof EndgameConnectorBlockEntity && inputs.add(adjacentPos)) {
                 queue.add(adjacentPos);
             }
         }
@@ -64,12 +64,12 @@ public final class EndgameTemplateNetwork {
         }
 
         @Nullable
-        public EndgameTemplateBlockEntity singleController(Level level) {
+        public EndgameControllerBlockEntity singleController(Level level) {
             if (this.controllerPos == null) {
                 return null;
             }
 
-            return level.getBlockEntity(this.controllerPos) instanceof EndgameTemplateBlockEntity template ? template : null;
+            return level.getBlockEntity(this.controllerPos) instanceof EndgameControllerBlockEntity controller ? controller : null;
         }
     }
 }

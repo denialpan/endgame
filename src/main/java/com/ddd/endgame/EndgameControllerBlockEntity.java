@@ -35,19 +35,19 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 
-public class EndgameTemplateBlockEntity extends BlockEntity implements Container, MenuProvider {
+public class EndgameControllerBlockEntity extends BlockEntity implements Container, MenuProvider {
     private static final int SLOT_INPUT = 0;
     private static final int SLOT_OUTPUT = 1;
     private final LinkedHashMap<ResourceLocation, Long> remaining = new LinkedHashMap<>();
     private final LinkedHashMap<ResourceLocation, Long> fluidRemaining = new LinkedHashMap<>();
-    private final IItemHandler itemHandler = new TemplateItemHandler();
-    private final IFluidHandler fluidHandler = new TemplateFluidHandler();
+    private final IItemHandler itemHandler = new ControllerItemHandler();
+    private final IFluidHandler fluidHandler = new ControllerFluidHandler();
     private List<EndgameRequirement> cachedRequirements = List.of();
     private boolean requirementsDirty = true;
     private int requirementsRevision;
 
-    public EndgameTemplateBlockEntity(BlockPos pos, BlockState blockState) {
-        super(dddsendgame.ENDGAME_TEMPLATE_BLOCK_ENTITY.get(), pos, blockState);
+    public EndgameControllerBlockEntity(BlockPos pos, BlockState blockState) {
+        super(dddsendgame.ENDGAME_CONTROLLER_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     public List<EndgameRequirement> requirements() {
@@ -107,8 +107,8 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         return this.requirementsRevision;
     }
 
-    public EndgameTemplateNetwork.Status networkStatus() {
-        return this.level == null ? new EndgameTemplateNetwork.Status(this.worldPosition, 1, 0) : EndgameTemplateNetwork.fromController(this.level, this.worldPosition);
+    public EndgameControllerNetwork.Status networkStatus() {
+        return this.level == null ? new EndgameControllerNetwork.Status(this.worldPosition, 1, 0) : EndgameControllerNetwork.fromController(this.level, this.worldPosition);
     }
 
     public int connectedInputCount() {
@@ -181,7 +181,7 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         }
 
         if (changed) {
-            dddsendgame.LOGGER.info("Endgame template at {} tracks {} recipe output items and {} fluids", this.worldPosition, this.remaining.size(), this.fluidRemaining.size());
+            dddsendgame.LOGGER.info("Endgame controller at {} tracks {} recipe output items and {} fluids", this.worldPosition, this.remaining.size(), this.fluidRemaining.size());
             this.setChangedAndSync();
         }
     }
@@ -213,7 +213,7 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
     private static void addRecipeOutputItem(Map<ResourceLocation, Item> recipeItems, ItemStack result) {
         if (result.isEmpty()
                 || result.is(dddsendgame.ENDGAME_TEST_STICK.get())
-                || result.is(dddsendgame.ENDGAME_TEMPLATE_ITEM.get())) {
+                || result.is(dddsendgame.ENDGAME_CONTROLLER_ITEM.get())) {
             return;
         }
 
@@ -333,14 +333,14 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("container.dddsendgame.endgame_template");
+        return Component.translatable("container.dddsendgame.endgame_controller");
     }
 
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
         this.initializeRequirementsFromRecipes();
-        return new EndgameTemplateMenu(containerId, playerInventory, this);
+        return new EndgameControllerMenu(containerId, playerInventory, this);
     }
 
     @Override
@@ -470,7 +470,7 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         this.requirementsRevision++;
     }
 
-    private class TemplateItemHandler implements IItemHandler {
+    private class ControllerItemHandler implements IItemHandler {
         @Override
         public int getSlots() {
             return 2;
@@ -479,8 +479,8 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         @Override
         public ItemStack getStackInSlot(int slot) {
             validateSlot(slot);
-            if (slot == SLOT_OUTPUT && EndgameTemplateBlockEntity.this.level != null && EndgameTemplateBlockEntity.this.isComplete()) {
-                return EndgameTestRecipe.createResult(EndgameTemplateBlockEntity.this.level.registryAccess());
+            if (slot == SLOT_OUTPUT && EndgameControllerBlockEntity.this.level != null && EndgameControllerBlockEntity.this.isComplete()) {
+                return EndgameTestRecipe.createResult(EndgameControllerBlockEntity.this.level.registryAccess());
             }
             return ItemStack.EMPTY;
         }
@@ -492,14 +492,14 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
                 return stack;
             }
 
-            int accepted = EndgameTemplateBlockEntity.this.acceptedContributionCount(stack);
+            int accepted = EndgameControllerBlockEntity.this.acceptedContributionCount(stack);
             if (accepted <= 0) {
                 return stack;
             }
 
             if (!simulate) {
                 ItemStack consumed = stack.copyWithCount(accepted);
-                EndgameTemplateBlockEntity.this.acceptContribution(consumed);
+                EndgameControllerBlockEntity.this.acceptContribution(consumed);
             }
 
             return accepted >= stack.getCount() ? ItemStack.EMPTY : stack.copyWithCount(stack.getCount() - accepted);
@@ -512,13 +512,13 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
                 return ItemStack.EMPTY;
             }
 
-            if (EndgameTemplateBlockEntity.this.level == null || !EndgameTemplateBlockEntity.this.isComplete()) {
+            if (EndgameControllerBlockEntity.this.level == null || !EndgameControllerBlockEntity.this.isComplete()) {
                 return ItemStack.EMPTY;
             }
 
-            ItemStack result = EndgameTestRecipe.createResult(EndgameTemplateBlockEntity.this.level.registryAccess());
+            ItemStack result = EndgameTestRecipe.createResult(EndgameControllerBlockEntity.this.level.registryAccess());
             if (!simulate) {
-                EndgameTemplateBlockEntity.this.resetRequirements();
+                EndgameControllerBlockEntity.this.resetRequirements();
             }
             return result;
         }
@@ -532,7 +532,7 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
             validateSlot(slot);
-            return slot == SLOT_INPUT && EndgameTemplateBlockEntity.this.acceptedContributionCount(stack) > 0;
+            return slot == SLOT_INPUT && EndgameControllerBlockEntity.this.acceptedContributionCount(stack) > 0;
         }
 
         private void validateSlot(int slot) {
@@ -542,7 +542,7 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         }
     }
 
-    private class TemplateFluidHandler implements IFluidHandler {
+    private class ControllerFluidHandler implements IFluidHandler {
         @Override
         public int getTanks() {
             return 1;
@@ -563,12 +563,12 @@ public class EndgameTemplateBlockEntity extends BlockEntity implements Container
         @Override
         public boolean isFluidValid(int tank, FluidStack stack) {
             validateTank(tank);
-            return EndgameTemplateBlockEntity.this.acceptFluidContribution(stack, FluidAction.SIMULATE) > 0;
+            return EndgameControllerBlockEntity.this.acceptFluidContribution(stack, FluidAction.SIMULATE) > 0;
         }
 
         @Override
         public int fill(FluidStack resource, FluidAction action) {
-            return EndgameTemplateBlockEntity.this.acceptFluidContribution(resource, action);
+            return EndgameControllerBlockEntity.this.acceptFluidContribution(resource, action);
         }
 
         @Override

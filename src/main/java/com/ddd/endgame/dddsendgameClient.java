@@ -53,19 +53,19 @@ public class dddsendgameClient {
 
         BlockPos pos = event.getTarget().getBlockPos();
         BlockState state = level.getBlockState(pos);
-        if (state.is(dddsendgame.ENDGAME_TEMPLATE_BLOCK.get()) || state.is(dddsendgame.ENDGAME_TEMPLATE_INPUT_BLOCK.get())) {
+        if (state.is(dddsendgame.ENDGAME_CONTROLLER_BLOCK.get()) || state.is(dddsendgame.ENDGAME_CONNECTOR_BLOCK.get())) {
             event.setCanceled(true);
         }
     }
 
     @SubscribeEvent
     static void registerScreens(RegisterMenuScreensEvent event) {
-        event.register(dddsendgame.ENDGAME_TEMPLATE_MENU.get(), EndgameTemplateScreen::new);
+        event.register(dddsendgame.ENDGAME_CONTROLLER_MENU.get(), EndgameControllerScreen::new);
     }
 
     @SubscribeEvent
     static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(dddsendgame.ENDGAME_TEMPLATE_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
-        event.registerBlockEntityRenderer(dddsendgame.ENDGAME_TEMPLATE_INPUT_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(dddsendgame.ENDGAME_CONTROLLER_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(dddsendgame.ENDGAME_CONNECTOR_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
     }
 }

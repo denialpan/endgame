@@ -9,14 +9,14 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 
-public class EndgameTemplateInputBlockEntity extends BlockEntity {
+public class EndgameConnectorBlockEntity extends BlockEntity {
     private static final int SLOT_INPUT = 0;
     private static final int SLOT_OUTPUT = 1;
     private final IItemHandler itemHandler = new InputItemHandler();
     private final IFluidHandler fluidHandler = new InputFluidHandler();
 
-    public EndgameTemplateInputBlockEntity(BlockPos pos, BlockState blockState) {
-        super(dddsendgame.ENDGAME_TEMPLATE_INPUT_BLOCK_ENTITY.get(), pos, blockState);
+    public EndgameConnectorBlockEntity(BlockPos pos, BlockState blockState) {
+        super(dddsendgame.ENDGAME_CONNECTOR_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     public IItemHandler itemHandler() {
@@ -28,12 +28,12 @@ public class EndgameTemplateInputBlockEntity extends BlockEntity {
     }
 
     @Nullable
-    private EndgameTemplateBlockEntity connectedTemplate() {
+    private EndgameControllerBlockEntity connectedController() {
         if (this.level == null) {
             return null;
         }
 
-        EndgameTemplateNetwork.Status status = EndgameTemplateNetwork.fromInput(this.level, this.worldPosition);
+        EndgameControllerNetwork.Status status = EndgameControllerNetwork.fromInput(this.level, this.worldPosition);
         return status.hasMultipleControllers() ? null : status.singleController(this.level);
     }
 
@@ -46,9 +46,9 @@ public class EndgameTemplateInputBlockEntity extends BlockEntity {
         @Override
         public ItemStack getStackInSlot(int slot) {
             validateSlot(slot);
-            EndgameTemplateBlockEntity template = EndgameTemplateInputBlockEntity.this.connectedTemplate();
-            if (template != null && slot == SLOT_OUTPUT) {
-                return template.itemHandler().getStackInSlot(SLOT_OUTPUT);
+            EndgameControllerBlockEntity controller = EndgameConnectorBlockEntity.this.connectedController();
+            if (controller != null && slot == SLOT_OUTPUT) {
+                return controller.itemHandler().getStackInSlot(SLOT_OUTPUT);
             }
             return ItemStack.EMPTY;
         }
@@ -60,12 +60,12 @@ public class EndgameTemplateInputBlockEntity extends BlockEntity {
                 return stack;
             }
 
-            EndgameTemplateBlockEntity template = EndgameTemplateInputBlockEntity.this.connectedTemplate();
-            if (template == null) {
+            EndgameControllerBlockEntity controller = EndgameConnectorBlockEntity.this.connectedController();
+            if (controller == null) {
                 return stack;
             }
 
-            return template.itemHandler().insertItem(SLOT_INPUT, stack, simulate);
+            return controller.itemHandler().insertItem(SLOT_INPUT, stack, simulate);
         }
 
         @Override
@@ -75,8 +75,8 @@ public class EndgameTemplateInputBlockEntity extends BlockEntity {
                 return ItemStack.EMPTY;
             }
 
-            EndgameTemplateBlockEntity template = EndgameTemplateInputBlockEntity.this.connectedTemplate();
-            return template == null ? ItemStack.EMPTY : template.itemHandler().extractItem(SLOT_OUTPUT, amount, simulate);
+            EndgameControllerBlockEntity controller = EndgameConnectorBlockEntity.this.connectedController();
+            return controller == null ? ItemStack.EMPTY : controller.itemHandler().extractItem(SLOT_OUTPUT, amount, simulate);
         }
 
         @Override
@@ -88,8 +88,8 @@ public class EndgameTemplateInputBlockEntity extends BlockEntity {
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
             validateSlot(slot);
-            EndgameTemplateBlockEntity template = EndgameTemplateInputBlockEntity.this.connectedTemplate();
-            return slot == SLOT_INPUT && template != null && template.itemHandler().isItemValid(SLOT_INPUT, stack);
+            EndgameControllerBlockEntity controller = EndgameConnectorBlockEntity.this.connectedController();
+            return slot == SLOT_INPUT && controller != null && controller.itemHandler().isItemValid(SLOT_INPUT, stack);
         }
 
         private void validateSlot(int slot) {
@@ -120,14 +120,14 @@ public class EndgameTemplateInputBlockEntity extends BlockEntity {
         @Override
         public boolean isFluidValid(int tank, FluidStack stack) {
             validateTank(tank);
-            EndgameTemplateBlockEntity template = EndgameTemplateInputBlockEntity.this.connectedTemplate();
-            return template != null && template.fluidHandler().isFluidValid(0, stack);
+            EndgameControllerBlockEntity controller = EndgameConnectorBlockEntity.this.connectedController();
+            return controller != null && controller.fluidHandler().isFluidValid(0, stack);
         }
 
         @Override
         public int fill(FluidStack resource, FluidAction action) {
-            EndgameTemplateBlockEntity template = EndgameTemplateInputBlockEntity.this.connectedTemplate();
-            return template == null ? 0 : template.fluidHandler().fill(resource, action);
+            EndgameControllerBlockEntity controller = EndgameConnectorBlockEntity.this.connectedController();
+            return controller == null ? 0 : controller.fluidHandler().fill(resource, action);
         }
 
         @Override

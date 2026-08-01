@@ -24,7 +24,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 
-public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTemplateMenu> {
+public class EndgameControllerScreen extends AbstractContainerScreen<EndgameControllerMenu> {
     private static final ResourceLocation ATLAS = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/gui/atlas.png");
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getIntegerInstance(Locale.US);
     private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.0000000");
@@ -81,7 +81,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
     private int cachedCompletedStacks;
     private int cachedTotalStacks;
 
-    public EndgameTemplateScreen(EndgameTemplateMenu menu, Inventory playerInventory, Component title) {
+    public EndgameControllerScreen(EndgameControllerMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = TEMPLATE_WIDTH;
         this.imageHeight = TEMPLATE_HEIGHT;
@@ -98,7 +98,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
                 this.topPos + SEARCH_Y,
                 SEARCH_WIDTH,
                 SEARCH_HEIGHT,
-                Component.translatable("container.dddsendgame.endgame_template.search")
+                Component.translatable("container.dddsendgame.endgame_controller.search")
         );
         this.searchBox.setMaxLength(64);
         this.searchBox.setBordered(false);
@@ -124,7 +124,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
         guiGraphics.blit(ATLAS, x, y, 0, 0, TEMPLATE_WIDTH, TEMPLATE_HEIGHT);
         guiGraphics.fill(x + SEARCH_X + 1, y + SEARCH_Y + 1, x + SEARCH_X + SEARCH_WIDTH - 1, y + SEARCH_Y + SEARCH_HEIGHT - 1, 0xFF000000);
         if (this.searchBox != null && this.searchBox.getValue().isEmpty() && !this.searchBox.isFocused()) {
-            guiGraphics.drawString(this.font, Component.translatable("container.dddsendgame.endgame_template.search.short"), x + SEARCH_X + 2, y + SEARCH_Y + 1, 0xFFB0B0B0, false);
+            guiGraphics.drawString(this.font, Component.translatable("container.dddsendgame.endgame_controller.search.short"), x + SEARCH_X + 2, y + SEARCH_Y + 1, 0xFFB0B0B0, false);
         }
 
         if (this.hasNetworkConflict()) {
@@ -224,12 +224,12 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
         return super.mouseReleased(mouseX, mouseY, button);
     }
 
-    private EndgameTemplateBlockEntity currentTemplate() {
+    private EndgameControllerBlockEntity currentController() {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level != null) {
             BlockEntity blockEntity = minecraft.level.getBlockEntity(this.menu.pos());
-            if (blockEntity instanceof EndgameTemplateBlockEntity template) {
-                return template;
+            if (blockEntity instanceof EndgameControllerBlockEntity controller) {
+                return controller;
             }
         }
 
@@ -237,18 +237,18 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
     }
 
     private boolean hasNetworkConflict() {
-        EndgameTemplateBlockEntity template = this.currentTemplate();
-        return template != null && template.hasMultipleConnectedControllers();
+        EndgameControllerBlockEntity controller = this.currentController();
+        return controller != null && controller.hasMultipleConnectedControllers();
     }
 
     private int connectedInputCount() {
-        EndgameTemplateBlockEntity template = this.currentTemplate();
-        return template == null ? 0 : template.connectedInputCount();
+        EndgameControllerBlockEntity controller = this.currentController();
+        return controller == null ? 0 : controller.connectedInputCount();
     }
 
     private List<RowData> sortedRows() {
-        EndgameTemplateBlockEntity template = this.currentTemplate();
-        int revision = template == null ? -1 : template.requirementsRevision();
+        EndgameControllerBlockEntity controller = this.currentController();
+        int revision = controller == null ? -1 : controller.requirementsRevision();
         String searchText = normalizedSearchText();
         if (revision == this.cachedRequirementsRevision
                 && this.sortMode == this.cachedSortMode
@@ -257,7 +257,7 @@ public class EndgameTemplateScreen extends AbstractContainerScreen<EndgameTempla
             return this.cachedRows;
         }
 
-        List<EndgameRequirement> requirements = template == null ? List.of() : template.requirements();
+        List<EndgameRequirement> requirements = controller == null ? List.of() : controller.requirements();
         List<RowData> rows = new ArrayList<>(requirements.size());
         long totalRequired = 0L;
         long totalRemaining = 0L;

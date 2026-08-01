@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "dddsendgame:endgame_template",
-    "dddsendgame:endgame_template_input"
+    "dddsendgame:endgame_controller",
+    "dddsendgame:endgame_connector"
   ]
 }

@@ -8,10 +8,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class EndgameTemplateInputBlock extends OrientableEntityBlock {
-    public static final MapCodec<EndgameTemplateInputBlock> CODEC = simpleCodec(EndgameTemplateInputBlock::new);
+public class EndgameConnectorBlock extends OrientableEntityBlock {
+    public static final MapCodec<EndgameConnectorBlock> CODEC = simpleCodec(EndgameConnectorBlock::new);
 
-    public EndgameTemplateInputBlock(BlockBehaviour.Properties properties) {
+    public EndgameConnectorBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 
@@ -28,6 +28,6 @@ public class EndgameTemplateInputBlock extends OrientableEntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new EndgameTemplateInputBlockEntity(pos, state);
+        return new EndgameConnectorBlockEntity(pos, state);
     }
 }

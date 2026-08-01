@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "dddsendgame:block/endgame_controller",
+      "y": 90
+    },
+    "facing=east": {
+      "model": "dddsendgame:block/endgame_controller",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "dddsendgame:block/endgame_controller",
+      "y": 270
+    },
+    "facing=west": {
+      "model": "dddsendgame:block/endgame_controller"
+    }
+  }
+}

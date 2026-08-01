@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "dddsendgame:block/endgame_connector"
+    },
+    "axis=z": {
+      "model": "dddsendgame:block/endgame_connector",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "dddsendgame:block/endgame_connector",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

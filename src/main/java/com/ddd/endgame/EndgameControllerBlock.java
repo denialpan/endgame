@@ -18,10 +18,10 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class EndgameTemplateBlock extends HorizontalFacingEntityBlock {
-    public static final MapCodec<EndgameTemplateBlock> CODEC = simpleCodec(EndgameTemplateBlock::new);
+public class EndgameControllerBlock extends HorizontalFacingEntityBlock {
+    public static final MapCodec<EndgameControllerBlock> CODEC = simpleCodec(EndgameControllerBlock::new);
 
-    public EndgameTemplateBlock(BlockBehaviour.Properties properties) {
+    public EndgameControllerBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 
@@ -38,12 +38,12 @@ public class EndgameTemplateBlock extends HorizontalFacingEntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new EndgameTemplateBlockEntity(pos, state);
+        return new EndgameControllerBlockEntity(pos, state);
     }
 
     @Override
     public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!level.isClientSide && !player.isCreative() && level.getBlockEntity(pos) instanceof EndgameTemplateBlockEntity blockEntity) {
+        if (!level.isClientSide && !player.isCreative() && level.getBlockEntity(pos) instanceof EndgameControllerBlockEntity blockEntity) {
             popResource(level, pos, savedControllerStack(blockEntity, (ServerLevel)level));
         }
 
@@ -69,14 +69,14 @@ public class EndgameTemplateBlock extends HorizontalFacingEntityBlock {
     }
 
     private static void open(Level level, BlockPos pos, Player player) {
-        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof EndgameTemplateBlockEntity blockEntity) {
+        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof EndgameControllerBlockEntity blockEntity) {
             blockEntity.initializeRequirementsFromRecipes();
             serverPlayer.openMenu(blockEntity, buffer -> buffer.writeBlockPos(pos));
         }
     }
 
-    private static ItemStack savedControllerStack(EndgameTemplateBlockEntity blockEntity, ServerLevel level) {
-        ItemStack stack = new ItemStack(dddsendgame.ENDGAME_TEMPLATE_ITEM.get());
+    private static ItemStack savedControllerStack(EndgameControllerBlockEntity blockEntity, ServerLevel level) {
+        ItemStack stack = new ItemStack(dddsendgame.ENDGAME_CONTROLLER_ITEM.get());
         blockEntity.saveToItem(stack, level.registryAccess());
         return stack;
     }

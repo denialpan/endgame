@@ -20,8 +20,8 @@ import net.minecraft.world.level.block.Block;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
-public class EndgameTemplateItemRenderer extends BlockEntityWithoutLevelRenderer {
-    public static final EndgameTemplateItemRenderer INSTANCE = new EndgameTemplateItemRenderer();
+public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
+    public static final EndgameSkyboxItemRenderer INSTANCE = new EndgameSkyboxItemRenderer();
 
     private static final ResourceLocation FRONT = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/front.png");
     private static final ResourceLocation BACK = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/back.png");
@@ -30,7 +30,7 @@ public class EndgameTemplateItemRenderer extends BlockEntityWithoutLevelRenderer
     private static final ResourceLocation TOP = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/top.png");
     private static final ResourceLocation BOTTOM = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/bottom.png");
 
-    private EndgameTemplateItemRenderer() {
+    private EndgameSkyboxItemRenderer() {
         super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
     }
 

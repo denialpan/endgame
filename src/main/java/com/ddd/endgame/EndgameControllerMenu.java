@@ -12,23 +12,23 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-public class EndgameTemplateMenu extends AbstractContainerMenu {
+public class EndgameControllerMenu extends AbstractContainerMenu {
     private static final int TEMPLATE_SLOT_COUNT = 0;
     private final Container container;
     private final BlockPos pos;
     @Nullable
-    private final EndgameTemplateBlockEntity blockEntity;
+    private final EndgameControllerBlockEntity blockEntity;
 
-    public EndgameTemplateMenu(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buffer) {
+    public EndgameControllerMenu(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buffer) {
         this(containerId, playerInventory, clientContainer(playerInventory, buffer.readBlockPos()));
     }
 
-    public EndgameTemplateMenu(int containerId, Inventory playerInventory, EndgameTemplateBlockEntity blockEntity) {
+    public EndgameControllerMenu(int containerId, Inventory playerInventory, EndgameControllerBlockEntity blockEntity) {
         this(containerId, playerInventory, new MenuTarget(blockEntity, blockEntity.getBlockPos(), blockEntity));
     }
 
-    private EndgameTemplateMenu(int containerId, Inventory playerInventory, MenuTarget target) {
-        super(dddsendgame.ENDGAME_TEMPLATE_MENU.get(), containerId);
+    private EndgameControllerMenu(int containerId, Inventory playerInventory, MenuTarget target) {
+        super(dddsendgame.ENDGAME_CONTROLLER_MENU.get(), containerId);
         checkContainerSize(target.container(), TEMPLATE_SLOT_COUNT);
         this.container = target.container();
         this.pos = target.pos();
@@ -40,7 +40,7 @@ public class EndgameTemplateMenu extends AbstractContainerMenu {
     }
 
     @Nullable
-    public EndgameTemplateBlockEntity blockEntity() {
+    public EndgameControllerBlockEntity blockEntity() {
         return this.blockEntity;
     }
 
@@ -53,16 +53,16 @@ public class EndgameTemplateMenu extends AbstractContainerMenu {
     public boolean stillValid(Player player) {
         return this.blockEntity == null
                 ? true
-                : stillValid(ContainerLevelAccess.create(player.level(), this.pos), player, dddsendgame.ENDGAME_TEMPLATE_BLOCK.get());
+                : stillValid(ContainerLevelAccess.create(player.level(), this.pos), player, dddsendgame.ENDGAME_CONTROLLER_BLOCK.get());
     }
 
     private static MenuTarget clientContainer(Inventory inventory, BlockPos pos) {
-        if (inventory.player.level().getBlockEntity(pos) instanceof EndgameTemplateBlockEntity blockEntity) {
+        if (inventory.player.level().getBlockEntity(pos) instanceof EndgameControllerBlockEntity blockEntity) {
             return new MenuTarget(blockEntity, pos, blockEntity);
         }
         return new MenuTarget(new SimpleContainer(TEMPLATE_SLOT_COUNT), pos, null);
     }
 
-    private record MenuTarget(Container container, BlockPos pos, @Nullable EndgameTemplateBlockEntity blockEntity) {
+    private record MenuTarget(Container container, BlockPos pos, @Nullable EndgameControllerBlockEntity blockEntity) {
     }
 }

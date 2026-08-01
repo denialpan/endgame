@@ -1,23 +1,19 @@
 package com.ddd.endgame;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.material.MapColor;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -50,48 +46,41 @@ public class dddsendgame {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, MODID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
-    public static final DeferredBlock<Block> EXAMPLE_BLOCK = BLOCKS.registerSimpleBlock("example_block", BlockBehaviour.Properties.of().mapColor(MapColor.STONE));
-    public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block", EXAMPLE_BLOCK);
-    public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", new Item.Properties().food(new FoodProperties.Builder()
-            .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
-
     public static final DeferredItem<Item> ENDGAME_TEST_STICK = ITEMS.registerSimpleItem("endgame_test_stick", new Item.Properties().stacksTo(1));
-    public static final DeferredBlock<EndgameTemplateBlock> ENDGAME_TEMPLATE_BLOCK = BLOCKS.registerBlock(
-            "endgame_template",
-            EndgameTemplateBlock::new,
+    public static final DeferredBlock<EndgameControllerBlock> ENDGAME_CONTROLLER_BLOCK = BLOCKS.registerBlock(
+            "endgame_controller",
+            EndgameControllerBlock::new,
             BlockBehaviour.Properties.ofFullCopy(Blocks.OBSIDIAN)
     );
-    public static final DeferredItem<BlockItem> ENDGAME_TEMPLATE_ITEM = ITEMS.register(
-            "endgame_template",
-            () -> new EndgameTemplateBlockItem(ENDGAME_TEMPLATE_BLOCK.get(), new Item.Properties())
+    public static final DeferredItem<BlockItem> ENDGAME_CONTROLLER_ITEM = ITEMS.register(
+            "endgame_controller",
+            () -> new EndgameSkyboxBlockItem(ENDGAME_CONTROLLER_BLOCK.get(), new Item.Properties())
     );
-    public static final DeferredBlock<EndgameTemplateInputBlock> ENDGAME_TEMPLATE_INPUT_BLOCK = BLOCKS.registerBlock(
-            "endgame_template_input",
-            EndgameTemplateInputBlock::new,
+    public static final DeferredBlock<EndgameConnectorBlock> ENDGAME_CONNECTOR_BLOCK = BLOCKS.registerBlock(
+            "endgame_connector",
+            EndgameConnectorBlock::new,
             BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
     );
-    public static final DeferredItem<BlockItem> ENDGAME_TEMPLATE_INPUT_ITEM = ITEMS.register(
-            "endgame_template_input",
-            () -> new EndgameTemplateBlockItem(ENDGAME_TEMPLATE_INPUT_BLOCK.get(), new Item.Properties())
+    public static final DeferredItem<BlockItem> ENDGAME_CONNECTOR_ITEM = ITEMS.register(
+            "endgame_connector",
+            () -> new EndgameSkyboxBlockItem(ENDGAME_CONNECTOR_BLOCK.get(), new Item.Properties())
     );
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameTemplateBlockEntity>> ENDGAME_TEMPLATE_BLOCK_ENTITY =
-            BLOCK_ENTITY_TYPES.register("endgame_template", () -> BlockEntityType.Builder.of(EndgameTemplateBlockEntity::new, ENDGAME_TEMPLATE_BLOCK.get()).build(null));
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameTemplateInputBlockEntity>> ENDGAME_TEMPLATE_INPUT_BLOCK_ENTITY =
-            BLOCK_ENTITY_TYPES.register("endgame_template_input", () -> BlockEntityType.Builder.of(EndgameTemplateInputBlockEntity::new, ENDGAME_TEMPLATE_INPUT_BLOCK.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameControllerBlockEntity>> ENDGAME_CONTROLLER_BLOCK_ENTITY =
+            BLOCK_ENTITY_TYPES.register("endgame_controller", () -> BlockEntityType.Builder.of(EndgameControllerBlockEntity::new, ENDGAME_CONTROLLER_BLOCK.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameConnectorBlockEntity>> ENDGAME_CONNECTOR_BLOCK_ENTITY =
+            BLOCK_ENTITY_TYPES.register("endgame_connector", () -> BlockEntityType.Builder.of(EndgameConnectorBlockEntity::new, ENDGAME_CONNECTOR_BLOCK.get()).build(null));
 
-    public static final DeferredHolder<MenuType<?>, MenuType<EndgameTemplateMenu>> ENDGAME_TEMPLATE_MENU =
-            MENU_TYPES.register("endgame_template", () -> IMenuTypeExtension.create(EndgameTemplateMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<EndgameControllerMenu>> ENDGAME_CONTROLLER_MENU =
+            MENU_TYPES.register("endgame_controller", () -> IMenuTypeExtension.create(EndgameControllerMenu::new));
 
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> ENDGAME_TAB = CREATIVE_MODE_TABS.register("endgame_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.dddsendgame"))
             .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> ENDGAME_TEMPLATE_ITEM.get().getDefaultInstance())
+            .icon(() -> ENDGAME_CONTROLLER_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
-                output.accept(EXAMPLE_ITEM.get());
-                output.accept(EXAMPLE_BLOCK_ITEM.get());
-                output.accept(ENDGAME_TEMPLATE_ITEM.get());
-                output.accept(ENDGAME_TEMPLATE_INPUT_ITEM.get());
+                output.accept(ENDGAME_CONTROLLER_ITEM.get());
+                output.accept(ENDGAME_CONNECTOR_ITEM.get());
                 output.accept(EndgameTestRecipe.createResult(parameters.holders()));
             }).build());
 
@@ -114,42 +103,34 @@ public class dddsendgame {
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
-                ENDGAME_TEMPLATE_BLOCK_ENTITY.get(),
+                ENDGAME_CONTROLLER_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.itemHandler()
         );
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
-                ENDGAME_TEMPLATE_BLOCK_ENTITY.get(),
+                ENDGAME_CONTROLLER_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.fluidHandler()
         );
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
-                ENDGAME_TEMPLATE_INPUT_BLOCK_ENTITY.get(),
+                ENDGAME_CONNECTOR_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.itemHandler()
         );
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
-                ENDGAME_TEMPLATE_INPUT_BLOCK_ENTITY.get(),
+                ENDGAME_CONNECTOR_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.fluidHandler()
         );
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
-        LOGGER.info("HELLO FROM COMMON SETUP");
-
-        if (Config.LOG_DIRT_BLOCK.getAsBoolean()) {
-            LOGGER.info("DIRT BLOCK >> {}", BuiltInRegistries.BLOCK.getKey(Blocks.DIRT));
-        }
-
-        LOGGER.info("{}{}", Config.MAGIC_NUMBER_INTRODUCTION.get(), Config.MAGIC_NUMBER.getAsInt());
-        Config.ITEM_STRINGS.get().forEach((item) -> LOGGER.info("ITEM >> {}", item));
+        LOGGER.info("ddd's endgame common setup complete");
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-            event.accept(EXAMPLE_BLOCK_ITEM);
-            event.accept(ENDGAME_TEMPLATE_ITEM);
-            event.accept(ENDGAME_TEMPLATE_INPUT_ITEM);
+            event.accept(ENDGAME_CONTROLLER_ITEM);
+            event.accept(ENDGAME_CONNECTOR_ITEM);
         }
     }
 

@@ -7,8 +7,8 @@ import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 import java.util.function.Consumer;
 
-public class EndgameTemplateBlockItem extends BlockItem {
-    public EndgameTemplateBlockItem(Block block, Item.Properties properties) {
+public class EndgameSkyboxBlockItem extends BlockItem {
+    public EndgameSkyboxBlockItem(Block block, Item.Properties properties) {
         super(block, properties);
     }
 
@@ -17,7 +17,7 @@ public class EndgameTemplateBlockItem extends BlockItem {
         consumer.accept(new IClientItemExtensions() {
             @Override
             public net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                return EndgameTemplateItemRenderer.INSTANCE;
+                return EndgameSkyboxItemRenderer.INSTANCE;
             }
         });
     }
