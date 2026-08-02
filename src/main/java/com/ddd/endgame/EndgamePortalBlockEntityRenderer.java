@@ -38,10 +38,14 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     private static final float SKYBOX_SIZE = 96.0F;
     private static final float FIXED_SKYBOX_FOV = 70.0F;
     private static final float ITEM_WINDOW_SCALE = 0.985F;
+    private static final int BLOCK_STENCIL_REF = 1;
+    private static final int ITEM_STENCIL_REF = 2;
     private static final List<Matrix4f> WINDOW_MASKS = new ArrayList<>();
     private static final List<Matrix4f> ITEM_WINDOW_MASKS = new ArrayList<>();
     private static final Set<Long> WINDOW_MASK_KEYS = new HashSet<>();
     private static final Set<MatrixKey> ITEM_WINDOW_MASK_KEYS = new HashSet<>();
+    private static int lastStencilClearRenderTick = Integer.MIN_VALUE;
+    private static float lastStencilClearPartialTick = Float.NaN;
     private static boolean stencilEnabled;
 
     public EndgamePortalBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -70,14 +74,14 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static void renderSkyboxLayer(RenderLevelStageEvent event) {
-        renderSkyboxLayer(event, WINDOW_MASKS, WINDOW_MASK_KEYS);
+        renderSkyboxLayer(event, WINDOW_MASKS, WINDOW_MASK_KEYS, BLOCK_STENCIL_REF);
     }
 
     public static void renderItemSkyboxLayer(RenderLevelStageEvent event) {
-        renderSkyboxLayer(event, ITEM_WINDOW_MASKS, ITEM_WINDOW_MASK_KEYS);
+        renderSkyboxLayer(event, ITEM_WINDOW_MASKS, ITEM_WINDOW_MASK_KEYS, ITEM_STENCIL_REF);
     }
 
-    private static void renderSkyboxLayer(RenderLevelStageEvent event, List<Matrix4f> queuedMasks, Set<?> queuedKeys) {
+    private static void renderSkyboxLayer(RenderLevelStageEvent event, List<Matrix4f> queuedMasks, Set<?> queuedKeys, int stencilRef) {
         if (!stencilEnabled) {
             ensureStencil(Minecraft.getInstance());
         }
@@ -96,15 +100,13 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             return;
         }
 
-        GL11.glEnable(GL11.GL_STENCIL_TEST);
-        RenderSystem.stencilMask(0xFF);
-        RenderSystem.clear(GL11.GL_STENCIL_BUFFER_BIT, Minecraft.ON_OSX);
+        prepareStencilForFrame(event);
 
         RenderSystem.enableDepthTest();
         RenderSystem.disableCull();
         RenderSystem.depthMask(false);
         RenderSystem.colorMask(false, false, false, false);
-        RenderSystem.stencilFunc(GL11.GL_ALWAYS, 1, 0xFF);
+        RenderSystem.stencilFunc(GL11.GL_ALWAYS, stencilRef, 0xFF);
         RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
         RenderSystem.setShader(GameRenderer::getPositionShader);
 
@@ -117,7 +119,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
 
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.stencilMask(0x00);
-        RenderSystem.stencilFunc(GL11.GL_EQUAL, 1, 0xFF);
+        RenderSystem.stencilFunc(GL11.GL_EQUAL, stencilRef, 0xFF);
         RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
@@ -150,6 +152,21 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             minecraft.getMainRenderTarget().enableStencil();
             stencilEnabled = minecraft.getMainRenderTarget().isStencilEnabled();
         }
+    }
+
+    private static void prepareStencilForFrame(RenderLevelStageEvent event) {
+        GL11.glEnable(GL11.GL_STENCIL_TEST);
+
+        int renderTick = event.getRenderTick();
+        float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        if (lastStencilClearRenderTick == renderTick && Float.compare(lastStencilClearPartialTick, partialTick) == 0) {
+            return;
+        }
+
+        RenderSystem.stencilMask(0xFF);
+        RenderSystem.clear(GL11.GL_STENCIL_BUFFER_BIT, Minecraft.ON_OSX);
+        lastStencilClearRenderTick = renderTick;
+        lastStencilClearPartialTick = partialTick;
     }
 
     public static void applyConfiguredSkyboxRotation(PoseStack poseStack) {
