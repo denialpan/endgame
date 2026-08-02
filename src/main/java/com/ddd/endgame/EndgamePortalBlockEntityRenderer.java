@@ -9,12 +9,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexSorting;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -22,7 +22,9 @@ import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements BlockEntityRenderer<T> {
     private static final float BLOCK_MIN = 0.0F;
@@ -34,6 +36,8 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     private static final float ITEM_WINDOW_SCALE = 0.985F;
     private static final List<Matrix4f> WINDOW_MASKS = new ArrayList<>();
     private static final List<Matrix4f> ITEM_WINDOW_MASKS = new ArrayList<>();
+    private static final Set<Long> WINDOW_MASK_KEYS = new HashSet<>();
+    private static final Set<MatrixKey> ITEM_WINDOW_MASK_KEYS = new HashSet<>();
     private static boolean stencilEnabled;
 
     public EndgamePortalBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -47,20 +51,25 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             return;
         }
 
+        BlockPos blockPos = blockEntity.getBlockPos();
+        if (!WINDOW_MASK_KEYS.add(blockPos.asLong())) {
+            return;
+        }
+
         Matrix4f maskPose = new Matrix4f(poseStack.last().pose());
         WINDOW_MASKS.add(maskPose);
         renderWindowDepthMask(maskPose);
     }
 
     public static void renderSkyboxLayer(RenderLevelStageEvent event) {
-        renderSkyboxLayer(event, WINDOW_MASKS);
+        renderSkyboxLayer(event, WINDOW_MASKS, WINDOW_MASK_KEYS);
     }
 
     public static void renderItemSkyboxLayer(RenderLevelStageEvent event) {
-        renderSkyboxLayer(event, ITEM_WINDOW_MASKS);
+        renderSkyboxLayer(event, ITEM_WINDOW_MASKS, ITEM_WINDOW_MASK_KEYS);
     }
 
-    private static void renderSkyboxLayer(RenderLevelStageEvent event, List<Matrix4f> queuedMasks) {
+    private static void renderSkyboxLayer(RenderLevelStageEvent event, List<Matrix4f> queuedMasks, Set<?> queuedKeys) {
         if (!stencilEnabled) {
             ensureStencil(Minecraft.getInstance());
         }
@@ -70,6 +79,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
 
         List<Matrix4f> masks = new ArrayList<>(queuedMasks);
         queuedMasks.clear();
+        queuedKeys.clear();
 
         GL11.glEnable(GL11.GL_STENCIL_TEST);
         RenderSystem.stencilMask(0xFF);
@@ -84,9 +94,11 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         RenderSystem.setShader(GameRenderer::getPositionShader);
 
         PoseStack poseStack = event.getPoseStack();
+        BufferBuilder maskBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
         for (Matrix4f mask : masks) {
-            renderWindowMask(mask, BLOCK_MIN, BLOCK_MAX);
+            appendWindowMask(maskBuilder, mask, BLOCK_MIN, BLOCK_MAX);
         }
+        BufferUploader.drawWithShader(maskBuilder.buildOrThrow());
 
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.stencilMask(0x00);
@@ -115,6 +127,9 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         itemPose.translate(0.5F, 0.5F, 0.5F);
         itemPose.scale(ITEM_WINDOW_SCALE);
         itemPose.translate(-0.5F, -0.5F, -0.5F);
+        if (!ITEM_WINDOW_MASK_KEYS.add(MatrixKey.from(itemPose))) {
+            return;
+        }
         ITEM_WINDOW_MASKS.add(itemPose);
     }
 
@@ -188,29 +203,29 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         RenderSystem.colorMask(false, false, false, false);
         RenderSystem.setShader(GameRenderer::getPositionShader);
 
-        renderWindowMask(pose, DEPTH_MIN, DEPTH_MAX);
+        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        appendWindowMask(builder, pose, DEPTH_MIN, DEPTH_MAX);
+        BufferUploader.drawWithShader(builder.buildOrThrow());
 
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.depthMask(true);
         RenderSystem.enableCull();
     }
 
-    private static void renderWindowMask(Matrix4f pose, float min, float max) {
-        renderMaskFace(pose, min, max, min, max, max, max, max, max);
-        renderMaskFace(pose, min, max, max, min, min, min, min, min);
-        renderMaskFace(pose, max, max, max, min, min, max, max, min);
-        renderMaskFace(pose, min, min, min, max, min, max, max, min);
-        renderMaskFace(pose, min, max, min, min, min, min, max, max);
-        renderMaskFace(pose, min, max, max, max, max, max, min, min);
+    private static void appendWindowMask(BufferBuilder builder, Matrix4f pose, float min, float max) {
+        appendMaskFace(builder, pose, min, max, min, max, max, max, max, max);
+        appendMaskFace(builder, pose, min, max, max, min, min, min, min, min);
+        appendMaskFace(builder, pose, max, max, max, min, min, max, max, min);
+        appendMaskFace(builder, pose, min, min, min, max, min, max, max, min);
+        appendMaskFace(builder, pose, min, max, min, min, min, min, max, max);
+        appendMaskFace(builder, pose, min, max, max, max, max, max, min, min);
     }
 
-    private static void renderMaskFace(Matrix4f pose, float x0, float x1, float y0, float y1, float z0, float z1, float z2, float z3) {
-        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+    private static void appendMaskFace(BufferBuilder builder, Matrix4f pose, float x0, float x1, float y0, float y1, float z0, float z1, float z2, float z3) {
         builder.addVertex(pose, x0, y0, z0);
         builder.addVertex(pose, x1, y0, z1);
         builder.addVertex(pose, x1, y1, z2);
         builder.addVertex(pose, x0, y1, z3);
-        BufferUploader.drawWithShader(builder.buildOrThrow());
     }
 
     private static void renderSkyboxCube(Matrix4f pose) {
@@ -260,6 +275,28 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
 
         CubemapFace(String textureName) {
             this.texture = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/" + textureName + ".png");
+        }
+    }
+
+    private record MatrixKey(
+            int m00, int m01, int m02, int m03,
+            int m10, int m11, int m12, int m13,
+            int m20, int m21, int m22, int m23,
+            int m30, int m31, int m32, int m33
+    ) {
+        private static final float SCALE = 4096.0F;
+
+        private static MatrixKey from(Matrix4f matrix) {
+            return new MatrixKey(
+                    quantize(matrix.m00()), quantize(matrix.m01()), quantize(matrix.m02()), quantize(matrix.m03()),
+                    quantize(matrix.m10()), quantize(matrix.m11()), quantize(matrix.m12()), quantize(matrix.m13()),
+                    quantize(matrix.m20()), quantize(matrix.m21()), quantize(matrix.m22()), quantize(matrix.m23()),
+                    quantize(matrix.m30()), quantize(matrix.m31()), quantize(matrix.m32()), quantize(matrix.m33())
+            );
+        }
+
+        private static int quantize(float value) {
+            return Math.round(value * SCALE);
         }
     }
 }
