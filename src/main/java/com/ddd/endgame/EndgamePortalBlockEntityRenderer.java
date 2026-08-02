@@ -15,18 +15,14 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements BlockEntityRenderer<T> {
     private static final float BLOCK_MIN = 0.0F;
@@ -35,7 +31,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     private static final float DEPTH_MAX = 0.998F;
     private static final float SKYBOX_SIZE = 96.0F;
     private static final float FIXED_SKYBOX_FOV = 70.0F;
-    private static final Set<BlockPos> WINDOW_POSITIONS = new HashSet<>();
+    private static final List<Matrix4f> WINDOW_MASKS = new ArrayList<>();
     private static boolean stencilEnabled;
 
     public EndgamePortalBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -49,20 +45,21 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             return;
         }
 
-        WINDOW_POSITIONS.add(blockEntity.getBlockPos().immutable());
-        renderWindowDepthMask(blockEntity.getBlockPos(), minecraft.gameRenderer.getMainCamera().getPosition(), poseStack.last().pose());
+        Matrix4f maskPose = new Matrix4f(poseStack.last().pose());
+        WINDOW_MASKS.add(maskPose);
+        renderWindowDepthMask(maskPose);
     }
 
     public static void renderSkyboxLayer(RenderLevelStageEvent event) {
         if (!stencilEnabled) {
             ensureStencil(Minecraft.getInstance());
         }
-        if (!stencilEnabled || WINDOW_POSITIONS.isEmpty()) {
+        if (!stencilEnabled || WINDOW_MASKS.isEmpty()) {
             return;
         }
 
-        List<BlockPos> windows = new ArrayList<>(WINDOW_POSITIONS);
-        WINDOW_POSITIONS.clear();
+        List<Matrix4f> masks = new ArrayList<>(WINDOW_MASKS);
+        WINDOW_MASKS.clear();
 
         GL11.glEnable(GL11.GL_STENCIL_TEST);
         RenderSystem.stencilMask(0xFF);
@@ -77,12 +74,8 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         RenderSystem.setShader(GameRenderer::getPositionShader);
 
         PoseStack poseStack = event.getPoseStack();
-        Vec3 cameraPosition = event.getCamera().getPosition();
-        for (BlockPos window : windows) {
-            poseStack.pushPose();
-            poseStack.translate(window.getX() - cameraPosition.x, window.getY() - cameraPosition.y, window.getZ() - cameraPosition.z);
-            renderVisibleWindowFaces(window, cameraPosition, poseStack.last().pose(), BLOCK_MIN, BLOCK_MAX);
-            poseStack.popPose();
+        for (Matrix4f mask : masks) {
+            renderWindowMask(mask, BLOCK_MIN, BLOCK_MAX);
         }
 
         RenderSystem.colorMask(true, true, true, true);
@@ -170,42 +163,27 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         return (float) ((seconds * degreesPerSecond) % 360.0D);
     }
 
-    private static void renderWindowDepthMask(BlockPos blockPos, Vec3 cameraPos, Matrix4f pose) {
+    private static void renderWindowDepthMask(Matrix4f pose) {
         RenderSystem.enableDepthTest();
         RenderSystem.disableCull();
         RenderSystem.depthMask(true);
         RenderSystem.colorMask(false, false, false, false);
         RenderSystem.setShader(GameRenderer::getPositionShader);
 
-        renderVisibleWindowFaces(blockPos, cameraPos, pose, DEPTH_MIN, DEPTH_MAX);
+        renderWindowMask(pose, DEPTH_MIN, DEPTH_MAX);
 
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.depthMask(true);
         RenderSystem.enableCull();
     }
 
-    private static void renderVisibleWindowFaces(BlockPos blockPos, Vec3 cameraPos, Matrix4f pose, float min, float max) {
-        double cameraX = cameraPos.x - blockPos.getX();
-        double cameraY = cameraPos.y - blockPos.getY();
-        double cameraZ = cameraPos.z - blockPos.getZ();
-        if (cameraZ >= min) {
-            renderMaskFace(pose, min, max, min, max, max, max, max, max);
-        }
-        if (cameraZ <= max) {
-            renderMaskFace(pose, min, max, max, min, min, min, min, min);
-        }
-        if (cameraX >= min) {
-            renderMaskFace(pose, max, max, max, min, min, max, max, min);
-        }
-        if (cameraX <= max) {
-            renderMaskFace(pose, min, min, min, max, min, max, max, min);
-        }
-        if (cameraY <= max) {
-            renderMaskFace(pose, min, max, min, min, min, min, max, max);
-        }
-        if (cameraY >= min) {
-            renderMaskFace(pose, min, max, max, max, max, max, min, min);
-        }
+    private static void renderWindowMask(Matrix4f pose, float min, float max) {
+        renderMaskFace(pose, min, max, min, max, max, max, max, max);
+        renderMaskFace(pose, min, max, max, min, min, min, min, min);
+        renderMaskFace(pose, max, max, max, min, min, max, max, min);
+        renderMaskFace(pose, min, min, min, max, min, max, max, min);
+        renderMaskFace(pose, min, max, min, min, min, min, max, max);
+        renderMaskFace(pose, min, max, max, max, max, max, min, min);
     }
 
     private static void renderMaskFace(Matrix4f pose, float x0, float x1, float y0, float y1, float z0, float z1, float z2, float z3) {
