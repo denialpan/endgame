@@ -38,6 +38,10 @@ public class Config {
             .comment("Client-side maximum distance for rendering endgame skybox windows, in blocks. Use 0 to disable distance culling.")
             .defineInRange("skyboxRenderDistance", 96.0D, 0.0D, 1024.0D);
 
+    public static final ModConfigSpec.IntValue SKYBOX_MAX_BLOCK_ENTITY_WINDOWS = CLIENT_BUILDER
+            .comment("Client-side maximum number of in-world endgame block skybox windows rendered per frame. Use 0 to disable this cap.")
+            .defineInRange("skyboxMaxBlockEntityWindows", 4096, 0, 262144);
+
     static final ModConfigSpec SPEC = BUILDER.build();
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 

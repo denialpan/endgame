@@ -46,6 +46,11 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     private static final Set<MatrixKey> ITEM_WINDOW_MASK_KEYS = new HashSet<>();
     private static int lastStencilClearRenderTick = Integer.MIN_VALUE;
     private static float lastStencilClearPartialTick = Float.NaN;
+    private static int blockEntityWindowSkippedThisFrame;
+    private static int lastBlockEntityWindowsQueued;
+    private static int lastBlockEntityWindowsVisible;
+    private static int lastBlockEntityWindowsCulled;
+    private static int lastBlockEntityWindowsSkipped;
     private static boolean stencilEnabled;
 
     public EndgamePortalBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -69,23 +74,29 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             return;
         }
 
+        if (blockEntityWindowLimitReached()) {
+            blockEntityWindowSkippedThisFrame++;
+            return;
+        }
+
         WINDOW_MASKS.add(maskPose);
         renderWindowDepthMask(maskPose);
     }
 
     public static void renderSkyboxLayer(RenderLevelStageEvent event) {
-        renderSkyboxLayer(event, WINDOW_MASKS, WINDOW_MASK_KEYS, BLOCK_STENCIL_REF);
+        renderSkyboxLayer(event, WINDOW_MASKS, WINDOW_MASK_KEYS, BLOCK_STENCIL_REF, true);
     }
 
     public static void renderItemSkyboxLayer(RenderLevelStageEvent event) {
-        renderSkyboxLayer(event, ITEM_WINDOW_MASKS, ITEM_WINDOW_MASK_KEYS, ITEM_STENCIL_REF);
+        renderSkyboxLayer(event, ITEM_WINDOW_MASKS, ITEM_WINDOW_MASK_KEYS, ITEM_STENCIL_REF, false);
     }
 
-    private static void renderSkyboxLayer(RenderLevelStageEvent event, List<Matrix4f> queuedMasks, Set<?> queuedKeys, int stencilRef) {
+    private static void renderSkyboxLayer(RenderLevelStageEvent event, List<Matrix4f> queuedMasks, Set<?> queuedKeys, int stencilRef, boolean trackBlockEntityCount) {
         if (!stencilEnabled) {
             ensureStencil(Minecraft.getInstance());
         }
         if (!stencilEnabled || queuedMasks.isEmpty()) {
+            updateBlockEntityWindowCounts(trackBlockEntityCount, 0, 0);
             return;
         }
 
@@ -96,6 +107,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         List<Matrix4f> visibleMasks = masks.stream()
                 .filter(mask -> shouldRenderMask(mask, event))
                 .toList();
+        updateBlockEntityWindowCounts(trackBlockEntityCount, masks.size(), visibleMasks.size());
         if (visibleMasks.isEmpty()) {
             return;
         }
@@ -147,11 +159,44 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         ITEM_WINDOW_MASKS.add(itemPose);
     }
 
+    public static int lastBlockEntityWindowsQueued() {
+        return lastBlockEntityWindowsQueued;
+    }
+
+    public static int lastBlockEntityWindowsVisible() {
+        return lastBlockEntityWindowsVisible;
+    }
+
+    public static int lastBlockEntityWindowsCulled() {
+        return lastBlockEntityWindowsCulled;
+    }
+
+    public static int lastBlockEntityWindowsSkipped() {
+        return lastBlockEntityWindowsSkipped;
+    }
+
     private static void ensureStencil(Minecraft minecraft) {
         if (!stencilEnabled) {
             minecraft.getMainRenderTarget().enableStencil();
             stencilEnabled = minecraft.getMainRenderTarget().isStencilEnabled();
         }
+    }
+
+    private static boolean blockEntityWindowLimitReached() {
+        int maxWindows = Config.SKYBOX_MAX_BLOCK_ENTITY_WINDOWS.get();
+        return maxWindows > 0 && WINDOW_MASKS.size() >= maxWindows;
+    }
+
+    private static void updateBlockEntityWindowCounts(boolean trackBlockEntityCount, int queuedCount, int visibleCount) {
+        if (!trackBlockEntityCount) {
+            return;
+        }
+
+        lastBlockEntityWindowsQueued = queuedCount;
+        lastBlockEntityWindowsVisible = visibleCount;
+        lastBlockEntityWindowsCulled = queuedCount - visibleCount;
+        lastBlockEntityWindowsSkipped = blockEntityWindowSkippedThisFrame;
+        blockEntityWindowSkippedThisFrame = 0;
     }
 
     private static void prepareStencilForFrame(RenderLevelStageEvent event) {
