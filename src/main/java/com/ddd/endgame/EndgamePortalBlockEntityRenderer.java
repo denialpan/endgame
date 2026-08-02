@@ -169,7 +169,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static void registerWindowMask(Matrix4f pose) {
-        if (!Config.SKYBOX_DROPPED_ITEM_WINDOWS.getAsBoolean()) {
+        if (!Config.SKYBOX_DROPPED_ITEM_WINDOWS.getAsBoolean() || IrisCompat.isRenderingShadowPass()) {
             return;
         }
 

@@ -7,6 +7,7 @@ public final class IrisCompat {
     private static boolean checked;
     private static Method getInstanceMethod;
     private static Method isShaderPackInUseMethod;
+    private static Method isRenderingShadowPassMethod;
     private static Method getCurrentPackNameMethod;
 
     private IrisCompat() {
@@ -41,15 +42,33 @@ public final class IrisCompat {
         }
     }
 
+    public static boolean isRenderingShadowPass() {
+        if (!checked) {
+            initialize();
+        }
+        if (getInstanceMethod == null || isRenderingShadowPassMethod == null) {
+            return false;
+        }
+
+        try {
+            Object api = getInstanceMethod.invoke(null);
+            return api != null && Boolean.TRUE.equals(isRenderingShadowPassMethod.invoke(api));
+        } catch (ReflectiveOperationException | RuntimeException ignored) {
+            return false;
+        }
+    }
+
     private static void initialize() {
         checked = true;
         try {
             Class<?> apiClass = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
             getInstanceMethod = apiClass.getMethod("getInstance");
             isShaderPackInUseMethod = apiClass.getMethod("isShaderPackInUse");
+            isRenderingShadowPassMethod = apiClass.getMethod("isRenderingShadowPass");
         } catch (ReflectiveOperationException ignored) {
             getInstanceMethod = null;
             isShaderPackInUseMethod = null;
+            isRenderingShadowPassMethod = null;
         }
 
         try {
