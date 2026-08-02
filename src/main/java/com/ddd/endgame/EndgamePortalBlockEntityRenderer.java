@@ -31,7 +31,9 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     private static final float DEPTH_MAX = 0.998F;
     private static final float SKYBOX_SIZE = 96.0F;
     private static final float FIXED_SKYBOX_FOV = 70.0F;
+    private static final float ITEM_WINDOW_SCALE = 0.985F;
     private static final List<Matrix4f> WINDOW_MASKS = new ArrayList<>();
+    private static final List<Matrix4f> ITEM_WINDOW_MASKS = new ArrayList<>();
     private static boolean stencilEnabled;
 
     public EndgamePortalBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -51,15 +53,23 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static void renderSkyboxLayer(RenderLevelStageEvent event) {
+        renderSkyboxLayer(event, WINDOW_MASKS);
+    }
+
+    public static void renderItemSkyboxLayer(RenderLevelStageEvent event) {
+        renderSkyboxLayer(event, ITEM_WINDOW_MASKS);
+    }
+
+    private static void renderSkyboxLayer(RenderLevelStageEvent event, List<Matrix4f> queuedMasks) {
         if (!stencilEnabled) {
             ensureStencil(Minecraft.getInstance());
         }
-        if (!stencilEnabled || WINDOW_MASKS.isEmpty()) {
+        if (!stencilEnabled || queuedMasks.isEmpty()) {
             return;
         }
 
-        List<Matrix4f> masks = new ArrayList<>(WINDOW_MASKS);
-        WINDOW_MASKS.clear();
+        List<Matrix4f> masks = new ArrayList<>(queuedMasks);
+        queuedMasks.clear();
 
         GL11.glEnable(GL11.GL_STENCIL_TEST);
         RenderSystem.stencilMask(0xFF);
@@ -101,7 +111,11 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static void registerWindowMask(Matrix4f pose) {
-        WINDOW_MASKS.add(new Matrix4f(pose));
+        Matrix4f itemPose = new Matrix4f(pose);
+        itemPose.translate(0.5F, 0.5F, 0.5F);
+        itemPose.scale(ITEM_WINDOW_SCALE);
+        itemPose.translate(-0.5F, -0.5F, -0.5F);
+        ITEM_WINDOW_MASKS.add(itemPose);
     }
 
     private static void ensureStencil(Minecraft minecraft) {

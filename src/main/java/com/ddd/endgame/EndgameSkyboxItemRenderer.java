@@ -23,6 +23,7 @@ import org.lwjgl.opengl.GL11;
 public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
     public static final EndgameSkyboxItemRenderer INSTANCE = new EndgameSkyboxItemRenderer();
     private static final float GUI_SKYBOX_SIZE = 0.95F;
+    private static final float LOCAL_SKYBOX_SIZE = 8.0F;
 
     private static final ResourceLocation FRONT = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/front.png");
     private static final ResourceLocation BACK = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/back.png");
@@ -51,8 +52,7 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
     }
 
     private static void renderStencilWindow(ItemDisplayContext displayContext, PoseStack poseStack) {
-        if (displayContext != ItemDisplayContext.GUI) {
-            renderWorldItemDepthMask(poseStack);
+        if (displayContext == ItemDisplayContext.GROUND) {
             EndgamePortalBlockEntityRenderer.registerWindowMask(poseStack.last().pose());
             return;
         }
@@ -83,7 +83,12 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.5F, 0.5F);
         EndgamePortalBlockEntityRenderer.applyConfiguredSkyboxRotation(poseStack);
-        renderSkyboxCube(poseStack.last().pose(), GUI_SKYBOX_SIZE);
+        float skyboxSize = displayContext == ItemDisplayContext.GUI ? GUI_SKYBOX_SIZE : LOCAL_SKYBOX_SIZE;
+        if (displayContext == ItemDisplayContext.GUI) {
+            renderSkyboxCube(poseStack.last().pose(), skyboxSize);
+        } else {
+            EndgamePortalBlockEntityRenderer.withFixedSkyboxProjection(() -> renderSkyboxCube(poseStack.last().pose(), skyboxSize));
+        }
         poseStack.popPose();
 
         RenderSystem.depthMask(true);
@@ -93,18 +98,6 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
         RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
         GL11.glDisable(GL11.GL_STENCIL_TEST);
-    }
-
-    private static void renderWorldItemDepthMask(PoseStack poseStack) {
-        RenderSystem.disableCull();
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(true);
-        RenderSystem.colorMask(false, false, false, false);
-        RenderSystem.setShader(GameRenderer::getPositionShader);
-        renderCube(poseStack.last().pose(), 0.0F, 1.0F);
-        RenderSystem.colorMask(true, true, true, true);
-        RenderSystem.depthMask(true);
-        RenderSystem.enableCull();
     }
 
     private static void renderCube(Matrix4f pose, float min, float max) {

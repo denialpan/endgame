@@ -40,7 +40,9 @@ public class dddsendgameClient {
     }
 
     private static void onRenderLevelStage(RenderLevelStageEvent event) {
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
+            EndgamePortalBlockEntityRenderer.renderItemSkyboxLayer(event);
+        } else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
             EndgamePortalBlockEntityRenderer.renderSkyboxLayer(event);
         }
     }
