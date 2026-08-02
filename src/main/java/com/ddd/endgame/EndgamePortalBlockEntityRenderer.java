@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -26,8 +27,10 @@ import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements BlockEntityRenderer<T> {
@@ -40,10 +43,15 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     private static final float ITEM_WINDOW_SCALE = 0.985F;
     private static final int BLOCK_STENCIL_REF = 1;
     private static final int ITEM_STENCIL_REF = 2;
-    private static final List<Matrix4f> WINDOW_MASKS = new ArrayList<>();
-    private static final List<Matrix4f> ITEM_WINDOW_MASKS = new ArrayList<>();
+    private static final long STATIC_CACHE_PRUNE_INTERVAL_TICKS = 200L;
+    private static final long STATIC_CACHE_MAX_IDLE_TICKS = 400L;
+    private static final List<WindowMask> WINDOW_MASKS = new ArrayList<>();
+    private static final List<WindowMask> ITEM_WINDOW_MASKS = new ArrayList<>();
     private static final Set<Long> WINDOW_MASK_KEYS = new HashSet<>();
     private static final Set<MatrixKey> ITEM_WINDOW_MASK_KEYS = new HashSet<>();
+    private static final Map<Long, StaticWorldWindowMask> STATIC_WORLD_WINDOW_MASKS = new HashMap<>();
+    private static Level staticCacheLevel;
+    private static long lastStaticCachePruneTick;
     private static int lastStencilClearRenderTick = Integer.MIN_VALUE;
     private static float lastStencilClearPartialTick = Float.NaN;
     private static int blockEntityWindowSkippedThisFrame;
@@ -64,11 +72,6 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             return;
         }
 
-        Matrix4f maskPose = new Matrix4f(poseStack.last().pose());
-        if (tooFar(transformedUnitCubeBounds(maskPose))) {
-            return;
-        }
-
         BlockPos blockPos = blockEntity.getBlockPos();
         if (!WINDOW_MASK_KEYS.add(blockPos.asLong())) {
             return;
@@ -79,8 +82,13 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             return;
         }
 
-        WINDOW_MASKS.add(maskPose);
-        renderWindowDepthMask(maskPose);
+        WindowMask mask = createBlockEntityWindowMask(blockEntity, poseStack.last().pose(), minecraft);
+        if (tooFar(mask.cameraRelativeBounds())) {
+            return;
+        }
+
+        WINDOW_MASKS.add(mask);
+        renderWindowDepthMask(mask.pose());
     }
 
     public static void renderSkyboxLayer(RenderLevelStageEvent event) {
@@ -91,7 +99,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         renderSkyboxLayer(event, ITEM_WINDOW_MASKS, ITEM_WINDOW_MASK_KEYS, ITEM_STENCIL_REF, false);
     }
 
-    private static void renderSkyboxLayer(RenderLevelStageEvent event, List<Matrix4f> queuedMasks, Set<?> queuedKeys, int stencilRef, boolean trackBlockEntityCount) {
+    private static void renderSkyboxLayer(RenderLevelStageEvent event, List<? extends WindowMask> queuedMasks, Set<?> queuedKeys, int stencilRef, boolean trackBlockEntityCount) {
         if (!stencilEnabled) {
             ensureStencil(Minecraft.getInstance());
         }
@@ -100,11 +108,11 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             return;
         }
 
-        List<Matrix4f> masks = new ArrayList<>(queuedMasks);
+        List<? extends WindowMask> masks = new ArrayList<>(queuedMasks);
         queuedMasks.clear();
         queuedKeys.clear();
 
-        List<Matrix4f> visibleMasks = masks.stream()
+        List<? extends WindowMask> visibleMasks = masks.stream()
                 .filter(mask -> shouldRenderMask(mask, event))
                 .toList();
         updateBlockEntityWindowCounts(trackBlockEntityCount, masks.size(), visibleMasks.size());
@@ -124,8 +132,8 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
 
         PoseStack poseStack = event.getPoseStack();
         BufferBuilder maskBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        for (Matrix4f mask : visibleMasks) {
-            appendWindowMask(maskBuilder, mask, BLOCK_MIN, BLOCK_MAX);
+        for (WindowMask mask : visibleMasks) {
+            appendWindowMask(maskBuilder, mask.pose(), BLOCK_MIN, BLOCK_MAX);
         }
         BufferUploader.drawWithShader(maskBuilder.buildOrThrow());
 
@@ -156,7 +164,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         if (!ITEM_WINDOW_MASK_KEYS.add(MatrixKey.from(itemPose))) {
             return;
         }
-        ITEM_WINDOW_MASKS.add(itemPose);
+        ITEM_WINDOW_MASKS.add(new DynamicWindowMask(itemPose, transformedUnitCubeBounds(itemPose)));
     }
 
     public static int lastBlockEntityWindowsQueued() {
@@ -185,6 +193,39 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     private static boolean blockEntityWindowLimitReached() {
         int maxWindows = Config.SKYBOX_MAX_BLOCK_ENTITY_WINDOWS.get();
         return maxWindows > 0 && WINDOW_MASKS.size() >= maxWindows;
+    }
+
+    private static WindowMask createBlockEntityWindowMask(BlockEntity blockEntity, Matrix4f fallbackPose, Minecraft minecraft) {
+        if (blockEntity.getLevel() != minecraft.level || minecraft.level == null) {
+            Matrix4f pose = new Matrix4f(fallbackPose);
+            return new DynamicWindowMask(pose, transformedUnitCubeBounds(pose));
+        }
+
+        ensureStaticCacheLevel(minecraft.level);
+        long key = blockEntity.getBlockPos().asLong();
+        StaticWorldWindowMask mask = STATIC_WORLD_WINDOW_MASKS.computeIfAbsent(key, ignored -> new StaticWorldWindowMask(blockEntity.getBlockPos()));
+        mask.prepare(minecraft.gameRenderer.getMainCamera().getPosition(), minecraft.level.getGameTime());
+        pruneStaticWorldWindowMasks(minecraft.level.getGameTime());
+        return mask;
+    }
+
+    private static void ensureStaticCacheLevel(Level level) {
+        if (staticCacheLevel == level) {
+            return;
+        }
+
+        STATIC_WORLD_WINDOW_MASKS.clear();
+        staticCacheLevel = level;
+        lastStaticCachePruneTick = 0L;
+    }
+
+    private static void pruneStaticWorldWindowMasks(long gameTime) {
+        if (gameTime - lastStaticCachePruneTick < STATIC_CACHE_PRUNE_INTERVAL_TICKS) {
+            return;
+        }
+
+        STATIC_WORLD_WINDOW_MASKS.values().removeIf(mask -> gameTime - mask.lastSeenGameTime > STATIC_CACHE_MAX_IDLE_TICKS);
+        lastStaticCachePruneTick = gameTime;
     }
 
     private static void updateBlockEntityWindowCounts(boolean trackBlockEntityCount, int queuedCount, int visibleCount) {
@@ -295,8 +336,8 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         appendMaskFace(builder, pose, min, max, max, max, max, max, min, min);
     }
 
-    private static boolean shouldRenderMask(Matrix4f pose, RenderLevelStageEvent event) {
-        AABB cameraRelativeBounds = transformedUnitCubeBounds(pose);
+    private static boolean shouldRenderMask(WindowMask mask, RenderLevelStageEvent event) {
+        AABB cameraRelativeBounds = mask.cameraRelativeBounds();
         if (tooFar(cameraRelativeBounds)) {
             return false;
         }
@@ -306,16 +347,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             return true;
         }
 
-        Vec3 cameraPosition = event.getCamera().getPosition();
-        AABB worldBounds = new AABB(
-                cameraRelativeBounds.minX + cameraPosition.x,
-                cameraRelativeBounds.minY + cameraPosition.y,
-                cameraRelativeBounds.minZ + cameraPosition.z,
-                cameraRelativeBounds.maxX + cameraPosition.x,
-                cameraRelativeBounds.maxY + cameraPosition.y,
-                cameraRelativeBounds.maxZ + cameraPosition.z
-        );
-        return frustum.isVisible(worldBounds);
+        return frustum.isVisible(mask.worldBounds(event.getCamera().getPosition()));
     }
 
     private static boolean tooFar(AABB cameraRelativeBounds) {
@@ -427,6 +459,70 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
 
         CubemapFace(String textureName) {
             this.texture = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/" + textureName + ".png");
+        }
+    }
+
+    private interface WindowMask {
+        Matrix4f pose();
+
+        AABB cameraRelativeBounds();
+
+        AABB worldBounds(Vec3 cameraPosition);
+    }
+
+    private record DynamicWindowMask(Matrix4f pose, AABB cameraRelativeBounds) implements WindowMask {
+        @Override
+        public AABB worldBounds(Vec3 cameraPosition) {
+            return new AABB(
+                    cameraRelativeBounds.minX + cameraPosition.x,
+                    cameraRelativeBounds.minY + cameraPosition.y,
+                    cameraRelativeBounds.minZ + cameraPosition.z,
+                    cameraRelativeBounds.maxX + cameraPosition.x,
+                    cameraRelativeBounds.maxY + cameraPosition.y,
+                    cameraRelativeBounds.maxZ + cameraPosition.z
+            );
+        }
+    }
+
+    private static class StaticWorldWindowMask implements WindowMask {
+        private final Matrix4f pose = new Matrix4f();
+        private final AABB worldBounds;
+        private AABB cameraRelativeBounds;
+        private long lastSeenGameTime;
+
+        private StaticWorldWindowMask(BlockPos pos) {
+            this.worldBounds = new AABB(pos);
+        }
+
+        private void prepare(Vec3 cameraPosition, long gameTime) {
+            double x = this.worldBounds.minX - cameraPosition.x;
+            double y = this.worldBounds.minY - cameraPosition.y;
+            double z = this.worldBounds.minZ - cameraPosition.z;
+            this.pose.translation((float)x, (float)y, (float)z);
+            this.cameraRelativeBounds = new AABB(
+                    this.worldBounds.minX - cameraPosition.x,
+                    this.worldBounds.minY - cameraPosition.y,
+                    this.worldBounds.minZ - cameraPosition.z,
+                    this.worldBounds.maxX - cameraPosition.x,
+                    this.worldBounds.maxY - cameraPosition.y,
+                    this.worldBounds.maxZ - cameraPosition.z
+            );
+            this.lastSeenGameTime = gameTime;
+        }
+
+        @Override
+        public Matrix4f pose() {
+            return this.pose;
+        }
+
+        @Override
+        public AABB cameraRelativeBounds() {
+            return this.cameraRelativeBounds;
+        }
+
+        @Override
+        public AABB worldBounds(Vec3 cameraPosition) {
+            return this.worldBounds;
         }
     }
 
