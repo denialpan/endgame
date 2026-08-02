@@ -95,14 +95,26 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static void renderSkyboxLayer(RenderLevelStageEvent event) {
-        renderSkyboxLayer(event, WINDOW_MASKS, WINDOW_MASK_KEYS, BLOCK_STENCIL_REF, true);
+        renderSkyboxLayer(event, WINDOW_MASKS, WINDOW_MASK_KEYS, BLOCK_STENCIL_REF, true, BLOCK_MIN, BLOCK_MAX);
+    }
+
+    public static void renderPhotonSkyboxLayer(RenderLevelStageEvent event) {
+        renderSkyboxLayer(event, WINDOW_MASKS, WINDOW_MASK_KEYS, BLOCK_STENCIL_REF, true, DEPTH_MIN, DEPTH_MAX);
     }
 
     public static void renderItemSkyboxLayer(RenderLevelStageEvent event) {
-        renderSkyboxLayer(event, ITEM_WINDOW_MASKS, ITEM_WINDOW_MASK_KEYS, ITEM_STENCIL_REF, false);
+        renderSkyboxLayer(event, ITEM_WINDOW_MASKS, ITEM_WINDOW_MASK_KEYS, ITEM_STENCIL_REF, false, BLOCK_MIN, BLOCK_MAX);
     }
 
-    private static void renderSkyboxLayer(RenderLevelStageEvent event, List<? extends WindowMask> queuedMasks, Set<?> queuedKeys, int stencilRef, boolean trackBlockEntityCount) {
+    private static void renderSkyboxLayer(
+            RenderLevelStageEvent event,
+            List<? extends WindowMask> queuedMasks,
+            Set<?> queuedKeys,
+            int stencilRef,
+            boolean trackBlockEntityCount,
+            float maskMin,
+            float maskMax
+    ) {
         if (!stencilEnabled) {
             ensureStencil(Minecraft.getInstance());
         }
@@ -136,7 +148,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         PoseStack poseStack = event.getPoseStack();
         BufferBuilder maskBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
         for (WindowMask mask : visibleMasks) {
-            appendWindowMask(maskBuilder, mask.pose(), BLOCK_MIN, BLOCK_MAX);
+            appendWindowMask(maskBuilder, mask.pose(), maskMin, maskMax);
         }
         BufferUploader.drawWithShader(maskBuilder.buildOrThrow());
 

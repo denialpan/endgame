@@ -40,10 +40,13 @@ public class dddsendgameClient {
     }
 
     private static void onRenderLevelStage(RenderLevelStageEvent event) {
+        boolean photonShaderPackInUse = IrisCompat.isPhotonShaderPackInUse();
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
             EndgamePortalBlockEntityRenderer.renderItemSkyboxLayer(event);
-        } else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
+        } else if (!photonShaderPackInUse && event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
             EndgamePortalBlockEntityRenderer.renderSkyboxLayer(event);
+        } else if (photonShaderPackInUse && event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+            EndgamePortalBlockEntityRenderer.renderPhotonSkyboxLayer(event);
         }
     }
 
