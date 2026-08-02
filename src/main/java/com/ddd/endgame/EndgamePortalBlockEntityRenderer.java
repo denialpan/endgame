@@ -45,6 +45,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     private static final int ITEM_STENCIL_REF = 2;
     private static final long STATIC_CACHE_PRUNE_INTERVAL_TICKS = 200L;
     private static final long STATIC_CACHE_MAX_IDLE_TICKS = 400L;
+    private static final float STATIC_POSE_TRANSLATION_EPSILON = 0.001F;
     private static final List<WindowMask> WINDOW_MASKS = new ArrayList<>();
     private static final List<WindowMask> ITEM_WINDOW_MASKS = new ArrayList<>();
     private static final Set<Long> WINDOW_MASK_KEYS = new HashSet<>();
@@ -54,6 +55,8 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     private static long lastStaticCachePruneTick;
     private static int lastStencilClearRenderTick = Integer.MIN_VALUE;
     private static float lastStencilClearPartialTick = Float.NaN;
+    private static int lastDistantAnimationRenderTick = Integer.MIN_VALUE;
+    private static double lastDistantAnimationSeconds;
     private static int blockEntityWindowSkippedThisFrame;
     private static int lastBlockEntityWindowsQueued;
     private static int lastBlockEntityWindowsVisible;
@@ -146,7 +149,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
 
         poseStack.pushPose();
-        applyConfiguredSkyboxRotation(poseStack, event.getPartialTick().getGameTimeDeltaPartialTick(false));
+        applyConfiguredSkyboxRotation(poseStack, skyboxAnimationSeconds(event, visibleMasks));
         withFixedSkyboxProjection(() -> renderSkyboxCube(poseStack.last().pose()));
         poseStack.popPose();
 
@@ -154,6 +157,10 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static void registerWindowMask(Matrix4f pose) {
+        if (!Config.SKYBOX_DROPPED_ITEM_WINDOWS.getAsBoolean()) {
+            return;
+        }
+
         Matrix4f itemPose = new Matrix4f(pose);
         itemPose.translate(0.5F, 0.5F, 0.5F);
         itemPose.scale(ITEM_WINDOW_SCALE);
@@ -201,12 +208,41 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             return new DynamicWindowMask(pose, transformedUnitCubeBounds(pose));
         }
 
+        Vec3 cameraPosition = minecraft.gameRenderer.getMainCamera().getPosition();
+        BlockPos blockPos = blockEntity.getBlockPos();
+        if (!isStaticWorldPose(fallbackPose, blockPos, cameraPosition)) {
+            Matrix4f pose = new Matrix4f(fallbackPose);
+            return new DynamicWindowMask(pose, transformedUnitCubeBounds(pose));
+        }
+
         ensureStaticCacheLevel(minecraft.level);
-        long key = blockEntity.getBlockPos().asLong();
-        StaticWorldWindowMask mask = STATIC_WORLD_WINDOW_MASKS.computeIfAbsent(key, ignored -> new StaticWorldWindowMask(blockEntity.getBlockPos()));
-        mask.prepare(minecraft.gameRenderer.getMainCamera().getPosition(), minecraft.level.getGameTime());
+        long key = blockPos.asLong();
+        StaticWorldWindowMask mask = STATIC_WORLD_WINDOW_MASKS.computeIfAbsent(key, ignored -> new StaticWorldWindowMask(blockPos));
+        mask.prepare(cameraPosition, minecraft.level.getGameTime());
         pruneStaticWorldWindowMasks(minecraft.level.getGameTime());
         return mask;
+    }
+
+    private static boolean isStaticWorldPose(Matrix4f pose, BlockPos blockPos, Vec3 cameraPosition) {
+        float expectedX = (float)(blockPos.getX() - cameraPosition.x);
+        float expectedY = (float)(blockPos.getY() - cameraPosition.y);
+        float expectedZ = (float)(blockPos.getZ() - cameraPosition.z);
+        return nearlyEqual(pose.m30(), expectedX)
+                && nearlyEqual(pose.m31(), expectedY)
+                && nearlyEqual(pose.m32(), expectedZ)
+                && nearlyEqual(pose.m00(), 1.0F)
+                && nearlyEqual(pose.m11(), 1.0F)
+                && nearlyEqual(pose.m22(), 1.0F)
+                && nearlyEqual(pose.m01(), 0.0F)
+                && nearlyEqual(pose.m02(), 0.0F)
+                && nearlyEqual(pose.m10(), 0.0F)
+                && nearlyEqual(pose.m12(), 0.0F)
+                && nearlyEqual(pose.m20(), 0.0F)
+                && nearlyEqual(pose.m21(), 0.0F);
+    }
+
+    private static boolean nearlyEqual(float actual, float expected) {
+        return Math.abs(actual - expected) <= STATIC_POSE_TRANSLATION_EPSILON;
     }
 
     private static void ensureStaticCacheLevel(Level level) {
@@ -258,11 +294,11 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     public static void applyConfiguredSkyboxRotation(PoseStack poseStack) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.getTimer() == null) {
-            applyConfiguredSkyboxRotation(poseStack, 0.0F);
+            applyConfiguredSkyboxRotation(poseStack, 0.0D);
             return;
         }
 
-        applyConfiguredSkyboxRotation(poseStack, minecraft.getTimer().getGameTimeDeltaPartialTick(false));
+        applyConfiguredSkyboxRotation(poseStack, currentAnimationSeconds(minecraft, minecraft.getTimer().getGameTimeDeltaPartialTick(false)));
     }
 
     public static void withFixedSkyboxProjection(Runnable renderAction) {
@@ -285,13 +321,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         }
     }
 
-    private static void applyConfiguredSkyboxRotation(PoseStack poseStack, float partialTick) {
-        Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null) {
-            return;
-        }
-
-        double seconds = (minecraft.level.getGameTime() + partialTick) / 20.0D;
+    private static void applyConfiguredSkyboxRotation(PoseStack poseStack, double seconds) {
         double pitchSpeed = Config.SKYBOX_PITCH_ROTATION_SPEED.get();
         double yawSpeed = Config.SKYBOX_YAW_ROTATION_SPEED.get();
         double rollSpeed = Config.SKYBOX_ROLL_ROTATION_SPEED.get();
@@ -309,6 +339,67 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
 
     private static float rotationDegrees(double seconds, double degreesPerSecond) {
         return (float) ((seconds * degreesPerSecond) % 360.0D);
+    }
+
+    private static double skyboxAnimationSeconds(RenderLevelStageEvent event, List<? extends WindowMask> visibleMasks) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.level == null) {
+            return 0.0D;
+        }
+
+        double nearestDistance = nearestMaskDistance(visibleMasks);
+        double disableRotationDistance = Config.SKYBOX_DISABLE_ROTATION_DISTANCE.get();
+        if (disableRotationDistance > 0.0D && nearestDistance >= disableRotationDistance) {
+            return 0.0D;
+        }
+
+        double seconds = currentAnimationSeconds(minecraft, event.getPartialTick().getGameTimeDeltaPartialTick(false));
+        double distantAnimationDistance = Config.SKYBOX_DISTANT_ANIMATION_DISTANCE.get();
+        int frameInterval = Config.SKYBOX_DISTANT_ANIMATION_FRAME_INTERVAL.get();
+        if (distantAnimationDistance <= 0.0D || nearestDistance < distantAnimationDistance || frameInterval <= 1) {
+            return seconds;
+        }
+
+        int renderTick = event.getRenderTick();
+        if (lastDistantAnimationRenderTick == Integer.MIN_VALUE || renderTick - lastDistantAnimationRenderTick >= frameInterval) {
+            lastDistantAnimationRenderTick = renderTick;
+            lastDistantAnimationSeconds = seconds;
+        }
+
+        return lastDistantAnimationSeconds;
+    }
+
+    private static double currentAnimationSeconds(Minecraft minecraft, float partialTick) {
+        if (minecraft.level == null) {
+            return 0.0D;
+        }
+
+        return (minecraft.level.getGameTime() + partialTick) / 20.0D;
+    }
+
+    private static double nearestMaskDistance(List<? extends WindowMask> masks) {
+        double nearestDistanceSqr = Double.POSITIVE_INFINITY;
+        for (WindowMask mask : masks) {
+            nearestDistanceSqr = Math.min(nearestDistanceSqr, distanceToBoundsSqr(mask.cameraRelativeBounds()));
+        }
+        return Math.sqrt(nearestDistanceSqr);
+    }
+
+    private static double distanceToBoundsSqr(AABB bounds) {
+        double dx = axisDistanceToBounds(0.0D, bounds.minX, bounds.maxX);
+        double dy = axisDistanceToBounds(0.0D, bounds.minY, bounds.maxY);
+        double dz = axisDistanceToBounds(0.0D, bounds.minZ, bounds.maxZ);
+        return dx * dx + dy * dy + dz * dz;
+    }
+
+    private static double axisDistanceToBounds(double value, double min, double max) {
+        if (value < min) {
+            return min - value;
+        }
+        if (value > max) {
+            return value - max;
+        }
+        return 0.0D;
     }
 
     private static void renderWindowDepthMask(Matrix4f pose) {

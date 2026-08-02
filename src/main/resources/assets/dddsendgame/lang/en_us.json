@@ -26,5 +26,9 @@
   "dddsendgame.configuration.debugStoneOnly": "Debug Stone Only",
   "dddsendgame.configuration.endgameStickGrantsCreative": "Endgame Stick Grants Creative",
   "dddsendgame.configuration.skyboxRenderDistance": "Skybox Render Distance",
-  "dddsendgame.configuration.skyboxMaxBlockEntityWindows": "Skybox Max Block Entity Windows"
+  "dddsendgame.configuration.skyboxDroppedItemWindows": "Skybox Dropped Item Windows",
+  "dddsendgame.configuration.skyboxMaxBlockEntityWindows": "Skybox Max Block Entity Windows",
+  "dddsendgame.configuration.skyboxDistantAnimationDistance": "Skybox Distant Animation Distance",
+  "dddsendgame.configuration.skyboxDistantAnimationFrameInterval": "Skybox Distant Animation Frame Interval",
+  "dddsendgame.configuration.skyboxDisableRotationDistance": "Skybox Disable Rotation Distance"
 }
