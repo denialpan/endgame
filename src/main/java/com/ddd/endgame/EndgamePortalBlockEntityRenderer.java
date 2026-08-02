@@ -100,6 +100,10 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         GL11.glDisable(GL11.GL_STENCIL_TEST);
     }
 
+    public static void registerWindowMask(Matrix4f pose) {
+        WINDOW_MASKS.add(new Matrix4f(pose));
+    }
+
     private static void ensureStencil(Minecraft minecraft) {
         if (!stencilEnabled) {
             minecraft.getMainRenderTarget().enableStencil();

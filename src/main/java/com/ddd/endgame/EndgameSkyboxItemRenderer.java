@@ -22,6 +22,7 @@ import org.lwjgl.opengl.GL11;
 
 public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
     public static final EndgameSkyboxItemRenderer INSTANCE = new EndgameSkyboxItemRenderer();
+    private static final float GUI_SKYBOX_SIZE = 0.95F;
 
     private static final ResourceLocation FRONT = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/front.png");
     private static final ResourceLocation BACK = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/back.png");
@@ -40,7 +41,7 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
             return;
         }
 
-        renderStencilWindow(poseStack);
+        renderStencilWindow(displayContext, poseStack);
         renderBlockModel(blockItem.getBlock(), poseStack, buffer, packedLight, packedOverlay);
     }
 
@@ -49,7 +50,13 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         dispatcher.renderSingleBlock(block.defaultBlockState(), poseStack, buffer, packedLight, packedOverlay);
     }
 
-    private static void renderStencilWindow(PoseStack poseStack) {
+    private static void renderStencilWindow(ItemDisplayContext displayContext, PoseStack poseStack) {
+        if (displayContext != ItemDisplayContext.GUI) {
+            renderWorldItemDepthMask(poseStack);
+            EndgamePortalBlockEntityRenderer.registerWindowMask(poseStack.last().pose());
+            return;
+        }
+
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getMainRenderTarget().enableStencil();
 
@@ -70,13 +77,13 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         RenderSystem.stencilMask(0x00);
         RenderSystem.stencilFunc(GL11.GL_EQUAL, 1, 0xFF);
         RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
-        RenderSystem.enableDepthTest();
+        RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.5F, 0.5F);
         EndgamePortalBlockEntityRenderer.applyConfiguredSkyboxRotation(poseStack);
-        EndgamePortalBlockEntityRenderer.withFixedSkyboxProjection(() -> renderSkyboxCube(poseStack.last().pose(), 0.95F));
+        renderSkyboxCube(poseStack.last().pose(), GUI_SKYBOX_SIZE);
         poseStack.popPose();
 
         RenderSystem.depthMask(true);
@@ -86,6 +93,18 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
         RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
         GL11.glDisable(GL11.GL_STENCIL_TEST);
+    }
+
+    private static void renderWorldItemDepthMask(PoseStack poseStack) {
+        RenderSystem.disableCull();
+        RenderSystem.enableDepthTest();
+        RenderSystem.depthMask(true);
+        RenderSystem.colorMask(false, false, false, false);
+        RenderSystem.setShader(GameRenderer::getPositionShader);
+        renderCube(poseStack.last().pose(), 0.0F, 1.0F);
+        RenderSystem.colorMask(true, true, true, true);
+        RenderSystem.depthMask(true);
+        RenderSystem.enableCull();
     }
 
     private static void renderCube(Matrix4f pose, float min, float max) {
