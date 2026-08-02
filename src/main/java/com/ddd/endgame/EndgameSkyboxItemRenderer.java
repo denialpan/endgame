@@ -76,7 +76,7 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.5F, 0.5F);
         EndgamePortalBlockEntityRenderer.applyConfiguredSkyboxRotation(poseStack);
-        renderSkyboxCube(poseStack.last().pose(), 0.95F);
+        EndgamePortalBlockEntityRenderer.withFixedSkyboxProjection(() -> renderSkyboxCube(poseStack.last().pose(), 0.95F));
         poseStack.popPose();
 
         RenderSystem.depthMask(true);

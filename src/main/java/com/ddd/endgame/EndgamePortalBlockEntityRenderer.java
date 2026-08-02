@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
@@ -33,6 +34,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     private static final float DEPTH_MIN = 0.002F;
     private static final float DEPTH_MAX = 0.998F;
     private static final float SKYBOX_SIZE = 96.0F;
+    private static final float FIXED_SKYBOX_FOV = 70.0F;
     private static final Set<BlockPos> WINDOW_POSITIONS = new HashSet<>();
     private static boolean stencilEnabled;
 
@@ -93,7 +95,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
 
         poseStack.pushPose();
         applyConfiguredSkyboxRotation(poseStack, event.getPartialTick().getGameTimeDeltaPartialTick(false));
-        renderSkyboxCube(poseStack.last().pose());
+        withFixedSkyboxProjection(() -> renderSkyboxCube(poseStack.last().pose()));
         poseStack.popPose();
 
         RenderSystem.enableCull();
@@ -120,6 +122,26 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         }
 
         applyConfiguredSkyboxRotation(poseStack, minecraft.getTimer().getGameTimeDeltaPartialTick(false));
+    }
+
+    public static void withFixedSkyboxProjection(Runnable renderAction) {
+        Minecraft minecraft = Minecraft.getInstance();
+        int width = Math.max(1, minecraft.getWindow().getWidth());
+        int height = Math.max(1, minecraft.getWindow().getHeight());
+        Matrix4f fixedProjection = new Matrix4f().perspective(
+                (float)Math.toRadians(FIXED_SKYBOX_FOV),
+                (float)width / (float)height,
+                0.05F,
+                minecraft.gameRenderer.getDepthFar()
+        );
+
+        RenderSystem.backupProjectionMatrix();
+        RenderSystem.setProjectionMatrix(fixedProjection, VertexSorting.DISTANCE_TO_ORIGIN);
+        try {
+            renderAction.run();
+        } finally {
+            RenderSystem.restoreProjectionMatrix();
+        }
     }
 
     private static void applyConfiguredSkyboxRotation(PoseStack poseStack, float partialTick) {
