@@ -14,11 +14,15 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -51,12 +55,16 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             return;
         }
 
+        Matrix4f maskPose = new Matrix4f(poseStack.last().pose());
+        if (tooFar(transformedUnitCubeBounds(maskPose))) {
+            return;
+        }
+
         BlockPos blockPos = blockEntity.getBlockPos();
         if (!WINDOW_MASK_KEYS.add(blockPos.asLong())) {
             return;
         }
 
-        Matrix4f maskPose = new Matrix4f(poseStack.last().pose());
         WINDOW_MASKS.add(maskPose);
         renderWindowDepthMask(maskPose);
     }
@@ -81,6 +89,13 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         queuedMasks.clear();
         queuedKeys.clear();
 
+        List<Matrix4f> visibleMasks = masks.stream()
+                .filter(mask -> shouldRenderMask(mask, event))
+                .toList();
+        if (visibleMasks.isEmpty()) {
+            return;
+        }
+
         GL11.glEnable(GL11.GL_STENCIL_TEST);
         RenderSystem.stencilMask(0xFF);
         RenderSystem.clear(GL11.GL_STENCIL_BUFFER_BIT, Minecraft.ON_OSX);
@@ -95,7 +110,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
 
         PoseStack poseStack = event.getPoseStack();
         BufferBuilder maskBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        for (Matrix4f mask : masks) {
+        for (Matrix4f mask : visibleMasks) {
             appendWindowMask(maskBuilder, mask, BLOCK_MIN, BLOCK_MAX);
         }
         BufferUploader.drawWithShader(maskBuilder.buildOrThrow());
@@ -113,13 +128,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         withFixedSkyboxProjection(() -> renderSkyboxCube(poseStack.last().pose()));
         poseStack.popPose();
 
-        RenderSystem.enableCull();
-        RenderSystem.depthMask(true);
-        RenderSystem.enableDepthTest();
-        RenderSystem.stencilMask(0xFF);
-        RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
-        RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
-        GL11.glDisable(GL11.GL_STENCIL_TEST);
+        restoreAfterSkyboxLayer();
     }
 
     public static void registerWindowMask(Matrix4f pose) {
@@ -127,6 +136,9 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         itemPose.translate(0.5F, 0.5F, 0.5F);
         itemPose.scale(ITEM_WINDOW_SCALE);
         itemPose.translate(-0.5F, -0.5F, -0.5F);
+        if (tooFar(transformedUnitCubeBounds(itemPose))) {
+            return;
+        }
         if (!ITEM_WINDOW_MASK_KEYS.add(MatrixKey.from(itemPose))) {
             return;
         }
@@ -219,6 +231,84 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         appendMaskFace(builder, pose, min, min, min, max, min, max, max, min);
         appendMaskFace(builder, pose, min, max, min, min, min, min, max, max);
         appendMaskFace(builder, pose, min, max, max, max, max, max, min, min);
+    }
+
+    private static boolean shouldRenderMask(Matrix4f pose, RenderLevelStageEvent event) {
+        AABB cameraRelativeBounds = transformedUnitCubeBounds(pose);
+        if (tooFar(cameraRelativeBounds)) {
+            return false;
+        }
+
+        Frustum frustum = event.getFrustum();
+        if (frustum == null) {
+            return true;
+        }
+
+        Vec3 cameraPosition = event.getCamera().getPosition();
+        AABB worldBounds = new AABB(
+                cameraRelativeBounds.minX + cameraPosition.x,
+                cameraRelativeBounds.minY + cameraPosition.y,
+                cameraRelativeBounds.minZ + cameraPosition.z,
+                cameraRelativeBounds.maxX + cameraPosition.x,
+                cameraRelativeBounds.maxY + cameraPosition.y,
+                cameraRelativeBounds.maxZ + cameraPosition.z
+        );
+        return frustum.isVisible(worldBounds);
+    }
+
+    private static boolean tooFar(AABB cameraRelativeBounds) {
+        double maxDistance = Config.SKYBOX_RENDER_DISTANCE.get();
+        if (maxDistance <= 0.0D) {
+            return false;
+        }
+
+        double centerX = (cameraRelativeBounds.minX + cameraRelativeBounds.maxX) * 0.5D;
+        double centerY = (cameraRelativeBounds.minY + cameraRelativeBounds.maxY) * 0.5D;
+        double centerZ = (cameraRelativeBounds.minZ + cameraRelativeBounds.maxZ) * 0.5D;
+        double radiusX = (cameraRelativeBounds.maxX - cameraRelativeBounds.minX) * 0.5D;
+        double radiusY = (cameraRelativeBounds.maxY - cameraRelativeBounds.minY) * 0.5D;
+        double radiusZ = (cameraRelativeBounds.maxZ - cameraRelativeBounds.minZ) * 0.5D;
+        double radius = Math.sqrt(radiusX * radiusX + radiusY * radiusY + radiusZ * radiusZ);
+        double allowedDistance = maxDistance + radius;
+        return centerX * centerX + centerY * centerY + centerZ * centerZ > allowedDistance * allowedDistance;
+    }
+
+    private static AABB transformedUnitCubeBounds(Matrix4f pose) {
+        Vector3f point = new Vector3f();
+        double minX = Double.POSITIVE_INFINITY;
+        double minY = Double.POSITIVE_INFINITY;
+        double minZ = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY;
+        double maxY = Double.NEGATIVE_INFINITY;
+        double maxZ = Double.NEGATIVE_INFINITY;
+
+        for (int x = 0; x <= 1; x++) {
+            for (int y = 0; y <= 1; y++) {
+                for (int z = 0; z <= 1; z++) {
+                    point.set((float)x, (float)y, (float)z);
+                    pose.transformPosition(point);
+                    minX = Math.min(minX, point.x);
+                    minY = Math.min(minY, point.y);
+                    minZ = Math.min(minZ, point.z);
+                    maxX = Math.max(maxX, point.x);
+                    maxY = Math.max(maxY, point.y);
+                    maxZ = Math.max(maxZ, point.z);
+                }
+            }
+        }
+
+        return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+    private static void restoreAfterSkyboxLayer() {
+        RenderSystem.enableCull();
+        RenderSystem.depthMask(true);
+        RenderSystem.enableDepthTest();
+        RenderSystem.colorMask(true, true, true, true);
+        RenderSystem.stencilMask(0xFF);
+        RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
+        RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
+        GL11.glDisable(GL11.GL_STENCIL_TEST);
     }
 
     private static void appendMaskFace(BufferBuilder builder, Matrix4f pose, float x0, float x1, float y0, float y1, float z0, float z1, float z2, float z3) {

@@ -24,5 +24,6 @@
   "dddsendgame.configuration.itemRequirement": "Item Requirement",
   "dddsendgame.configuration.fluidRequirementMb": "Fluid Requirement (mB)",
   "dddsendgame.configuration.debugStoneOnly": "Debug Stone Only",
-  "dddsendgame.configuration.endgameStickGrantsCreative": "Endgame Stick Grants Creative"
+  "dddsendgame.configuration.endgameStickGrantsCreative": "Endgame Stick Grants Creative",
+  "dddsendgame.configuration.skyboxRenderDistance": "Skybox Render Distance"
 }

@@ -34,6 +34,10 @@ public class Config {
             .comment("Client-side visual roll speed for the endgame controller inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
             .defineInRange("skyboxRollRotationSpeedDegreesPerSecond", 0.1D, -360.0D, 360.0D);
 
+    public static final ModConfigSpec.DoubleValue SKYBOX_RENDER_DISTANCE = CLIENT_BUILDER
+            .comment("Client-side maximum distance for rendering endgame skybox windows, in blocks. Use 0 to disable distance culling.")
+            .defineInRange("skyboxRenderDistance", 96.0D, 0.0D, 1024.0D);
+
     static final ModConfigSpec SPEC = BUILDER.build();
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 
