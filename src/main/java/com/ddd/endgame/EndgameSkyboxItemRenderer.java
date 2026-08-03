@@ -42,8 +42,10 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
             return;
         }
 
+        RenderOptimizationCompat.beforeSkyboxItemRender(displayContext);
         renderStencilWindow(displayContext, poseStack);
         renderBlockModel(blockItem.getBlock(), poseStack, buffer, packedLight, packedOverlay);
+        RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
     }
 
     private static void renderBlockModel(Block block, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
