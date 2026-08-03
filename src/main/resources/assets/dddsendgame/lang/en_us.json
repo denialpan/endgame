@@ -30,5 +30,6 @@
   "dddsendgame.configuration.skyboxMaxBlockEntityWindows": "Skybox Max Block Entity Windows",
   "dddsendgame.configuration.skyboxDistantAnimationDistance": "Skybox Distant Animation Distance",
   "dddsendgame.configuration.skyboxDistantAnimationFrameInterval": "Skybox Distant Animation Frame Interval",
-  "dddsendgame.configuration.skyboxDisableRotationDistance": "Skybox Disable Rotation Distance"
+  "dddsendgame.configuration.skyboxDisableRotationDistance": "Skybox Disable Rotation Distance",
+  "dddsendgame.configuration.skyboxIrisCompatibilityMode": "Skybox Iris Compatibility Mode"
 }

@@ -42,13 +42,34 @@ public class dddsendgameClient {
     }
 
     private static void onRenderLevelStage(RenderLevelStageEvent event) {
-        boolean photonShaderPackInUse = IrisCompat.isPhotonShaderPackInUse();
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
             EndgamePortalBlockEntityRenderer.renderItemSkyboxLayer(event);
-        } else if (!photonShaderPackInUse && event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
+            return;
+        }
+
+        IrisSkyboxMode mode = IrisSkyboxMode.resolve();
+        if (mode == IrisSkyboxMode.DISABLED && event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
+            EndgamePortalBlockEntityRenderer.discardSkyboxLayer();
+        } else if (mode == IrisSkyboxMode.VANILLA_STENCIL && event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
             EndgamePortalBlockEntityRenderer.renderSkyboxLayer(event);
-        } else if (photonShaderPackInUse && event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+        } else if (mode == IrisSkyboxMode.IRIS_SAFE && event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             EndgamePortalBlockEntityRenderer.renderPhotonSkyboxLayer(event);
+        }
+    }
+
+    private enum IrisSkyboxMode {
+        VANILLA_STENCIL,
+        IRIS_SAFE,
+        DISABLED;
+
+        private static IrisSkyboxMode resolve() {
+            String configured = Config.SKYBOX_IRIS_COMPATIBILITY_MODE.get().trim().toLowerCase();
+            return switch (configured) {
+                case "vanilla_stencil", "vanilla", "default" -> VANILLA_STENCIL;
+                case "iris_safe", "safe" -> IRIS_SAFE;
+                case "disabled", "off", "none" -> DISABLED;
+                default -> IrisCompat.isShaderPackInUse() ? IRIS_SAFE : VANILLA_STENCIL;
+            };
         }
     }
 

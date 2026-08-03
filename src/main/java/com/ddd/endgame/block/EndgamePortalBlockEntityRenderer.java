@@ -105,6 +105,12 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         renderSkyboxLayer(event, WINDOW_MASKS, WINDOW_MASK_KEYS, BLOCK_STENCIL_REF, true, DEPTH_MIN, DEPTH_MAX);
     }
 
+    public static void discardSkyboxLayer() {
+        WINDOW_MASKS.clear();
+        WINDOW_MASK_KEYS.clear();
+        updateBlockEntityWindowCounts(true, 0, 0);
+    }
+
     public static void renderItemSkyboxLayer(RenderLevelStageEvent event) {
         renderSkyboxLayer(event, ITEM_WINDOW_MASKS, ITEM_WINDOW_MASK_KEYS, ITEM_STENCIL_REF, false, BLOCK_MIN, BLOCK_MAX);
     }

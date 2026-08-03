@@ -58,6 +58,10 @@ public class Config {
             .comment("Distance in blocks where skybox rotation is disabled. Use 0 to keep rotation enabled at all rendered distances.")
             .defineInRange("skyboxDisableRotationDistance", 0.0D, 0.0D, 1024.0D);
 
+    public static final ModConfigSpec.ConfigValue<String> SKYBOX_IRIS_COMPATIBILITY_MODE = CLIENT_BUILDER
+            .comment("World skybox rendering mode when Iris shaderpacks are active. Supported values: auto, vanilla_stencil, iris_safe, disabled.")
+            .define("skyboxIrisCompatibilityMode", "auto");
+
     static final ModConfigSpec SPEC = BUILDER.build();
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 
