@@ -1,5 +1,7 @@
 package com.ddd.endgame;
 
+import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
+import com.ddd.endgame.compat.RenderOptimizationCompat;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;

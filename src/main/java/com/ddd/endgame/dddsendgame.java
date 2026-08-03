@@ -1,5 +1,12 @@
 package com.ddd.endgame;
 
+import com.ddd.endgame.block.EndgameConnectorBlock;
+import com.ddd.endgame.block.EndgameConnectorBlockEntity;
+import com.ddd.endgame.block.EndgameControllerBlock;
+import com.ddd.endgame.block.EndgameControllerBlockEntity;
+import com.ddd.endgame.block.EndgameDecorativeBlock;
+import com.ddd.endgame.block.EndgameDecorativeBlockEntity;
+import com.ddd.endgame.block.EndgameSkyboxBlockItem;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;

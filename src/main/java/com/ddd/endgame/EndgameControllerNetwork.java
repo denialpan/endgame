@@ -1,5 +1,7 @@
 package com.ddd.endgame;
 
+import com.ddd.endgame.block.EndgameConnectorBlockEntity;
+import com.ddd.endgame.block.EndgameControllerBlockEntity;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Queue;
