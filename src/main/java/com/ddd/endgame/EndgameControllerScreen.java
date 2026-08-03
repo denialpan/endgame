@@ -46,15 +46,16 @@ public class EndgameControllerScreen extends AbstractContainerScreen<EndgameCont
     private static final int SCROLL_THUMB_V = 177;
     private static final int SCROLL_THUMB_WIDTH = 12;
     private static final int SCROLL_THUMB_HEIGHT = 15;
-    private static final int BUTTON_U = 176;
-    private static final int BUTTON_SIZE = 18;
-    private static final int SORT_NUMBER_V = 0;
-    private static final int DIRECTION_ASCENDING_V = 22;
-    private static final int SORT_NAME_V = 44;
-    private static final int DIRECTION_DESCENDING_V = 66;
-    private static final int BUTTON_X = -21;
-    private static final int SORT_BUTTON_Y = 5;
-    private static final int DIRECTION_BUTTON_Y = 27;
+    private static final int SORT_BUTTON_ATLAS_U = 176;
+    private static final int SORT_BUTTON_WIDTH = 18;
+    private static final int SORT_BUTTON_HEIGHT = 20;
+    private static final int SORT_BY_NUMBER_ATLAS_V = 0;
+    private static final int SORT_ASCENDING_ATLAS_V = 22;
+    private static final int SORT_BY_NAME_ATLAS_V = 44;
+    private static final int SORT_DESCENDING_ATLAS_V = 66;
+    private static final int SORT_BUTTON_X = -21;
+    private static final int SORT_BY_BUTTON_Y = 5;
+    private static final int SORT_DIRECTION_BUTTON_Y = 27;
     private static final int GRID_X = 7;
     private static final int GRID_Y = 43;
     private static final int GRID_COLUMNS = 8;
@@ -182,11 +183,11 @@ public class EndgameControllerScreen extends AbstractContainerScreen<EndgameCont
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0) {
-            if (isMouseOver(mouseX, mouseY, BUTTON_X, SORT_BUTTON_Y, BUTTON_SIZE, BUTTON_SIZE)) {
+            if (isMouseOver(mouseX, mouseY, SORT_BUTTON_X, SORT_BY_BUTTON_Y, SORT_BUTTON_WIDTH, SORT_BUTTON_HEIGHT)) {
                 selectSortMode(this.sortMode == SortMode.NAME ? SortMode.PROGRESS : SortMode.NAME);
                 return true;
             }
-            if (isMouseOver(mouseX, mouseY, BUTTON_X, DIRECTION_BUTTON_Y, BUTTON_SIZE, BUTTON_SIZE)) {
+            if (isMouseOver(mouseX, mouseY, SORT_BUTTON_X, SORT_DIRECTION_BUTTON_Y, SORT_BUTTON_WIDTH, SORT_BUTTON_HEIGHT)) {
                 this.sortAscending = !this.sortAscending;
                 this.scrollRow = 0;
                 return true;
@@ -344,8 +345,8 @@ public class EndgameControllerScreen extends AbstractContainerScreen<EndgameCont
     }
 
     private void drawSortButtons(GuiGraphics guiGraphics, int x, int y) {
-        guiGraphics.blit(ATLAS, x + BUTTON_X, y + SORT_BUTTON_Y, BUTTON_U, this.sortMode == SortMode.NAME ? SORT_NAME_V : SORT_NUMBER_V, BUTTON_SIZE, BUTTON_SIZE);
-        guiGraphics.blit(ATLAS, x + BUTTON_X, y + DIRECTION_BUTTON_Y, BUTTON_U, this.sortAscending ? DIRECTION_ASCENDING_V : DIRECTION_DESCENDING_V, BUTTON_SIZE, BUTTON_SIZE);
+        guiGraphics.blit(ATLAS, x + SORT_BUTTON_X, y + SORT_BY_BUTTON_Y, SORT_BUTTON_ATLAS_U, this.sortMode == SortMode.NAME ? SORT_BY_NAME_ATLAS_V : SORT_BY_NUMBER_ATLAS_V, SORT_BUTTON_WIDTH, SORT_BUTTON_HEIGHT);
+        guiGraphics.blit(ATLAS, x + SORT_BUTTON_X, y + SORT_DIRECTION_BUTTON_Y, SORT_BUTTON_ATLAS_U, this.sortAscending ? SORT_ASCENDING_ATLAS_V : SORT_DESCENDING_ATLAS_V, SORT_BUTTON_WIDTH, SORT_BUTTON_HEIGHT);
     }
 
     private void drawNetworkConflict(GuiGraphics guiGraphics, int x, int y) {
