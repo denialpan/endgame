@@ -32,7 +32,7 @@ public class EndgameControllerScreen extends AbstractContainerScreen<EndgameCont
 
     private static final int TEMPLATE_WIDTH = 176;
     private static final int TEMPLATE_HEIGHT = 176;
-    private static final int SEARCH_X = 8;
+    private static final int SEARCH_X = 9;
     private static final int SEARCH_Y = 30;
     private static final int SEARCH_WIDTH = 160;
     private static final int SEARCH_HEIGHT = 9;
@@ -124,7 +124,6 @@ public class EndgameControllerScreen extends AbstractContainerScreen<EndgameCont
         int x = this.leftPos;
         int y = this.topPos;
         guiGraphics.blit(ATLAS, x, y, 0, 0, TEMPLATE_WIDTH, TEMPLATE_HEIGHT);
-        guiGraphics.fill(x + SEARCH_X + 1, y + SEARCH_Y + 1, x + SEARCH_X + SEARCH_WIDTH - 1, y + SEARCH_Y + SEARCH_HEIGHT - 1, 0xFF000000);
         if (this.searchBox != null && this.searchBox.getValue().isEmpty() && !this.searchBox.isFocused()) {
             guiGraphics.drawString(this.font, Component.translatable("container.dddsendgame.endgame_controller.search.short"), x + SEARCH_X + 2, y + SEARCH_Y + 1, 0xFFB0B0B0, false);
         }
