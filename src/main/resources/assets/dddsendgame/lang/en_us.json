@@ -8,6 +8,8 @@
   "item.dddsendgame.day_night_toggle.tooltip": "Right-click to control the time!",
   "item.dddsendgame.entity_purge_core": "Mob Annihilation Core",
   "item.dddsendgame.entity_purge_core.tooltip": "Right-click to kill all entities around you in a 32 block radius! This includes dropped items.",
+  "item.dddsendgame.random_block_placer": "Block Fabricator",
+  "item.dddsendgame.random_block_placer.tooltip": "Right-click and place any block unlimited times!",
   "block.dddsendgame.endgame_controller": "Endgame Controller",
   "block.dddsendgame.endgame_connector": "Endgame Connector",
   "block.dddsendgame.endgame_solid_block": "Endgame Obsidian",
