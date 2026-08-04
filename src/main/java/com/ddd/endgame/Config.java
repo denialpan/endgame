@@ -1,10 +1,24 @@
 package com.ddd.endgame;
 
+import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.TranslatableEnum;
 
 public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
     private static final ModConfigSpec.Builder CLIENT_BUILDER = new ModConfigSpec.Builder();
+
+    public enum RenderStageMode implements TranslatableEnum {
+        AUTO,
+        VANILLA_STENCIL,
+        IRIS_SAFE,
+        DISABLED;
+
+        @Override
+        public Component getTranslatedName() {
+            return Component.translatable("dddsendgame.configuration.skyboxIrisCompatibilityMode." + name().toLowerCase());
+        }
+    }
 
     public static final ModConfigSpec.LongValue ITEM_REQUIREMENT = BUILDER
             .comment("How many of each required item stack must be inserted into the endgame controller.")
@@ -22,45 +36,50 @@ public class Config {
             .comment("Whether holding the endgame stick in inventory sets the player to Creative mode.")
             .define("endgameStickGrantsCreative", true);
 
-    public static final ModConfigSpec.DoubleValue SKYBOX_PITCH_ROTATION_SPEED = CLIENT_BUILDER
+    public static final ModConfigSpec.DoubleValue PITCH_ROTATION_SPEED = CLIENT_BUILDER
             .comment("Client-side visual pitch speed for the endgame controller inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
             .defineInRange("skyboxPitchRotationSpeedDegreesPerSecond", 0.1D, -360.0D, 360.0D);
 
-    public static final ModConfigSpec.DoubleValue SKYBOX_YAW_ROTATION_SPEED = CLIENT_BUILDER
+    public static final ModConfigSpec.DoubleValue YAW_ROTATION_SPEED = CLIENT_BUILDER
             .comment("Client-side visual yaw speed for the endgame controller inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
             .defineInRange("skyboxYawRotationSpeedDegreesPerSecond", 0.1D, -360.0D, 360.0D);
 
-    public static final ModConfigSpec.DoubleValue SKYBOX_ROLL_ROTATION_SPEED = CLIENT_BUILDER
+    public static final ModConfigSpec.DoubleValue ROLL_ROTATION_SPEED = CLIENT_BUILDER
             .comment("Client-side visual roll speed for the endgame controller inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
             .defineInRange("skyboxRollRotationSpeedDegreesPerSecond", 0.1D, -360.0D, 360.0D);
 
-    public static final ModConfigSpec.DoubleValue SKYBOX_RENDER_DISTANCE = CLIENT_BUILDER
+    public static final ModConfigSpec.DoubleValue RENDER_DISTANCE = CLIENT_BUILDER
             .comment("Client-side maximum distance for rendering endgame skybox windows, in blocks. Use 0 to disable distance culling.")
             .defineInRange("skyboxRenderDistance", 96.0D, 0.0D, 1024.0D);
 
-    public static final ModConfigSpec.BooleanValue SKYBOX_DROPPED_ITEM_WINDOWS = CLIENT_BUILDER
+    public static final ModConfigSpec.BooleanValue DROPPED_ITEM_WINDOWS = CLIENT_BUILDER
             .comment("Whether dropped endgame skybox block items render the animated skybox window effect.")
             .define("skyboxDroppedItemWindows", true);
 
-    public static final ModConfigSpec.IntValue SKYBOX_MAX_BLOCK_ENTITY_WINDOWS = CLIENT_BUILDER
+    public static final ModConfigSpec.IntValue MAX_BLOCK_ENTITY_WINDOWS = CLIENT_BUILDER
             .comment("Client-side maximum number of in-world endgame block skybox windows rendered per frame. Use 0 to disable this cap.")
             .defineInRange("skyboxMaxBlockEntityWindows", 4096, 0, 262144);
 
-    public static final ModConfigSpec.DoubleValue SKYBOX_DISTANT_ANIMATION_DISTANCE = CLIENT_BUILDER
+    public static final ModConfigSpec.DoubleValue DISTANT_ANIMATION_DISTANCE = CLIENT_BUILDER
             .comment("Distance in blocks where skybox animation updates at a reduced rate. Use 0 to disable distant animation throttling.")
             .defineInRange("skyboxDistantAnimationDistance", 48.0D, 0.0D, 1024.0D);
 
-    public static final ModConfigSpec.IntValue SKYBOX_DISTANT_ANIMATION_FRAME_INTERVAL = CLIENT_BUILDER
+    public static final ModConfigSpec.IntValue DISTANT_ANIMATION_FRAME_INTERVAL = CLIENT_BUILDER
             .comment("Render-frame interval for updating distant skybox animation. Higher values reduce animation update rate for distant windows.")
             .defineInRange("skyboxDistantAnimationFrameInterval", 4, 1, 120);
 
-    public static final ModConfigSpec.DoubleValue SKYBOX_DISABLE_ROTATION_DISTANCE = CLIENT_BUILDER
+    public static final ModConfigSpec.DoubleValue DISABLE_ROTATION_DISTANCE = CLIENT_BUILDER
             .comment("Distance in blocks where skybox rotation is disabled. Use 0 to keep rotation enabled at all rendered distances.")
             .defineInRange("skyboxDisableRotationDistance", 0.0D, 0.0D, 1024.0D);
 
-    public static final ModConfigSpec.ConfigValue<String> SKYBOX_IRIS_COMPATIBILITY_MODE = CLIENT_BUILDER
-            .comment("World skybox rendering mode when Iris shaderpacks are active. Supported values: auto, vanilla_stencil, iris_safe, disabled.")
-            .define("skyboxIrisCompatibilityMode", "auto");
+    public static final ModConfigSpec.EnumValue<RenderStageMode> IRIS_COMPATIBILITY_MODE = CLIENT_BUILDER
+            .comment(
+                    "Controls the render stage used by in-world endgame skybox stencil windows.",
+                    "AUTO uses the standard vanilla stencil stage unless Iris reports an active shaderpack, then uses the shader-safe late stage.",
+                    "VANILLA_STENCIL renders after block entities and gives the most vanilla-like depth ordering.",
+                    "IRIS_SAFE renders after translucent blocks to avoid common shaderpack depth issues, at the cost of being later in the frame.",
+                    "DISABLED skips the in-world skybox window pass.")
+            .defineEnum("skyboxIrisCompatibilityMode", RenderStageMode.AUTO);
 
     static final ModConfigSpec SPEC = BUILDER.build();
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();

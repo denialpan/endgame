@@ -1,6 +1,7 @@
 package com.ddd.endgame.compat;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 public final class IrisCompat {
     private static final String PHOTON_SHADER_PACK_ID = "photon";
@@ -8,6 +9,7 @@ public final class IrisCompat {
     private static Method getInstanceMethod;
     private static Method isShaderPackInUseMethod;
     private static Method isRenderingShadowPassMethod;
+    private static Method getCurrentPackMethod;
     private static Method getCurrentPackNameMethod;
 
     private IrisCompat() {
@@ -23,7 +25,15 @@ public final class IrisCompat {
 
         try {
             Object api = getInstanceMethod.invoke(null);
-            return api != null && Boolean.TRUE.equals(isShaderPackInUseMethod.invoke(api));
+            if (api == null || !Boolean.TRUE.equals(isShaderPackInUseMethod.invoke(api))) {
+                return false;
+            }
+            if (getCurrentPackMethod == null) {
+                return true;
+            }
+
+            Object currentPack = getCurrentPackMethod.invoke(null);
+            return !(currentPack instanceof Optional<?> optional) || optional.isPresent();
         } catch (ReflectiveOperationException | RuntimeException ignored) {
             return false;
         }
@@ -73,8 +83,10 @@ public final class IrisCompat {
 
         try {
             Class<?> irisClass = Class.forName("net.irisshaders.iris.Iris");
+            getCurrentPackMethod = irisClass.getMethod("getCurrentPack");
             getCurrentPackNameMethod = irisClass.getMethod("getCurrentPackName");
         } catch (ReflectiveOperationException ignored) {
+            getCurrentPackMethod = null;
             getCurrentPackNameMethod = null;
         }
     }

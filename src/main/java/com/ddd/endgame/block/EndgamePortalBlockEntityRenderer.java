@@ -187,7 +187,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static void registerWindowMask(Matrix4f pose) {
-        if (!Config.SKYBOX_DROPPED_ITEM_WINDOWS.getAsBoolean() || IrisCompat.isRenderingShadowPass()) {
+        if (!Config.DROPPED_ITEM_WINDOWS.getAsBoolean() || IrisCompat.isRenderingShadowPass()) {
             return;
         }
 
@@ -228,7 +228,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     private static boolean blockEntityWindowLimitReached() {
-        int maxWindows = Config.SKYBOX_MAX_BLOCK_ENTITY_WINDOWS.get();
+        int maxWindows = Config.MAX_BLOCK_ENTITY_WINDOWS.get();
         return maxWindows > 0 && WINDOW_MASKS.size() >= maxWindows;
     }
 
@@ -352,9 +352,9 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     private static void applyConfiguredSkyboxRotation(PoseStack poseStack, double seconds) {
-        double pitchSpeed = Config.SKYBOX_PITCH_ROTATION_SPEED.get();
-        double yawSpeed = Config.SKYBOX_YAW_ROTATION_SPEED.get();
-        double rollSpeed = Config.SKYBOX_ROLL_ROTATION_SPEED.get();
+        double pitchSpeed = Config.PITCH_ROTATION_SPEED.get();
+        double yawSpeed = Config.YAW_ROTATION_SPEED.get();
+        double rollSpeed = Config.ROLL_ROTATION_SPEED.get();
 
         if (pitchSpeed != 0.0D) {
             poseStack.mulPose(Axis.XP.rotationDegrees(rotationDegrees(seconds, pitchSpeed)));
@@ -378,14 +378,14 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         }
 
         double nearestDistance = nearestMaskDistance(visibleMasks);
-        double disableRotationDistance = Config.SKYBOX_DISABLE_ROTATION_DISTANCE.get();
+        double disableRotationDistance = Config.DISABLE_ROTATION_DISTANCE.get();
         if (disableRotationDistance > 0.0D && nearestDistance >= disableRotationDistance) {
             return 0.0D;
         }
 
         double seconds = currentAnimationSeconds(minecraft, event.getPartialTick().getGameTimeDeltaPartialTick(false));
-        double distantAnimationDistance = Config.SKYBOX_DISTANT_ANIMATION_DISTANCE.get();
-        int frameInterval = Config.SKYBOX_DISTANT_ANIMATION_FRAME_INTERVAL.get();
+        double distantAnimationDistance = Config.DISTANT_ANIMATION_DISTANCE.get();
+        int frameInterval = Config.DISTANT_ANIMATION_FRAME_INTERVAL.get();
         if (distantAnimationDistance <= 0.0D || nearestDistance < distantAnimationDistance || frameInterval <= 1) {
             return seconds;
         }
@@ -472,12 +472,12 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     private static boolean isDistant(AABB cameraRelativeBounds) {
-        double distantAnimationDistance = Config.SKYBOX_DISTANT_ANIMATION_DISTANCE.get();
+        double distantAnimationDistance = Config.DISTANT_ANIMATION_DISTANCE.get();
         return distantAnimationDistance > 0.0D && distanceToBoundsSqr(cameraRelativeBounds) >= distantAnimationDistance * distantAnimationDistance;
     }
 
     private static boolean tooFar(AABB cameraRelativeBounds) {
-        double maxDistance = Config.SKYBOX_RENDER_DISTANCE.get();
+        double maxDistance = Config.RENDER_DISTANCE.get();
         if (maxDistance <= 0.0D) {
             return false;
         }
