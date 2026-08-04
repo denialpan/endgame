@@ -16,6 +16,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -99,6 +100,22 @@ public class dddsendgame {
             "endgame_full_glass",
             () -> new EndgameSkyboxBlockItem(ENDGAME_FULL_GLASS_BLOCK.get(), new Item.Properties())
     );
+    public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_1_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_1");
+    public static final DeferredItem<BlockItem> COMPRESSED_OBSIDIAN_1_ITEM = registerBlockItem("compressed_obsidian_1", COMPRESSED_OBSIDIAN_1_BLOCK);
+    public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_2_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_2");
+    public static final DeferredItem<BlockItem> COMPRESSED_OBSIDIAN_2_ITEM = registerBlockItem("compressed_obsidian_2", COMPRESSED_OBSIDIAN_2_BLOCK);
+    public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_3_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_3");
+    public static final DeferredItem<BlockItem> COMPRESSED_OBSIDIAN_3_ITEM = registerBlockItem("compressed_obsidian_3", COMPRESSED_OBSIDIAN_3_BLOCK);
+    public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_4_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_4");
+    public static final DeferredItem<BlockItem> COMPRESSED_OBSIDIAN_4_ITEM = registerBlockItem("compressed_obsidian_4", COMPRESSED_OBSIDIAN_4_BLOCK);
+    public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_5_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_5");
+    public static final DeferredItem<BlockItem> COMPRESSED_OBSIDIAN_5_ITEM = registerBlockItem("compressed_obsidian_5", COMPRESSED_OBSIDIAN_5_BLOCK);
+    public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_6_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_6");
+    public static final DeferredItem<BlockItem> COMPRESSED_OBSIDIAN_6_ITEM = registerBlockItem("compressed_obsidian_6", COMPRESSED_OBSIDIAN_6_BLOCK);
+    public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_7_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_7");
+    public static final DeferredItem<BlockItem> COMPRESSED_OBSIDIAN_7_ITEM = registerBlockItem("compressed_obsidian_7", COMPRESSED_OBSIDIAN_7_BLOCK);
+    public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_8_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_8");
+    public static final DeferredItem<BlockItem> COMPRESSED_OBSIDIAN_8_ITEM = registerBlockItem("compressed_obsidian_8", COMPRESSED_OBSIDIAN_8_BLOCK);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameControllerBlockEntity>> ENDGAME_CONTROLLER_BLOCK_ENTITY =
             BLOCK_ENTITY_TYPES.register("endgame_controller", () -> BlockEntityType.Builder.of(EndgameControllerBlockEntity::new, ENDGAME_CONTROLLER_BLOCK.get()).build(null));
@@ -125,6 +142,14 @@ public class dddsendgame {
                 output.accept(ENDGAME_SOLID_BLOCK_ITEM.get());
                 output.accept(ENDGAME_GLASS_ITEM.get());
                 output.accept(ENDGAME_FULL_GLASS_ITEM.get());
+                output.accept(COMPRESSED_OBSIDIAN_1_ITEM.get());
+                output.accept(COMPRESSED_OBSIDIAN_2_ITEM.get());
+                output.accept(COMPRESSED_OBSIDIAN_3_ITEM.get());
+                output.accept(COMPRESSED_OBSIDIAN_4_ITEM.get());
+                output.accept(COMPRESSED_OBSIDIAN_5_ITEM.get());
+                output.accept(COMPRESSED_OBSIDIAN_6_ITEM.get());
+                output.accept(COMPRESSED_OBSIDIAN_7_ITEM.get());
+                output.accept(COMPRESSED_OBSIDIAN_8_ITEM.get());
                 output.accept(EndgameTestRecipe.createResult(parameters.holders()));
             }).build());
 
@@ -178,7 +203,23 @@ public class dddsendgame {
             event.accept(ENDGAME_SOLID_BLOCK_ITEM);
             event.accept(ENDGAME_GLASS_ITEM);
             event.accept(ENDGAME_FULL_GLASS_ITEM);
+            event.accept(COMPRESSED_OBSIDIAN_1_ITEM);
+            event.accept(COMPRESSED_OBSIDIAN_2_ITEM);
+            event.accept(COMPRESSED_OBSIDIAN_3_ITEM);
+            event.accept(COMPRESSED_OBSIDIAN_4_ITEM);
+            event.accept(COMPRESSED_OBSIDIAN_5_ITEM);
+            event.accept(COMPRESSED_OBSIDIAN_6_ITEM);
+            event.accept(COMPRESSED_OBSIDIAN_7_ITEM);
+            event.accept(COMPRESSED_OBSIDIAN_8_ITEM);
         }
+    }
+
+    private static DeferredBlock<Block> registerCompressedObsidianBlock(String name) {
+        return BLOCKS.registerBlock(name, Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OBSIDIAN));
+    }
+
+    private static DeferredItem<BlockItem> registerBlockItem(String name, DeferredBlock<? extends Block> block) {
+        return ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
     }
 
     @SubscribeEvent

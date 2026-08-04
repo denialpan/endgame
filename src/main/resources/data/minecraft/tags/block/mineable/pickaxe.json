@@ -5,6 +5,14 @@
     "dddsendgame:endgame_connector",
     "dddsendgame:endgame_solid_block",
     "dddsendgame:endgame_glass",
-    "dddsendgame:endgame_full_glass"
+    "dddsendgame:endgame_full_glass",
+    "dddsendgame:compressed_obsidian_1",
+    "dddsendgame:compressed_obsidian_2",
+    "dddsendgame:compressed_obsidian_3",
+    "dddsendgame:compressed_obsidian_4",
+    "dddsendgame:compressed_obsidian_5",
+    "dddsendgame:compressed_obsidian_6",
+    "dddsendgame:compressed_obsidian_7",
+    "dddsendgame:compressed_obsidian_8"
   ]
 }

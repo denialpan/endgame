@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "dddsendgame:compressed_obsidian_1"
+    }
+  },
+  "result": {
+    "id": "dddsendgame:compressed_obsidian_2",
+    "count": 1
+  }
+}

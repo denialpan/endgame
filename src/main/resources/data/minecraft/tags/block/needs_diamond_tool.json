@@ -1,6 +1,14 @@
 {
   "replace": false,
   "values": [
-    "dddsendgame:endgame_controller"
+    "dddsendgame:endgame_controller",
+    "dddsendgame:compressed_obsidian_1",
+    "dddsendgame:compressed_obsidian_2",
+    "dddsendgame:compressed_obsidian_3",
+    "dddsendgame:compressed_obsidian_4",
+    "dddsendgame:compressed_obsidian_5",
+    "dddsendgame:compressed_obsidian_6",
+    "dddsendgame:compressed_obsidian_7",
+    "dddsendgame:compressed_obsidian_8"
   ]
 }
