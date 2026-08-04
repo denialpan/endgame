@@ -7,6 +7,9 @@ import com.ddd.endgame.block.EndgameControllerBlockEntity;
 import com.ddd.endgame.block.EndgameDecorativeBlock;
 import com.ddd.endgame.block.EndgameDecorativeBlockEntity;
 import com.ddd.endgame.block.EndgameSkyboxBlockItem;
+import com.ddd.endgame.item.DayNightToggleItem;
+import com.ddd.endgame.item.EntityPurgeItem;
+import com.ddd.endgame.item.WeatherCycleItem;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -56,6 +59,18 @@ public class dddsendgame {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     public static final DeferredItem<Item> ENDGAME_TEST_STICK = ITEMS.registerSimpleItem("endgame_test_stick", new Item.Properties().stacksTo(1));
+    public static final DeferredItem<Item> WEATHER_CYCLER = ITEMS.register(
+            "weather_cycler",
+            () -> new WeatherCycleItem(new Item.Properties().stacksTo(1))
+    );
+    public static final DeferredItem<Item> DAY_NIGHT_TOGGLE = ITEMS.register(
+            "day_night_toggle",
+            () -> new DayNightToggleItem(new Item.Properties().stacksTo(1))
+    );
+    public static final DeferredItem<Item> ENTITY_PURGE_CORE = ITEMS.register(
+            "entity_purge_core",
+            () -> new EntityPurgeItem(new Item.Properties().stacksTo(1))
+    );
     public static final DeferredBlock<EndgameControllerBlock> ENDGAME_CONTROLLER_BLOCK = BLOCKS.registerBlock(
             "endgame_controller",
             EndgameControllerBlock::new,
@@ -181,6 +196,9 @@ public class dddsendgame {
                 output.accept(COMPRESSED_GLASS_7_ITEM.get());
                 output.accept(COMPRESSED_GLASS_8_ITEM.get());
                 output.accept(COMPRESSED_GLASS_9_ITEM.get());
+                output.accept(WEATHER_CYCLER.get());
+                output.accept(DAY_NIGHT_TOGGLE.get());
+                output.accept(ENTITY_PURGE_CORE.get());
                 output.accept(EndgameTestRecipe.createResult(parameters.holders()));
             }).build());
 

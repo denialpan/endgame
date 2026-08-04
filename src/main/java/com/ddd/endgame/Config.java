@@ -36,6 +36,14 @@ public class Config {
             .comment("Whether holding the endgame stick in inventory sets the player to Creative mode.")
             .define("endgameStickGrantsCreative", true);
 
+    public static final ModConfigSpec.IntValue ENTITY_PURGE_RADIUS = BUILDER
+            .comment("Radius in blocks used by the entity purge item.")
+            .defineInRange("entityPurgeRadius", 32, 1, 1024);
+
+    public static final ModConfigSpec.BooleanValue ENTITY_PURGE_KILLS_PLAYERS = BUILDER
+            .comment("Whether the entity purge item can kill players other than the user.")
+            .define("entityPurgeKillsPlayers", false);
+
     public static final ModConfigSpec.DoubleValue PITCH_ROTATION_SPEED = CLIENT_BUILDER
             .comment("Client-side visual pitch speed for the endgame controller inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
             .defineInRange("skyboxPitchRotationSpeedDegreesPerSecond", 0.1D, -360.0D, 360.0D);
