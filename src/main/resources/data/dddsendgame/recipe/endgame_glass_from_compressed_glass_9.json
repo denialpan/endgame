@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PPP",
+    "PGP",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "item": "dddsendgame:endgame_solid_block"
+    },
+    "G": {
+      "item": "dddsendgame:compressed_glass_9"
+    }
+  },
+  "result": {
+    "id": "dddsendgame:endgame_glass",
+    "count": 1
+  }
+}

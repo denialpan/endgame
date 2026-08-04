@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "dddsendgame:compressed_glass_3"
+    }
+  },
+  "result": {
+    "id": "dddsendgame:compressed_glass_4",
+    "count": 1
+  }
+}

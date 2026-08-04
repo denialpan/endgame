@@ -19,6 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.GameType;
@@ -116,6 +117,24 @@ public class dddsendgame {
     public static final DeferredItem<BlockItem> COMPRESSED_OBSIDIAN_7_ITEM = registerBlockItem("compressed_obsidian_7", COMPRESSED_OBSIDIAN_7_BLOCK);
     public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_8_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_8");
     public static final DeferredItem<BlockItem> COMPRESSED_OBSIDIAN_8_ITEM = registerBlockItem("compressed_obsidian_8", COMPRESSED_OBSIDIAN_8_BLOCK);
+    public static final DeferredBlock<TransparentBlock> COMPRESSED_GLASS_1_BLOCK = registerCompressedGlassBlock("compressed_glass_1", 0.6F);
+    public static final DeferredItem<BlockItem> COMPRESSED_GLASS_1_ITEM = registerBlockItem("compressed_glass_1", COMPRESSED_GLASS_1_BLOCK);
+    public static final DeferredBlock<TransparentBlock> COMPRESSED_GLASS_2_BLOCK = registerCompressedGlassBlock("compressed_glass_2", 1.2F);
+    public static final DeferredItem<BlockItem> COMPRESSED_GLASS_2_ITEM = registerBlockItem("compressed_glass_2", COMPRESSED_GLASS_2_BLOCK);
+    public static final DeferredBlock<TransparentBlock> COMPRESSED_GLASS_3_BLOCK = registerCompressedGlassBlock("compressed_glass_3", 1.8F);
+    public static final DeferredItem<BlockItem> COMPRESSED_GLASS_3_ITEM = registerBlockItem("compressed_glass_3", COMPRESSED_GLASS_3_BLOCK);
+    public static final DeferredBlock<TransparentBlock> COMPRESSED_GLASS_4_BLOCK = registerCompressedGlassBlock("compressed_glass_4", 2.4F);
+    public static final DeferredItem<BlockItem> COMPRESSED_GLASS_4_ITEM = registerBlockItem("compressed_glass_4", COMPRESSED_GLASS_4_BLOCK);
+    public static final DeferredBlock<TransparentBlock> COMPRESSED_GLASS_5_BLOCK = registerCompressedGlassBlock("compressed_glass_5", 3.0F);
+    public static final DeferredItem<BlockItem> COMPRESSED_GLASS_5_ITEM = registerBlockItem("compressed_glass_5", COMPRESSED_GLASS_5_BLOCK);
+    public static final DeferredBlock<TransparentBlock> COMPRESSED_GLASS_6_BLOCK = registerCompressedGlassBlock("compressed_glass_6", 3.6F);
+    public static final DeferredItem<BlockItem> COMPRESSED_GLASS_6_ITEM = registerBlockItem("compressed_glass_6", COMPRESSED_GLASS_6_BLOCK);
+    public static final DeferredBlock<TransparentBlock> COMPRESSED_GLASS_7_BLOCK = registerCompressedGlassBlock("compressed_glass_7", 4.2F);
+    public static final DeferredItem<BlockItem> COMPRESSED_GLASS_7_ITEM = registerBlockItem("compressed_glass_7", COMPRESSED_GLASS_7_BLOCK);
+    public static final DeferredBlock<TransparentBlock> COMPRESSED_GLASS_8_BLOCK = registerCompressedGlassBlock("compressed_glass_8", 4.8F);
+    public static final DeferredItem<BlockItem> COMPRESSED_GLASS_8_ITEM = registerBlockItem("compressed_glass_8", COMPRESSED_GLASS_8_BLOCK);
+    public static final DeferredBlock<TransparentBlock> COMPRESSED_GLASS_9_BLOCK = registerCompressedGlassBlock("compressed_glass_9", 5.4F);
+    public static final DeferredItem<BlockItem> COMPRESSED_GLASS_9_ITEM = registerBlockItem("compressed_glass_9", COMPRESSED_GLASS_9_BLOCK);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameControllerBlockEntity>> ENDGAME_CONTROLLER_BLOCK_ENTITY =
             BLOCK_ENTITY_TYPES.register("endgame_controller", () -> BlockEntityType.Builder.of(EndgameControllerBlockEntity::new, ENDGAME_CONTROLLER_BLOCK.get()).build(null));
@@ -150,6 +169,15 @@ public class dddsendgame {
                 output.accept(COMPRESSED_OBSIDIAN_6_ITEM.get());
                 output.accept(COMPRESSED_OBSIDIAN_7_ITEM.get());
                 output.accept(COMPRESSED_OBSIDIAN_8_ITEM.get());
+                output.accept(COMPRESSED_GLASS_1_ITEM.get());
+                output.accept(COMPRESSED_GLASS_2_ITEM.get());
+                output.accept(COMPRESSED_GLASS_3_ITEM.get());
+                output.accept(COMPRESSED_GLASS_4_ITEM.get());
+                output.accept(COMPRESSED_GLASS_5_ITEM.get());
+                output.accept(COMPRESSED_GLASS_6_ITEM.get());
+                output.accept(COMPRESSED_GLASS_7_ITEM.get());
+                output.accept(COMPRESSED_GLASS_8_ITEM.get());
+                output.accept(COMPRESSED_GLASS_9_ITEM.get());
                 output.accept(EndgameTestRecipe.createResult(parameters.holders()));
             }).build());
 
@@ -211,11 +239,24 @@ public class dddsendgame {
             event.accept(COMPRESSED_OBSIDIAN_6_ITEM);
             event.accept(COMPRESSED_OBSIDIAN_7_ITEM);
             event.accept(COMPRESSED_OBSIDIAN_8_ITEM);
+            event.accept(COMPRESSED_GLASS_1_ITEM);
+            event.accept(COMPRESSED_GLASS_2_ITEM);
+            event.accept(COMPRESSED_GLASS_3_ITEM);
+            event.accept(COMPRESSED_GLASS_4_ITEM);
+            event.accept(COMPRESSED_GLASS_5_ITEM);
+            event.accept(COMPRESSED_GLASS_6_ITEM);
+            event.accept(COMPRESSED_GLASS_7_ITEM);
+            event.accept(COMPRESSED_GLASS_8_ITEM);
+            event.accept(COMPRESSED_GLASS_9_ITEM);
         }
     }
 
     private static DeferredBlock<Block> registerCompressedObsidianBlock(String name) {
         return BLOCKS.registerBlock(name, Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OBSIDIAN));
+    }
+
+    private static DeferredBlock<TransparentBlock> registerCompressedGlassBlock(String name, float destroyTime) {
+        return BLOCKS.registerBlock(name, TransparentBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS).strength(destroyTime, 6.0F));
     }
 
     private static DeferredItem<BlockItem> registerBlockItem(String name, DeferredBlock<? extends Block> block) {
