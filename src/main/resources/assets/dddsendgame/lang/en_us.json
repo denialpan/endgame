@@ -10,6 +10,8 @@
   "item.dddsendgame.entity_purge_core.tooltip": "Right-click to annihilate nearby entities with vanilla drops. Dropped items are ignored.",
   "item.dddsendgame.random_block_placer": "Block Fabricator",
   "item.dddsendgame.random_block_placer.tooltip": "Right-click and place any block unlimited times!",
+  "item.dddsendgame.reality_restorer": "Reality Shifter",
+  "item.dddsendgame.reality_restorer.tooltip": "Right-click to restore the current chunk to its original terrain.",
   "block.dddsendgame.endgame_controller": "Endgame Controller",
   "block.dddsendgame.endgame_connector": "Endgame Connector",
   "block.dddsendgame.endgame_solid_block": "Endgame Obsidian",
@@ -49,6 +51,9 @@
   "message.dddsendgame.time.day": "Time set to day",
   "message.dddsendgame.time.night": "Time set to night",
   "message.dddsendgame.entity_purge": "Purged %s entities within %s blocks",
+  "message.dddsendgame.reality_restorer.warning": "Endgame blocks detected in this chunk, are you sure you want to do this? Sneak + right-click to confirm",
+  "message.dddsendgame.reality_restorer.restored": "Restored chunk %s, %s (%s blocks changed)",
+  "message.dddsendgame.reality_restorer.failed": "Unable to restore this chunk",
 
   "dddsendgame.configuration.title": "ddd's endgame Configs",
   "dddsendgame.configuration.section.dddsendgame.common.toml": "ddd's endgame Configs",

@@ -9,6 +9,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 public final class EndgameTestRecipe {
     private EndgameTestRecipe() {
@@ -18,7 +19,8 @@ public final class EndgameTestRecipe {
         ItemStack stack = new ItemStack(dddsendgame.ENDGAME_TEST_STICK.get());
         registries.lookupOrThrow(Registries.ENCHANTMENT)
                 .listElements()
-                .forEach(enchantment -> stack.enchant(enchantment, 255));
+                .filter(enchantment -> !enchantment.is(Enchantments.VANISHING_CURSE))
+                .forEach(enchantment -> stack.enchant(enchantment, Integer.MAX_VALUE));
 
         List<Component> lore = new ArrayList<>();
         lore.add(Component.translatable("item.dddsendgame.endgame_test_stick.lore").withStyle(ChatFormatting.DARK_PURPLE));

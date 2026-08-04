@@ -10,6 +10,7 @@ import com.ddd.endgame.block.EndgameSkyboxBlockItem;
 import com.ddd.endgame.item.DayNightToggleItem;
 import com.ddd.endgame.item.EntityPurgeItem;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
+import com.ddd.endgame.item.RealityRestorerItem;
 import com.ddd.endgame.item.WeatherCycleItem;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.Registries;
@@ -75,6 +76,10 @@ public class dddsendgame {
     public static final DeferredItem<Item> RANDOM_BLOCK_PLACER = ITEMS.register(
             "random_block_placer",
             () -> new RandomBlockPlacerItem(new Item.Properties().stacksTo(1))
+    );
+    public static final DeferredItem<Item> REALITY_RESTORER = ITEMS.register(
+            "reality_restorer",
+            () -> new RealityRestorerItem(new Item.Properties().stacksTo(1))
     );
     public static final DeferredBlock<EndgameControllerBlock> ENDGAME_CONTROLLER_BLOCK = BLOCKS.registerBlock(
             "endgame_controller",
@@ -205,6 +210,7 @@ public class dddsendgame {
                 output.accept(DAY_NIGHT_TOGGLE.get());
                 output.accept(ENTITY_PURGE_CORE.get());
                 output.accept(RANDOM_BLOCK_PLACER.get());
+                output.accept(REALITY_RESTORER.get());
                 output.accept(EndgameTestRecipe.createResult(parameters.holders()));
             }).build());
 
