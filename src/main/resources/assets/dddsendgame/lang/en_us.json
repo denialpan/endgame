@@ -6,6 +6,7 @@
   "block.dddsendgame.endgame_connector": "Endgame Connector",
   "block.dddsendgame.endgame_solid_block": "Endgame Obsidian",
   "block.dddsendgame.endgame_glass": "Endgame Glass",
+  "block.dddsendgame.endgame_empty_glass": "Endgame Empty Glass",
   "block.dddsendgame.endgame_full_glass": "Endgame Full Glass",
   "block.dddsendgame.compressed_obsidian_1": "Slightly Compressed Obsidian",
   "block.dddsendgame.compressed_obsidian_2": "More Compressed Obsidian",

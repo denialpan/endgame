@@ -92,6 +92,8 @@ public class dddsendgame {
             "endgame_glass",
             () -> new EndgameSkyboxBlockItem(ENDGAME_GLASS_BLOCK.get(), new Item.Properties())
     );
+    public static final DeferredBlock<TransparentBlock> ENDGAME_EMPTY_GLASS_BLOCK = registerTransparentGlassBlock("endgame_empty_glass", 5.4F);
+    public static final DeferredItem<BlockItem> ENDGAME_EMPTY_GLASS_ITEM = registerBlockItem("endgame_empty_glass", ENDGAME_EMPTY_GLASS_BLOCK);
     public static final DeferredBlock<EndgameDecorativeBlock> ENDGAME_FULL_GLASS_BLOCK = BLOCKS.registerBlock(
             "endgame_full_glass",
             EndgameDecorativeBlock::new,
@@ -160,6 +162,7 @@ public class dddsendgame {
                 output.accept(ENDGAME_CONNECTOR_ITEM.get());
                 output.accept(ENDGAME_SOLID_BLOCK_ITEM.get());
                 output.accept(ENDGAME_GLASS_ITEM.get());
+                output.accept(ENDGAME_EMPTY_GLASS_ITEM.get());
                 output.accept(ENDGAME_FULL_GLASS_ITEM.get());
                 output.accept(COMPRESSED_OBSIDIAN_1_ITEM.get());
                 output.accept(COMPRESSED_OBSIDIAN_2_ITEM.get());
@@ -230,6 +233,7 @@ public class dddsendgame {
             event.accept(ENDGAME_CONNECTOR_ITEM);
             event.accept(ENDGAME_SOLID_BLOCK_ITEM);
             event.accept(ENDGAME_GLASS_ITEM);
+            event.accept(ENDGAME_EMPTY_GLASS_ITEM);
             event.accept(ENDGAME_FULL_GLASS_ITEM);
             event.accept(COMPRESSED_OBSIDIAN_1_ITEM);
             event.accept(COMPRESSED_OBSIDIAN_2_ITEM);
@@ -256,6 +260,10 @@ public class dddsendgame {
     }
 
     private static DeferredBlock<TransparentBlock> registerCompressedGlassBlock(String name, float destroyTime) {
+        return registerTransparentGlassBlock(name, destroyTime);
+    }
+
+    private static DeferredBlock<TransparentBlock> registerTransparentGlassBlock(String name, float destroyTime) {
         return BLOCKS.registerBlock(name, TransparentBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS).strength(destroyTime, 6.0F));
     }
 
