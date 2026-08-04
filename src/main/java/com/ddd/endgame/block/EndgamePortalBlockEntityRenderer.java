@@ -71,6 +71,16 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     @Override
+    public int getViewDistance() {
+        return 1024;
+    }
+
+    @Override
+    public boolean shouldRender(T blockEntity, Vec3 cameraPos) {
+        return true;
+    }
+
+    @Override
     public void render(T blockEntity, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         Minecraft minecraft = Minecraft.getInstance();
         ensureStencil(minecraft);
@@ -89,12 +99,10 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         }
 
         WindowMask mask = createBlockEntityWindowMask(blockEntity, poseStack.last().pose(), minecraft);
-        if (tooFar(mask.cameraRelativeBounds())) {
-            return;
-        }
-
         WINDOW_MASKS.add(mask);
-        renderWindowDepthMask(mask.pose());
+        if (!isDistant(mask.cameraRelativeBounds())) {
+            renderWindowDepthMask(mask.pose());
+        }
     }
 
     public static void renderSkyboxLayer(RenderLevelStageEvent event) {
@@ -128,6 +136,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             ensureStencil(Minecraft.getInstance());
         }
         if (!stencilEnabled || queuedMasks.isEmpty()) {
+            queuedKeys.clear();
             updateBlockEntityWindowCounts(trackBlockEntityCount, 0, 0);
             return;
         }
@@ -137,7 +146,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         queuedKeys.clear();
 
         List<? extends WindowMask> visibleMasks = masks.stream()
-                .filter(mask -> shouldRenderMask(mask, event))
+                .filter(mask -> shouldRenderMask(mask, event, !trackBlockEntityCount))
                 .toList();
         updateBlockEntityWindowCounts(trackBlockEntityCount, masks.size(), visibleMasks.size());
         if (visibleMasks.isEmpty()) {
@@ -448,9 +457,9 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         appendMaskFace(builder, pose, min, max, max, max, max, max, min, min);
     }
 
-    private static boolean shouldRenderMask(WindowMask mask, RenderLevelStageEvent event) {
+    private static boolean shouldRenderMask(WindowMask mask, RenderLevelStageEvent event, boolean distanceCull) {
         AABB cameraRelativeBounds = mask.cameraRelativeBounds();
-        if (tooFar(cameraRelativeBounds)) {
+        if (distanceCull && tooFar(cameraRelativeBounds)) {
             return false;
         }
 
@@ -460,6 +469,11 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         }
 
         return frustum.isVisible(mask.worldBounds(event.getCamera().getPosition()));
+    }
+
+    private static boolean isDistant(AABB cameraRelativeBounds) {
+        double distantAnimationDistance = Config.SKYBOX_DISTANT_ANIMATION_DISTANCE.get();
+        return distantAnimationDistance > 0.0D && distanceToBoundsSqr(cameraRelativeBounds) >= distantAnimationDistance * distantAnimationDistance;
     }
 
     private static boolean tooFar(AABB cameraRelativeBounds) {
