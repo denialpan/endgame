@@ -80,8 +80,11 @@ public class RealityRestorerItem extends Item {
         }
 
         try {
-            int changedBlocks = restoreChunk(serverLevel, chunkPos);
-            player.displayClientMessage(Component.translatable("message.dddsendgame.reality_restorer.restored", chunkPos.x, chunkPos.z, changedBlocks), true);
+            RestoreResult result = restoreChunk(serverLevel, chunkPos, player.getBlockX(), player.getBlockZ());
+            if (player instanceof ServerPlayer serverPlayer) {
+                queueSurfaceTeleport(serverLevel, serverPlayer, result.surfaceY());
+            }
+            player.displayClientMessage(Component.translatable("message.dddsendgame.reality_restorer.restored", chunkPos.x, chunkPos.z, result.changedBlocks()), true);
         } catch (RuntimeException exception) {
             dddsendgame.LOGGER.warn("Failed to restore chunk {} with Reality Restorer", chunkPos, exception);
             player.displayClientMessage(Component.translatable("message.dddsendgame.reality_restorer.failed").withStyle(ChatFormatting.RED), true);
@@ -113,8 +116,9 @@ public class RealityRestorerItem extends Item {
         return false;
     }
 
-    private static int restoreChunk(ServerLevel level, ChunkPos chunkPos) {
+    private static RestoreResult restoreChunk(ServerLevel level, ChunkPos chunkPos, int playerBlockX, int playerBlockZ) {
         ProtoChunk generatedChunk = generateRestoredChunk(level, chunkPos);
+        int surfaceY = generatedChunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, playerBlockX & 15, playerBlockZ & 15);
 
         LevelChunk liveChunk = level.getChunk(chunkPos.x, chunkPos.z);
         liveChunk.clearAllBlockEntities();
@@ -124,7 +128,20 @@ public class RealityRestorerItem extends Item {
 
         liveChunk.setUnsaved(true);
         sendFullChunkRefresh(level, liveChunk);
-        return changedBlocks;
+        return new RestoreResult(changedBlocks, surfaceY);
+    }
+
+    private static void queueSurfaceTeleport(ServerLevel level, ServerPlayer player, int surfaceY) {
+        double y = Math.max(level.getMinBuildHeight() + 1, Math.min(level.getMaxBuildHeight() - 1, surfaceY));
+        double x = player.getX();
+        double z = player.getZ();
+        float yRot = player.getYRot();
+        float xRot = player.getXRot();
+        level.getServer().execute(() -> {
+            if (!player.isRemoved() && player.level() == level) {
+                player.teleportTo(level, x, y, z, yRot, xRot);
+            }
+        });
     }
 
     private static ProtoChunk generateRestoredChunk(ServerLevel level, ChunkPos chunkPos) {
@@ -327,6 +344,9 @@ public class RealityRestorerItem extends Item {
         public boolean shouldGenerateStructures() {
             return false;
         }
+    }
+
+    private record RestoreResult(int changedBlocks, int surfaceY) {
     }
 
     private static void removeChunkEntities(ServerLevel level, ChunkPos chunkPos) {
