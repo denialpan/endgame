@@ -11,17 +11,24 @@ import com.ddd.endgame.item.DayNightToggleItem;
 import com.ddd.endgame.item.EntityPurgeItem;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
 import com.ddd.endgame.item.RealityRestorerItem;
+import com.ddd.endgame.item.SpectatorPhaseItem;
 import com.ddd.endgame.item.SurvivalFlightItem;
 import com.ddd.endgame.item.WeatherCycleItem;
 import com.mojang.logging.LogUtils;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
@@ -42,11 +49,17 @@ import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.UUID;
 
 @Mod(dddsendgame.MODID)
 public class dddsendgame {
@@ -54,6 +67,8 @@ public class dddsendgame {
     public static final long ENDGAME_ITEM_REQUIREMENT = 1_048_576L;
     private static final String ENDGAME_STICK_CREATIVE_KEY = MODID + ".endgame_stick_creative";
     private static final String SURVIVAL_FLIGHT_GRANTED_KEY = MODID + ".survival_flight_granted";
+    private static final int SPECTATOR_PHASE_TICKS = 15 * 20;
+    private static final Map<UUID, SpectatorPhaseState> SPECTATOR_PHASES = new HashMap<>();
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
@@ -86,6 +101,10 @@ public class dddsendgame {
     public static final DeferredItem<Item> SURVIVAL_FLIGHT_CORE = ITEMS.register(
             "survival_flight_core",
             () -> new SurvivalFlightItem(new Item.Properties().stacksTo(1))
+    );
+    public static final DeferredItem<Item> SPECTATOR_PHASE_CORE = ITEMS.register(
+            "spectator_phase_core",
+            () -> new SpectatorPhaseItem(new Item.Properties().stacksTo(1))
     );
     public static final DeferredBlock<EndgameControllerBlock> ENDGAME_CONTROLLER_BLOCK = BLOCKS.registerBlock(
             "endgame_controller",
@@ -218,6 +237,7 @@ public class dddsendgame {
                 output.accept(RANDOM_BLOCK_PLACER.get());
                 output.accept(REALITY_RESTORER.get());
                 output.accept(SURVIVAL_FLIGHT_CORE.get());
+                output.accept(SPECTATOR_PHASE_CORE.get());
                 output.accept(EndgameTestRecipe.createResult(parameters.holders()));
             }).build());
 
@@ -372,6 +392,78 @@ public class dddsendgame {
             player.getAbilities().mayfly = false;
             player.getAbilities().flying = false;
             player.onUpdateAbilities();
+        }
+    }
+
+    @SubscribeEvent
+    public void onServerTick(ServerTickEvent.Post event) {
+        tickSpectatorPhases(event.getServer());
+    }
+
+    public static void startSpectatorPhase(ServerPlayer player) {
+        UUID playerId = player.getUUID();
+        if (SPECTATOR_PHASES.containsKey(playerId)) {
+            return;
+        }
+
+        SpectatorPhaseState state = new SpectatorPhaseState(
+                player.serverLevel().dimension(),
+                player.getX(),
+                player.getY(),
+                player.getZ(),
+                player.getYRot(),
+                player.getXRot(),
+                player.gameMode.getGameModeForPlayer(),
+                SPECTATOR_PHASE_TICKS
+        );
+        SPECTATOR_PHASES.put(playerId, state);
+        player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, SPECTATOR_PHASE_TICKS, 0, false, false, false));
+        player.setGameMode(GameType.SPECTATOR);
+        player.displayClientMessage(Component.translatable("message.dddsendgame.spectator_phase.enter"), true);
+    }
+
+    private static void tickSpectatorPhases(MinecraftServer server) {
+        if (server == null || SPECTATOR_PHASES.isEmpty()) {
+            return;
+        }
+
+        Iterator<Map.Entry<UUID, SpectatorPhaseState>> iterator = SPECTATOR_PHASES.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<UUID, SpectatorPhaseState> entry = iterator.next();
+            ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
+            if (player == null) {
+                continue;
+            }
+
+            SpectatorPhaseState state = entry.getValue().tick();
+            if (state.remainingTicks() > 0) {
+                entry.setValue(state);
+                int secondsRemaining = (state.remainingTicks() + 19) / 20;
+                player.displayClientMessage(Component.translatable("message.dddsendgame.spectator_phase.countdown", secondsRemaining), true);
+                continue;
+            }
+
+            ServerLevel originalLevel = server.getLevel(state.dimension());
+            ServerLevel targetLevel = originalLevel != null ? originalLevel : player.serverLevel();
+            player.teleportTo(targetLevel, state.x(), state.y(), state.z(), state.yRot(), state.xRot());
+            player.setGameMode(state.gameType());
+            player.displayClientMessage(Component.translatable("message.dddsendgame.spectator_phase.return"), true);
+            iterator.remove();
+        }
+    }
+
+    private record SpectatorPhaseState(
+            ResourceKey<Level> dimension,
+            double x,
+            double y,
+            double z,
+            float yRot,
+            float xRot,
+            GameType gameType,
+            int remainingTicks
+    ) {
+        private SpectatorPhaseState tick() {
+            return new SpectatorPhaseState(dimension, x, y, z, yRot, xRot, gameType, remainingTicks - 1);
         }
     }
 }
