@@ -4,7 +4,6 @@ import com.ddd.endgame.Config;
 import com.ddd.endgame.EndgameControllerMenu;
 import com.ddd.endgame.EndgameControllerNetwork;
 import com.ddd.endgame.EndgameRequirement;
-import com.ddd.endgame.EndgameTestRecipe;
 import com.ddd.endgame.dddsendgame;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -486,7 +485,7 @@ public class EndgameControllerBlockEntity extends BlockEntity implements Contain
         public ItemStack getStackInSlot(int slot) {
             validateSlot(slot);
             if (slot == SLOT_OUTPUT && EndgameControllerBlockEntity.this.level != null && EndgameControllerBlockEntity.this.isComplete()) {
-                return EndgameTestRecipe.createResult(EndgameControllerBlockEntity.this.level.registryAccess());
+                return new ItemStack(dddsendgame.GALAXY_INGOT.get());
             }
             return ItemStack.EMPTY;
         }
@@ -522,7 +521,7 @@ public class EndgameControllerBlockEntity extends BlockEntity implements Contain
                 return ItemStack.EMPTY;
             }
 
-            ItemStack result = EndgameTestRecipe.createResult(EndgameControllerBlockEntity.this.level.registryAccess());
+            ItemStack result = new ItemStack(dddsendgame.GALAXY_INGOT.get());
             if (!simulate) {
                 EndgameControllerBlockEntity.this.resetRequirements();
             }

@@ -1,5 +1,6 @@
 {
   "itemGroup.dddsendgame": "ddd's Endgame",
+  "item.dddsendgame.galaxy_ingot": "Galaxy Ingot",
   "item.dddsendgame.endgame_test_stick": "Endgame Test Stick",
   "item.dddsendgame.endgame_test_stick.lore": "Generated from one million of every loaded recipe output item.",
   "item.dddsendgame.weather_cycler": "Weather Controller",
@@ -65,6 +66,9 @@
   "message.dddsendgame.spectator_phase.return": "noclip ended",
   "message.dddsendgame.chunk_annihilator.warning": "Endgame blocks detected in this chunk, are you sure you want to do this? Sneak + right-click to confirm",
   "message.dddsendgame.chunk_annihilator.destroyed": "Destroyed chunk %s, %s (%s blocks removed)",
+  "jei.dddsendgame.galaxy_controller": "Galaxy Controller Processing",
+  "jei.dddsendgame.galaxy_controller.process": "Processed in controller",
+  "jei.dddsendgame.galaxy_controller.requirements": "Automate the world!",
 
   "dddsendgame.configuration.title": "ddd's endgame Configs",
   "dddsendgame.configuration.section.dddsendgame.common.toml": "ddd's endgame Configs",

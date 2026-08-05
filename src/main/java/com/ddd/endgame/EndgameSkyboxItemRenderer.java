@@ -24,8 +24,8 @@ import org.lwjgl.opengl.GL11;
 
 public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
     public static final EndgameSkyboxItemRenderer INSTANCE = new EndgameSkyboxItemRenderer();
-    private static final float GUI_SKYBOX_SIZE = 0.95F;
-    private static final float LOCAL_SKYBOX_SIZE = 8.0F;
+    static final float GUI_SKYBOX_SIZE = 0.95F;
+    static final float LOCAL_SKYBOX_SIZE = 8.0F;
 
     private static final ResourceLocation FRONT = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/front.png");
     private static final ResourceLocation BACK = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/back.png");
@@ -122,7 +122,7 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         BufferUploader.drawWithShader(builder.buildOrThrow());
     }
 
-    private static void renderSkyboxCube(Matrix4f pose, float size) {
+    static void renderSkyboxCube(Matrix4f pose, float size) {
         renderSkyboxFace(FRONT, pose, -size, -size, size, size, -size, size, size, size, size, -size, size, size);
         renderSkyboxFace(BACK, pose, size, -size, -size, -size, -size, -size, -size, size, -size, size, size, -size);
         renderSkyboxFace(LEFT, pose, -size, -size, -size, -size, -size, size, -size, size, size, -size, size, -size);

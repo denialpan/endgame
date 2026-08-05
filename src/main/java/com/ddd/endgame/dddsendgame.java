@@ -10,6 +10,7 @@ import com.ddd.endgame.block.EndgameSkyboxBlockItem;
 import com.ddd.endgame.item.ChunkAnnihilatorItem;
 import com.ddd.endgame.item.DayNightToggleItem;
 import com.ddd.endgame.item.EntityPurgeItem;
+import com.ddd.endgame.item.GalaxyIngotItem;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
 import com.ddd.endgame.item.RealityRestorerItem;
 import com.ddd.endgame.item.SpectatorPhaseItem;
@@ -78,6 +79,10 @@ public class dddsendgame {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, MODID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
+    public static final DeferredItem<Item> GALAXY_INGOT = ITEMS.register(
+            "galaxy_ingot",
+            () -> new GalaxyIngotItem(new Item.Properties())
+    );
     public static final DeferredItem<Item> ENDGAME_TEST_STICK = ITEMS.registerSimpleItem("endgame_test_stick", new Item.Properties().stacksTo(1));
     public static final DeferredItem<Item> WEATHER_CYCLER = ITEMS.register(
             "weather_cycler",
@@ -244,6 +249,7 @@ public class dddsendgame {
                 output.accept(SURVIVAL_FLIGHT_CORE.get());
                 output.accept(SPECTATOR_PHASE_CORE.get());
                 output.accept(CHUNK_ANNIHILATOR.get());
+                output.accept(GALAXY_INGOT.get());
                 output.accept(EndgameTestRecipe.createResult(parameters.holders()));
             }).build());
 
