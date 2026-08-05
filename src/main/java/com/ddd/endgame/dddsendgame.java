@@ -7,6 +7,7 @@ import com.ddd.endgame.block.EndgameControllerBlockEntity;
 import com.ddd.endgame.block.EndgameDecorativeBlock;
 import com.ddd.endgame.block.EndgameDecorativeBlockEntity;
 import com.ddd.endgame.block.EndgameSkyboxBlockItem;
+import com.ddd.endgame.item.ChunkAnnihilatorItem;
 import com.ddd.endgame.item.DayNightToggleItem;
 import com.ddd.endgame.item.EntityPurgeItem;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
@@ -105,6 +106,10 @@ public class dddsendgame {
     public static final DeferredItem<Item> SPECTATOR_PHASE_CORE = ITEMS.register(
             "spectator_phase_core",
             () -> new SpectatorPhaseItem(new Item.Properties().stacksTo(1))
+    );
+    public static final DeferredItem<Item> CHUNK_ANNIHILATOR = ITEMS.register(
+            "chunk_annihilator",
+            () -> new ChunkAnnihilatorItem(new Item.Properties().stacksTo(1))
     );
     public static final DeferredBlock<EndgameControllerBlock> ENDGAME_CONTROLLER_BLOCK = BLOCKS.registerBlock(
             "endgame_controller",
@@ -238,6 +243,7 @@ public class dddsendgame {
                 output.accept(REALITY_RESTORER.get());
                 output.accept(SURVIVAL_FLIGHT_CORE.get());
                 output.accept(SPECTATOR_PHASE_CORE.get());
+                output.accept(CHUNK_ANNIHILATOR.get());
                 output.accept(EndgameTestRecipe.createResult(parameters.holders()));
             }).build());
 
