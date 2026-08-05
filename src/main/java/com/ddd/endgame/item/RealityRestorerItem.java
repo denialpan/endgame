@@ -3,6 +3,7 @@ package com.ddd.endgame.item;
 import com.ddd.endgame.dddsendgame;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -24,9 +25,11 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
@@ -226,13 +229,15 @@ public class RealityRestorerItem extends Item {
         ChunkPos center = generatedChunk.getPos();
         int radius = step.directDependencies().getRadius();
         StaticCache2D<GenerationChunkHolder> cache = StaticCache2D.create(center.x, center.z, radius, (chunkX, chunkZ) -> new GenerationChunkHolder(new ChunkPos(chunkX, chunkZ)) {
+            private final ChunkAccess emptyContextChunk = createEmptyContextChunk(level, chunkX, chunkZ);
+
             @Override
             public ChunkAccess getChunkIfPresentUnchecked(ChunkStatus status) {
                 ProtoChunk temporaryChunk = generatedChunks.get(ChunkPos.asLong(chunkX, chunkZ));
                 if (temporaryChunk != null && temporaryChunk.getPersistedStatus().isOrAfter(status)) {
                     return temporaryChunk;
                 }
-                return null;
+                return emptyContextChunk;
             }
 
             @Override
@@ -252,6 +257,11 @@ public class RealityRestorerItem extends Item {
             }
         });
         return new WorldGenRegion(level, cache, step, generatedChunk);
+    }
+
+    private static ChunkAccess createEmptyContextChunk(ServerLevel level, int chunkX, int chunkZ) {
+        Holder<Biome> biome = level.getUncachedNoiseBiome((chunkX << 2) + 2, 0, (chunkZ << 2) + 2);
+        return new EmptyLevelChunk(level, new ChunkPos(chunkX, chunkZ), biome);
     }
 
     private static int copyChunkSections(ProtoChunk generatedChunk, LevelChunk liveChunk) {
