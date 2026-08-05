@@ -11,6 +11,7 @@ import com.ddd.endgame.item.DayNightToggleItem;
 import com.ddd.endgame.item.EntityPurgeItem;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
 import com.ddd.endgame.item.RealityRestorerItem;
+import com.ddd.endgame.item.SurvivalFlightItem;
 import com.ddd.endgame.item.WeatherCycleItem;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.Registries;
@@ -52,6 +53,7 @@ public class dddsendgame {
     public static final String MODID = "dddsendgame";
     public static final long ENDGAME_ITEM_REQUIREMENT = 1_048_576L;
     private static final String ENDGAME_STICK_CREATIVE_KEY = MODID + ".endgame_stick_creative";
+    private static final String SURVIVAL_FLIGHT_GRANTED_KEY = MODID + ".survival_flight_granted";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
@@ -80,6 +82,10 @@ public class dddsendgame {
     public static final DeferredItem<Item> REALITY_RESTORER = ITEMS.register(
             "reality_restorer",
             () -> new RealityRestorerItem(new Item.Properties().stacksTo(1))
+    );
+    public static final DeferredItem<Item> SURVIVAL_FLIGHT_CORE = ITEMS.register(
+            "survival_flight_core",
+            () -> new SurvivalFlightItem(new Item.Properties().stacksTo(1))
     );
     public static final DeferredBlock<EndgameControllerBlock> ENDGAME_CONTROLLER_BLOCK = BLOCKS.registerBlock(
             "endgame_controller",
@@ -211,6 +217,7 @@ public class dddsendgame {
                 output.accept(ENTITY_PURGE_CORE.get());
                 output.accept(RANDOM_BLOCK_PLACER.get());
                 output.accept(REALITY_RESTORER.get());
+                output.accept(SURVIVAL_FLIGHT_CORE.get());
                 output.accept(EndgameTestRecipe.createResult(parameters.holders()));
             }).build());
 
@@ -312,6 +319,8 @@ public class dddsendgame {
             return;
         }
 
+        updateSurvivalFlight(player);
+
         boolean changedByStick = player.getPersistentData().getBoolean(ENDGAME_STICK_CREATIVE_KEY);
         if (!Config.ENDGAME_STICK_GRANTS_CREATIVE.getAsBoolean()) {
             if (changedByStick) {
@@ -338,6 +347,31 @@ public class dddsendgame {
                 player.setGameMode(GameType.SURVIVAL);
             }
             player.getPersistentData().remove(ENDGAME_STICK_CREATIVE_KEY);
+        }
+    }
+
+    private static void updateSurvivalFlight(ServerPlayer player) {
+        boolean grantedByItem = player.getPersistentData().getBoolean(SURVIVAL_FLIGHT_GRANTED_KEY);
+        boolean hasFlightCore = player.getInventory().contains(stack -> stack.is(SURVIVAL_FLIGHT_CORE.get()));
+
+        if (hasFlightCore) {
+            if (!player.getAbilities().mayfly) {
+                player.getAbilities().mayfly = true;
+                player.onUpdateAbilities();
+            }
+            player.getPersistentData().putBoolean(SURVIVAL_FLIGHT_GRANTED_KEY, true);
+            return;
+        }
+
+        if (!grantedByItem) {
+            return;
+        }
+
+        player.getPersistentData().remove(SURVIVAL_FLIGHT_GRANTED_KEY);
+        if (!player.isCreative() && !player.isSpectator()) {
+            player.getAbilities().mayfly = false;
+            player.getAbilities().flying = false;
+            player.onUpdateAbilities();
         }
     }
 }

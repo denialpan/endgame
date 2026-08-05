@@ -12,6 +12,8 @@
   "item.dddsendgame.random_block_placer.tooltip": "Right-click and place any block unlimited times!",
   "item.dddsendgame.reality_restorer": "Reality Shifter",
   "item.dddsendgame.reality_restorer.tooltip": "Right-click to restore the current chunk to its original terrain.",
+  "item.dddsendgame.survival_flight_core": "Free Flight",
+  "item.dddsendgame.survival_flight_core.tooltip": "Grants creative-style flight while in inventory.",
   "block.dddsendgame.endgame_controller": "Endgame Controller",
   "block.dddsendgame.endgame_connector": "Endgame Connector",
   "block.dddsendgame.endgame_solid_block": "Endgame Obsidian",
