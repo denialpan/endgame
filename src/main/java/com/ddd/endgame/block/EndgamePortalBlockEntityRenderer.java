@@ -366,6 +366,12 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         }
     }
 
+    public static void renderGlobalSkybox() {
+        PoseStack skyboxPose = new PoseStack();
+        applyConfiguredSkyboxRotation(skyboxPose);
+        withFixedSkyboxProjection(() -> renderSkyboxCube(skyboxPose.last().pose()));
+    }
+
     private static void applyConfiguredSkyboxRotation(PoseStack poseStack, double seconds) {
         double pitchSpeed = Config.PITCH_ROTATION_SPEED.get();
         double yawSpeed = Config.YAW_ROTATION_SPEED.get();

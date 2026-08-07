@@ -76,16 +76,15 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        poseStack.pushPose();
-        poseStack.translate(0.5F, 0.5F, 0.5F);
-        EndgamePortalBlockEntityRenderer.applyConfiguredSkyboxRotation(poseStack);
-        float skyboxSize = displayContext == ItemDisplayContext.GUI ? GUI_SKYBOX_SIZE : LOCAL_SKYBOX_SIZE;
         if (displayContext == ItemDisplayContext.GUI) {
-            EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), skyboxSize);
+            poseStack.pushPose();
+            poseStack.translate(0.5F, 0.5F, 0.5F);
+            EndgamePortalBlockEntityRenderer.applyConfiguredSkyboxRotation(poseStack);
+            EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), GUI_SKYBOX_SIZE);
+            poseStack.popPose();
         } else {
-            EndgamePortalBlockEntityRenderer.withFixedSkyboxProjection(() -> EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), skyboxSize));
+            EndgamePortalBlockEntityRenderer.renderGlobalSkybox();
         }
-        poseStack.popPose();
 
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();

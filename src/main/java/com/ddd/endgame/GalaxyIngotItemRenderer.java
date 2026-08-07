@@ -100,16 +100,15 @@ public class GalaxyIngotItemRenderer extends BlockEntityWithoutLevelRenderer {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        poseStack.pushPose();
-        poseStack.translate(0.5F, 0.5F, CENTER_Z);
-        EndgamePortalBlockEntityRenderer.applyConfiguredSkyboxRotation(poseStack);
-        float skyboxSize = displayContext == ItemDisplayContext.GUI ? EndgameSkyboxItemRenderer.GUI_SKYBOX_SIZE : EndgameSkyboxItemRenderer.LOCAL_SKYBOX_SIZE;
         if (displayContext == ItemDisplayContext.GUI) {
-            EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), skyboxSize);
+            poseStack.pushPose();
+            poseStack.translate(0.5F, 0.5F, CENTER_Z);
+            EndgamePortalBlockEntityRenderer.applyConfiguredSkyboxRotation(poseStack);
+            EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), EndgameSkyboxItemRenderer.GUI_SKYBOX_SIZE);
+            poseStack.popPose();
         } else {
-            EndgamePortalBlockEntityRenderer.withFixedSkyboxProjection(() -> EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), skyboxSize));
+            EndgamePortalBlockEntityRenderer.renderGlobalSkybox();
         }
-        poseStack.popPose();
 
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
