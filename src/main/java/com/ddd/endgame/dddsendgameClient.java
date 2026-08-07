@@ -93,7 +93,8 @@ public class dddsendgameClient {
                 || state.is(dddsendgame.ENDGAME_CONNECTOR_BLOCK.get())
                 || state.is(dddsendgame.ENDGAME_SOLID_BLOCK.get())
                 || state.is(dddsendgame.ENDGAME_GLASS_BLOCK.get())
-                || state.is(dddsendgame.ENDGAME_FULL_GLASS_BLOCK.get());
+                || state.is(dddsendgame.ENDGAME_FULL_GLASS_BLOCK.get())
+                || state.is(dddsendgame.GALAXY_BLOCK.get());
     }
 
     @SubscribeEvent

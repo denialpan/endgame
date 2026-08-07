@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GGG",
+    "GGG",
+    "GGG"
+  ],
+  "key": {
+    "G": {
+      "item": "dddsendgame:galaxy_ingot"
+    }
+  },
+  "result": {
+    "id": "dddsendgame:galaxy_block",
+    "count": 1
+  }
+}

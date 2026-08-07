@@ -70,6 +70,8 @@ public class dddsendgame {
     private static final String ENDGAME_STICK_CREATIVE_KEY = MODID + ".endgame_stick_creative";
     private static final String SURVIVAL_FLIGHT_GRANTED_KEY = MODID + ".survival_flight_granted";
     private static final int SPECTATOR_PHASE_TICKS = 15 * 20;
+    private static final int GALAXY_INSTABILITY_EFFECT_TICKS = 40;
+    private static final int GALAXY_INSTABILITY_SLOWNESS_AMPLIFIER = 5;
     private static final Map<UUID, SpectatorPhaseState> SPECTATOR_PHASES = new HashMap<>();
     public static final Logger LOGGER = LogUtils.getLogger();
 
@@ -163,6 +165,15 @@ public class dddsendgame {
             "endgame_full_glass",
             () -> new EndgameSkyboxBlockItem(ENDGAME_FULL_GLASS_BLOCK.get(), new Item.Properties())
     );
+    public static final DeferredBlock<EndgameDecorativeBlock> GALAXY_BLOCK = BLOCKS.registerBlock(
+            "galaxy_block",
+            EndgameDecorativeBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
+    );
+    public static final DeferredItem<BlockItem> GALAXY_BLOCK_ITEM = ITEMS.register(
+            "galaxy_block",
+            () -> new EndgameSkyboxBlockItem(GALAXY_BLOCK.get(), new Item.Properties())
+    );
     public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_1_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_1");
     public static final DeferredItem<BlockItem> COMPRESSED_OBSIDIAN_1_ITEM = registerBlockItem("compressed_obsidian_1", COMPRESSED_OBSIDIAN_1_BLOCK);
     public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_2_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_2");
@@ -207,7 +218,8 @@ public class dddsendgame {
                     EndgameDecorativeBlockEntity::new,
                     ENDGAME_SOLID_BLOCK.get(),
                     ENDGAME_GLASS_BLOCK.get(),
-                    ENDGAME_FULL_GLASS_BLOCK.get()
+                    ENDGAME_FULL_GLASS_BLOCK.get(),
+                    GALAXY_BLOCK.get()
             ).build(null));
 
     public static final DeferredHolder<MenuType<?>, MenuType<EndgameControllerMenu>> ENDGAME_CONTROLLER_MENU =
@@ -224,6 +236,7 @@ public class dddsendgame {
                 output.accept(ENDGAME_GLASS_ITEM.get());
                 output.accept(ENDGAME_EMPTY_GLASS_ITEM.get());
                 output.accept(ENDGAME_FULL_GLASS_ITEM.get());
+                output.accept(GALAXY_BLOCK_ITEM.get());
                 output.accept(COMPRESSED_OBSIDIAN_1_ITEM.get());
                 output.accept(COMPRESSED_OBSIDIAN_2_ITEM.get());
                 output.accept(COMPRESSED_OBSIDIAN_3_ITEM.get());
@@ -250,6 +263,7 @@ public class dddsendgame {
                 output.accept(SPECTATOR_PHASE_CORE.get());
                 output.accept(CHUNK_ANNIHILATOR.get());
                 output.accept(GALAXY_INGOT.get());
+                output.accept(GALAXY_BLOCK_ITEM.get());
                 output.accept(EndgameTestRecipe.createResult(parameters.holders()));
             }).build());
 
@@ -304,6 +318,7 @@ public class dddsendgame {
             event.accept(ENDGAME_GLASS_ITEM);
             event.accept(ENDGAME_EMPTY_GLASS_ITEM);
             event.accept(ENDGAME_FULL_GLASS_ITEM);
+            event.accept(GALAXY_BLOCK_ITEM);
             event.accept(COMPRESSED_OBSIDIAN_1_ITEM);
             event.accept(COMPRESSED_OBSIDIAN_2_ITEM);
             event.accept(COMPRESSED_OBSIDIAN_3_ITEM);
@@ -352,6 +367,7 @@ public class dddsendgame {
         }
 
         updateSurvivalFlight(player);
+        updateGalaxyInstability(player);
 
         boolean changedByStick = player.getPersistentData().getBoolean(ENDGAME_STICK_CREATIVE_KEY);
         if (!Config.ENDGAME_STICK_GRANTS_CREATIVE.getAsBoolean()) {
@@ -404,6 +420,22 @@ public class dddsendgame {
             player.getAbilities().mayfly = false;
             player.getAbilities().flying = false;
             player.onUpdateAbilities();
+        }
+    }
+
+    private static void updateGalaxyInstability(ServerPlayer player) {
+        boolean hasUnstableGalaxyMaterial = player.getInventory().contains(stack ->
+                stack.is(GALAXY_INGOT.get()) || stack.is(GALAXY_BLOCK_ITEM.get())
+        );
+        if (hasUnstableGalaxyMaterial) {
+            player.addEffect(new MobEffectInstance(
+                    MobEffects.MOVEMENT_SLOWDOWN,
+                    GALAXY_INSTABILITY_EFFECT_TICKS,
+                    GALAXY_INSTABILITY_SLOWNESS_AMPLIFIER,
+                    true,
+                    false,
+                    true
+            ));
         }
     }
 
