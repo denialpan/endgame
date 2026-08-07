@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -26,13 +25,6 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
     public static final EndgameSkyboxItemRenderer INSTANCE = new EndgameSkyboxItemRenderer();
     static final float GUI_SKYBOX_SIZE = 0.95F;
     static final float LOCAL_SKYBOX_SIZE = 8.0F;
-
-    private static final ResourceLocation FRONT = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/front.png");
-    private static final ResourceLocation BACK = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/back.png");
-    private static final ResourceLocation LEFT = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/left.png");
-    private static final ResourceLocation RIGHT = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/right.png");
-    private static final ResourceLocation TOP = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/top.png");
-    private static final ResourceLocation BOTTOM = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/bottom.png");
 
     private EndgameSkyboxItemRenderer() {
         super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
@@ -89,9 +81,9 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         EndgamePortalBlockEntityRenderer.applyConfiguredSkyboxRotation(poseStack);
         float skyboxSize = displayContext == ItemDisplayContext.GUI ? GUI_SKYBOX_SIZE : LOCAL_SKYBOX_SIZE;
         if (displayContext == ItemDisplayContext.GUI) {
-            renderSkyboxCube(poseStack.last().pose(), skyboxSize);
+            EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), skyboxSize);
         } else {
-            EndgamePortalBlockEntityRenderer.withFixedSkyboxProjection(() -> renderSkyboxCube(poseStack.last().pose(), skyboxSize));
+            EndgamePortalBlockEntityRenderer.withFixedSkyboxProjection(() -> EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), skyboxSize));
         }
         poseStack.popPose();
 
@@ -122,22 +114,4 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         BufferUploader.drawWithShader(builder.buildOrThrow());
     }
 
-    static void renderSkyboxCube(Matrix4f pose, float size) {
-        renderSkyboxFace(FRONT, pose, -size, -size, size, size, -size, size, size, size, size, -size, size, size);
-        renderSkyboxFace(BACK, pose, size, -size, -size, -size, -size, -size, -size, size, -size, size, size, -size);
-        renderSkyboxFace(LEFT, pose, -size, -size, -size, -size, -size, size, -size, size, size, -size, size, -size);
-        renderSkyboxFace(RIGHT, pose, size, -size, size, size, -size, -size, size, size, -size, size, size, size);
-        renderSkyboxFace(TOP, pose, -size, size, size, size, size, size, size, size, -size, -size, size, -size);
-        renderSkyboxFace(BOTTOM, pose, -size, -size, -size, size, -size, -size, size, -size, size, -size, -size, size);
-    }
-
-    private static void renderSkyboxFace(ResourceLocation texture, Matrix4f pose, float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3) {
-        RenderSystem.setShaderTexture(0, texture);
-        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        builder.addVertex(pose, x0, y0, z0).setUv(0.0F, 1.0F);
-        builder.addVertex(pose, x1, y1, z1).setUv(1.0F, 1.0F);
-        builder.addVertex(pose, x2, y2, z2).setUv(1.0F, 0.0F);
-        builder.addVertex(pose, x3, y3, z3).setUv(0.0F, 0.0F);
-        BufferUploader.drawWithShader(builder.buildOrThrow());
-    }
 }

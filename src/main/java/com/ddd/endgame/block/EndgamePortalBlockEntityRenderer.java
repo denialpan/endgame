@@ -166,7 +166,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         PoseStack poseStack = event.getPoseStack();
         BufferBuilder maskBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
         for (WindowMask mask : visibleMasks) {
-            appendWindowMask(maskBuilder, mask.pose(), maskMin, maskMax);
+            mask.append(maskBuilder, maskMin, maskMax);
         }
         BufferUploader.drawWithShader(maskBuilder.buildOrThrow());
 
@@ -202,6 +202,21 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             return;
         }
         ITEM_WINDOW_MASKS.add(new DynamicWindowMask(itemPose, transformedUnitCubeBounds(itemPose)));
+    }
+
+    public static void registerPixelWindowMask(Matrix4f pose, boolean[][] pixels, int pixelCount, float frontZ, float backZ) {
+        if (!Config.DROPPED_ITEM_WINDOWS.getAsBoolean() || IrisCompat.isRenderingShadowPass()) {
+            return;
+        }
+
+        Matrix4f itemPose = new Matrix4f(pose);
+        if (tooFar(transformedUnitCubeBounds(itemPose))) {
+            return;
+        }
+        if (!ITEM_WINDOW_MASK_KEYS.add(MatrixKey.from(itemPose))) {
+            return;
+        }
+        ITEM_WINDOW_MASKS.add(new PixelWindowMask(itemPose, transformedUnitCubeBounds(itemPose), pixels, pixelCount, frontZ, backZ));
     }
 
     public static int lastBlockEntityWindowsQueued() {
@@ -538,8 +553,24 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         builder.addVertex(pose, x0, y1, z3);
     }
 
+    private static void appendPixelMaskQuad(BufferBuilder builder, Matrix4f pose, float minX, float minY, float maxX, float maxY, float frontZ, float backZ) {
+        builder.addVertex(pose, minX, minY, frontZ);
+        builder.addVertex(pose, maxX, minY, frontZ);
+        builder.addVertex(pose, maxX, maxY, frontZ);
+        builder.addVertex(pose, minX, maxY, frontZ);
+
+        builder.addVertex(pose, minX, maxY, backZ);
+        builder.addVertex(pose, maxX, maxY, backZ);
+        builder.addVertex(pose, maxX, minY, backZ);
+        builder.addVertex(pose, minX, minY, backZ);
+    }
+
     private static void renderSkyboxCube(Matrix4f pose) {
-        float s = SKYBOX_SIZE;
+        renderSkyboxCube(pose, SKYBOX_SIZE);
+    }
+
+    public static void renderSkyboxCube(Matrix4f pose, float size) {
+        float s = size;
         renderSkyboxFace(CubemapFace.FRONT, pose, -s, -s, s, s, -s, s, s, s, s, -s, s, s);
         renderSkyboxFace(CubemapFace.BACK, pose, s, -s, -s, -s, -s, -s, -s, s, -s, s, s, -s);
         renderSkyboxFace(CubemapFace.LEFT, pose, -s, -s, -s, -s, -s, s, -s, s, s, -s, s, -s);
@@ -594,6 +625,8 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         AABB cameraRelativeBounds();
 
         AABB worldBounds(Vec3 cameraPosition);
+
+        void append(BufferBuilder builder, float min, float max);
     }
 
     private record DynamicWindowMask(Matrix4f pose, AABB cameraRelativeBounds) implements WindowMask {
@@ -607,6 +640,43 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
                     cameraRelativeBounds.maxY + cameraPosition.y,
                     cameraRelativeBounds.maxZ + cameraPosition.z
             );
+        }
+
+        @Override
+        public void append(BufferBuilder builder, float min, float max) {
+            appendWindowMask(builder, this.pose, min, max);
+        }
+    }
+
+    private record PixelWindowMask(Matrix4f pose, AABB cameraRelativeBounds, boolean[][] pixels, int pixelCount, float frontZ, float backZ) implements WindowMask {
+        @Override
+        public AABB worldBounds(Vec3 cameraPosition) {
+            return new AABB(
+                    cameraRelativeBounds.minX + cameraPosition.x,
+                    cameraRelativeBounds.minY + cameraPosition.y,
+                    cameraRelativeBounds.minZ + cameraPosition.z,
+                    cameraRelativeBounds.maxX + cameraPosition.x,
+                    cameraRelativeBounds.maxY + cameraPosition.y,
+                    cameraRelativeBounds.maxZ + cameraPosition.z
+            );
+        }
+
+        @Override
+        public void append(BufferBuilder builder, float min, float max) {
+            float pixel = 1.0F / this.pixelCount;
+            for (int y = 0; y < this.pixelCount; y++) {
+                for (int x = 0; x < this.pixelCount; x++) {
+                    if (!this.pixels[y][x]) {
+                        continue;
+                    }
+
+                    float minX = x * pixel;
+                    float maxX = minX + pixel;
+                    float maxY = 1.0F - y * pixel;
+                    float minY = maxY - pixel;
+                    appendPixelMaskQuad(builder, this.pose, minX, minY, maxX, maxY, this.frontZ, this.backZ);
+                }
+            }
         }
     }
 
@@ -649,6 +719,11 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         @Override
         public AABB worldBounds(Vec3 cameraPosition) {
             return this.worldBounds;
+        }
+
+        @Override
+        public void append(BufferBuilder builder, float min, float max) {
+            appendWindowMask(builder, this.pose, min, max);
         }
     }
 

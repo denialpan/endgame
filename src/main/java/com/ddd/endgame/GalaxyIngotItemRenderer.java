@@ -46,6 +46,11 @@ public class GalaxyIngotItemRenderer extends BlockEntityWithoutLevelRenderer {
         RenderOptimizationCompat.beforeSkyboxItemRender(displayContext);
         renderOriginalGeneratedModel(stack, poseStack, buffer, packedLight, packedOverlay);
         flushItemBuffers(buffer);
+        if (displayContext == ItemDisplayContext.GROUND) {
+            EndgamePortalBlockEntityRenderer.registerPixelWindowMask(poseStack.last().pose(), pixelMasks().stencil(), MASK_SIZE, FRONT_Z, BACK_Z);
+            RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
+            return;
+        }
         renderStencilWindow(displayContext, poseStack);
         RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
     }
@@ -100,9 +105,9 @@ public class GalaxyIngotItemRenderer extends BlockEntityWithoutLevelRenderer {
         EndgamePortalBlockEntityRenderer.applyConfiguredSkyboxRotation(poseStack);
         float skyboxSize = displayContext == ItemDisplayContext.GUI ? EndgameSkyboxItemRenderer.GUI_SKYBOX_SIZE : EndgameSkyboxItemRenderer.LOCAL_SKYBOX_SIZE;
         if (displayContext == ItemDisplayContext.GUI) {
-            EndgameSkyboxItemRenderer.renderSkyboxCube(poseStack.last().pose(), skyboxSize);
+            EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), skyboxSize);
         } else {
-            EndgamePortalBlockEntityRenderer.withFixedSkyboxProjection(() -> EndgameSkyboxItemRenderer.renderSkyboxCube(poseStack.last().pose(), skyboxSize));
+            EndgamePortalBlockEntityRenderer.withFixedSkyboxProjection(() -> EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), skyboxSize));
         }
         poseStack.popPose();
 
