@@ -38,8 +38,8 @@ public final class GalaxyFreezerPreviewRenderer {
     private static final TagKey<Item> WRENCHES = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "tools/wrench"));
     private static final int DETECTION_RADIUS_BLOCKS = 32;
     private static final int DETECTION_RADIUS_BLOCKS_SQUARED = DETECTION_RADIUS_BLOCKS * DETECTION_RADIUS_BLOCKS;
-    private static final float COMPLETE_MODEL_ALPHA = 0.18F;
-    private static final float MISSING_MODEL_ALPHA = 0.42F;
+    private static final float COMPLETE_MODEL_ALPHA = 0.75F;
+    private static final float MISSING_MODEL_ALPHA = 0.75F;
     private static final MultiBufferSource.BufferSource IMMEDIATE = MultiBufferSource.immediate(new ByteBufferBuilder(256));
     private static final Map<BlockPos, PreviewTarget> QUEUED_TARGETS = new LinkedHashMap<>();
 
