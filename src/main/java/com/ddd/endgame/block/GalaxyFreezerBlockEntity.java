@@ -35,6 +35,17 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         }
 
         @Override
+        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+            if (stack.isEmpty()) {
+                return ItemStack.EMPTY;
+            }
+
+            ItemStack stabilizedStack = stack.copy();
+            GalaxyInstability.resetTicks(stabilizedStack);
+            return super.insertItem(slot, stabilizedStack, simulate);
+        }
+
+        @Override
         protected void onContentsChanged(int slot) {
             GalaxyInstability.resetTicks(this.getStackInSlot(slot));
             GalaxyFreezerBlockEntity.this.setChanged();

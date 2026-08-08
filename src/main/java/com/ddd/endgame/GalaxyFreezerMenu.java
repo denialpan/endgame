@@ -7,6 +7,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -50,11 +51,19 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
         return this.blockEntity;
     }
 
+    @Override
+    public void clicked(int slotId, int button, ClickType clickType, Player player) {
+        if (slotId >= 0 && slotId < SLOT_COUNT) {
+            GalaxyInstability.resetTicks(this.getCarried());
+        }
+        super.clicked(slotId, button, clickType, player);
+    }
+
     private void addFreezerSlots(IItemHandler itemHandler) {
         for (int row = 0; row < 2; row++) {
             for (int col = 0; col < 3; col++) {
                 int slot = row * 3 + col;
-                this.addSlot(new SlotItemHandler(itemHandler, slot, SLOT_START_X + col * SLOT_SPACING, SLOT_START_Y + row * SLOT_SPACING));
+                this.addSlot(new FreezerSlot(itemHandler, slot, SLOT_START_X + col * SLOT_SPACING, SLOT_START_Y + row * SLOT_SPACING));
             }
         }
     }
@@ -132,5 +141,29 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
     }
 
     private record ClientTarget(BlockPos pos, @Nullable GalaxyFreezerBlockEntity blockEntity, IItemHandler itemHandler) {
+    }
+
+    private static class FreezerSlot extends SlotItemHandler {
+        private FreezerSlot(IItemHandler itemHandler, int index, int xPosition, int yPosition) {
+            super(itemHandler, index, xPosition, yPosition);
+        }
+
+        @Override
+        public ItemStack safeInsert(ItemStack stack, int increment) {
+            if (stack.isEmpty() || !this.mayPlace(stack)) {
+                return stack;
+            }
+
+            int insertCount = Math.min(increment, stack.getCount());
+            ItemStack stabilizedStack = stack.copyWithCount(insertCount);
+            GalaxyInstability.resetTicks(stabilizedStack);
+            ItemStack remainder = this.getItemHandler().insertItem(this.index, stabilizedStack, false);
+            int inserted = insertCount - remainder.getCount();
+            if (inserted > 0) {
+                stack.shrink(inserted);
+                this.setChanged();
+            }
+            return stack;
+        }
     }
 }
