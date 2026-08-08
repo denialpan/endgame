@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "TGT",
+    "TGT",
+    "TTT"
+  ],
+  "key": {
+    "T": {
+      "item": "minecraft:tnt"
+    },
+    "G": {
+      "item": "dddsendgame:galaxy_ingot"
+    }
+  },
+  "result": {
+    "id": "dddsendgame:chunk_annihilator",
+    "count": 1
+  }
+}
