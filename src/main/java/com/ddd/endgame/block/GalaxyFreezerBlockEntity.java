@@ -1,6 +1,7 @@
 package com.ddd.endgame.block;
 
 import com.ddd.endgame.GalaxyFreezerMenu;
+import com.ddd.endgame.GalaxyInstability;
 import com.ddd.endgame.dddsendgame;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -35,6 +36,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
 
         @Override
         protected void onContentsChanged(int slot) {
+            GalaxyInstability.resetTicks(this.getStackInSlot(slot));
             GalaxyFreezerBlockEntity.this.setChanged();
         }
     };
@@ -93,6 +95,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         this.itemHandler.deserializeNBT(registries, tag.getCompound(ITEMS_TAG));
+        resetStoredInstabilityTimers();
     }
 
     @Override
@@ -112,5 +115,11 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         CompoundTag tag = super.getUpdateTag(registries);
         this.saveAdditional(tag, registries);
         return tag;
+    }
+
+    private void resetStoredInstabilityTimers() {
+        for (int slot = 0; slot < this.itemHandler.getSlots(); slot++) {
+            GalaxyInstability.resetTicks(this.itemHandler.getStackInSlot(slot));
+        }
     }
 }

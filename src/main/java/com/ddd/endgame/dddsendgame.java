@@ -7,6 +7,7 @@ import com.ddd.endgame.block.EndgameControllerBlockEntity;
 import com.ddd.endgame.block.EndgameDecorativeBlock;
 import com.ddd.endgame.block.EndgameDecorativeBlockEntity;
 import com.ddd.endgame.block.EndgameSkyboxBlockItem;
+import com.ddd.endgame.block.GalaxyBlockItem;
 import com.ddd.endgame.block.GalaxyFreezerBlock;
 import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
 import com.ddd.endgame.item.ChunkAnnihilatorItem;
@@ -76,7 +77,6 @@ public class dddsendgame {
     public static final int GALAXY_INSTABILITY_DETONATION_TICKS = 10 * 20;
     public static final float GALAXY_INSTABILITY_EXPLOSION_RADIUS = 8.0F;
     private static final Map<UUID, SpectatorPhaseState> SPECTATOR_PHASES = new HashMap<>();
-    private static final Map<UUID, Integer> GALAXY_INSTABILITY_TIMERS = new HashMap<>();
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
@@ -176,7 +176,7 @@ public class dddsendgame {
     );
     public static final DeferredItem<BlockItem> GALAXY_BLOCK_ITEM = ITEMS.register(
             "galaxy_block",
-            () -> new EndgameSkyboxBlockItem(GALAXY_BLOCK.get(), new Item.Properties())
+            () -> new GalaxyBlockItem(GALAXY_BLOCK.get(), new Item.Properties())
     );
     public static final DeferredBlock<GalaxyFreezerBlock> GALAXY_FREEZER_BLOCK = BLOCKS.registerBlock(
             "galaxy_freezer",
@@ -391,8 +391,7 @@ public class dddsendgame {
         }
 
         updateSurvivalFlight(player);
-        updateGalaxyInstability(player);
-
+        GalaxyInstability.tickPlayerStacks(player);
         boolean changedByStick = player.getPersistentData().getBoolean(ENDGAME_STICK_CREATIVE_KEY);
         if (!Config.ENDGAME_STICK_GRANTS_CREATIVE.getAsBoolean()) {
             if (changedByStick) {
@@ -444,60 +443,6 @@ public class dddsendgame {
             player.getAbilities().mayfly = false;
             player.getAbilities().flying = false;
             player.onUpdateAbilities();
-        }
-    }
-
-    private static void updateGalaxyInstability(ServerPlayer player) {
-        UUID playerId = player.getUUID();
-        if (!hasGalaxyMaterial(player)) {
-            GALAXY_INSTABILITY_TIMERS.remove(playerId);
-            return;
-        }
-
-        int timer = GALAXY_INSTABILITY_TIMERS.getOrDefault(playerId, 0) + 1;
-        if (timer < GALAXY_INSTABILITY_DETONATION_TICKS) {
-            GALAXY_INSTABILITY_TIMERS.put(playerId, timer);
-            return;
-        }
-
-        GALAXY_INSTABILITY_TIMERS.remove(playerId);
-        removeGalaxyMaterials(player);
-        player.serverLevel().explode(
-                player,
-                player.getX(),
-                player.getY(),
-                player.getZ(),
-                GALAXY_INSTABILITY_EXPLOSION_RADIUS,
-                false,
-                Level.ExplosionInteraction.BLOCK
-        );
-        player.hurt(player.damageSources().genericKill(), Float.MAX_VALUE);
-    }
-
-    private static boolean hasGalaxyMaterial(ServerPlayer player) {
-        return player.getInventory().contains(dddsendgame::isGalaxyMaterial);
-    }
-
-    public static int galaxyInstabilityTimer(ServerPlayer player) {
-        return GALAXY_INSTABILITY_TIMERS.getOrDefault(player.getUUID(), 0);
-    }
-
-    private static boolean isGalaxyMaterial(ItemStack stack) {
-        return stack.is(GALAXY_INGOT.get()) || stack.is(GALAXY_BLOCK_ITEM.get());
-    }
-
-    private static void removeGalaxyMaterials(ServerPlayer player) {
-        removeGalaxyMaterials(player.getInventory().items);
-        removeGalaxyMaterials(player.getInventory().armor);
-        removeGalaxyMaterials(player.getInventory().offhand);
-        player.getInventory().setChanged();
-    }
-
-    private static void removeGalaxyMaterials(Iterable<ItemStack> stacks) {
-        for (ItemStack stack : stacks) {
-            if (isGalaxyMaterial(stack)) {
-                stack.setCount(0);
-            }
         }
     }
 

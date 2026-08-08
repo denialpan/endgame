@@ -2,11 +2,11 @@ package com.ddd.endgame.block;
 
 import com.mojang.serialization.MapCodec;
 import java.util.function.Consumer;
+import com.ddd.endgame.GalaxyInstability;
 import javax.annotation.Nullable;
 import com.ddd.endgame.dddsendgame;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -50,8 +50,7 @@ public class EndgameDecorativeBlock extends BaseEntityBlock {
         }
 
         if (level.getBlockEntity(pos) instanceof EndgameDecorativeBlockEntity blockEntity) {
-            int carriedTicks = placer instanceof ServerPlayer player ? dddsendgame.galaxyInstabilityTimer(player) : 0;
-            blockEntity.setGalaxyInstabilityTicks(carriedTicks);
+            blockEntity.setGalaxyInstabilityTicks(GalaxyInstability.ticks(stack));
         }
     }
 

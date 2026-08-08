@@ -1,7 +1,13 @@
 package com.ddd.endgame.item;
 
 import com.ddd.endgame.GalaxyIngotItemRenderer;
+import com.ddd.endgame.GalaxyInstability;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 import java.util.function.Consumer;
@@ -9,6 +15,18 @@ import java.util.function.Consumer;
 public class GalaxyIngotItem extends Item {
     public GalaxyIngotItem(Properties properties) {
         super(properties);
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
+        if (!(entity instanceof Player)) {
+            GalaxyInstability.tickStack(stack, level, entity);
+        }
+    }
+
+    @Override
+    public boolean onEntityItemUpdate(ItemStack stack, ItemEntity entity) {
+        return GalaxyInstability.tickDroppedStack(stack, entity);
     }
 
     @Override
