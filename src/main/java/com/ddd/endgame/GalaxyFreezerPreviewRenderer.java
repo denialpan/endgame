@@ -31,7 +31,12 @@ import net.neoforged.neoforge.client.model.pipeline.VertexConsumerWrapper;
 
 public final class GalaxyFreezerPreviewRenderer {
     private static final TagKey<Item> WRENCHES = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "tools/wrench"));
+    private static final int DETECTION_RADIUS_BLOCKS = 32;
+    private static final int DETECTION_RADIUS_BLOCKS_SQUARED = DETECTION_RADIUS_BLOCKS * DETECTION_RADIUS_BLOCKS;
+    private static final long DETECTION_SCAN_INTERVAL_TICKS = 10L;
     private static final float MODEL_ALPHA = 0.42F;
+    private static PreviewTarget cachedNearbyTarget;
+    private static long nextNearbyScanTick = Long.MIN_VALUE;
 
     private GalaxyFreezerPreviewRenderer() {
     }
@@ -90,8 +95,9 @@ public final class GalaxyFreezerPreviewRenderer {
     }
 
     private static PreviewTarget findTarget(Minecraft minecraft, Level level, Player player) {
+        boolean holdingFreezer = player.getMainHandItem().is(dddsendgame.GALAXY_FREEZER_ITEM.get()) || player.getOffhandItem().is(dddsendgame.GALAXY_FREEZER_ITEM.get());
         if (!(minecraft.hitResult instanceof BlockHitResult hitResult) || hitResult.getType() != HitResult.Type.BLOCK) {
-            return null;
+            return findNearbyFreezer(level, player);
         }
 
         BlockPos hitPos = hitResult.getBlockPos();
@@ -100,10 +106,55 @@ public final class GalaxyFreezerPreviewRenderer {
             return new PreviewTarget(hitPos, hitState.getValue(HorizontalFacingEntityBlock.FACING));
         }
 
-        if (player.getMainHandItem().is(dddsendgame.GALAXY_FREEZER_ITEM.get()) || player.getOffhandItem().is(dddsendgame.GALAXY_FREEZER_ITEM.get())) {
+        if (holdingFreezer) {
             return new PreviewTarget(hitPos.relative(hitResult.getDirection()), player.getDirection().getOpposite());
         }
-        return null;
+        return findNearbyFreezer(level, player);
+    }
+
+    private static PreviewTarget findNearbyFreezer(Level level, Player player) {
+        long gameTime = level.getGameTime();
+        if (gameTime < nextNearbyScanTick && cachedNearbyTarget != null && isNearbyTargetValid(level, player, cachedNearbyTarget)) {
+            return cachedNearbyTarget;
+        }
+
+        nextNearbyScanTick = gameTime + DETECTION_SCAN_INTERVAL_TICKS;
+        cachedNearbyTarget = scanNearbyFreezer(level, player);
+        return cachedNearbyTarget;
+    }
+
+    private static boolean isNearbyTargetValid(Level level, Player player, PreviewTarget target) {
+        if (target.controllerPos().distToCenterSqr(player.position()) > DETECTION_RADIUS_BLOCKS_SQUARED) {
+            return false;
+        }
+        BlockState state = level.getBlockState(target.controllerPos());
+        return state.is(dddsendgame.GALAXY_FREEZER_BLOCK.get());
+    }
+
+    private static PreviewTarget scanNearbyFreezer(Level level, Player player) {
+        BlockPos center = player.blockPosition();
+        PreviewTarget nearest = null;
+        double nearestDistance = Double.MAX_VALUE;
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+
+        for (int y = -DETECTION_RADIUS_BLOCKS; y <= DETECTION_RADIUS_BLOCKS; y++) {
+            for (int z = -DETECTION_RADIUS_BLOCKS; z <= DETECTION_RADIUS_BLOCKS; z++) {
+                for (int x = -DETECTION_RADIUS_BLOCKS; x <= DETECTION_RADIUS_BLOCKS; x++) {
+                    mutablePos.set(center.getX() + x, center.getY() + y, center.getZ() + z);
+                    double distance = mutablePos.distToCenterSqr(player.position());
+                    if (distance > DETECTION_RADIUS_BLOCKS_SQUARED || distance >= nearestDistance) {
+                        continue;
+                    }
+
+                    BlockState state = level.getBlockState(mutablePos);
+                    if (state.is(dddsendgame.GALAXY_FREEZER_BLOCK.get())) {
+                        nearestDistance = distance;
+                        nearest = new PreviewTarget(mutablePos.immutable(), state.getValue(HorizontalFacingEntityBlock.FACING));
+                    }
+                }
+            }
+        }
+        return nearest;
     }
 
     private record PreviewTarget(BlockPos controllerPos, Direction facing) {
