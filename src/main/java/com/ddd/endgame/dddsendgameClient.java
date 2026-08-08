@@ -53,7 +53,7 @@ public class dddsendgameClient {
             return;
         }
 
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
             GalaxyFreezerPreviewRenderer.render(event);
         }
 
