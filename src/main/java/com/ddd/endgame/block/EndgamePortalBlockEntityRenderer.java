@@ -1,6 +1,7 @@
 package com.ddd.endgame.block;
 
 import com.ddd.endgame.Config;
+import com.ddd.endgame.GalaxyFreezerPreviewRenderer;
 import com.ddd.endgame.compat.IrisCompat;
 import com.ddd.endgame.dddsendgame;
 import com.mojang.math.Axis;
@@ -82,6 +83,10 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
 
     @Override
     public void render(T blockEntity, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+        if (blockEntity instanceof GalaxyFreezerBlockEntity freezer) {
+            GalaxyFreezerPreviewRenderer.enqueue(freezer);
+        }
+
         Minecraft minecraft = Minecraft.getInstance();
         ensureStencil(minecraft);
         if (!stencilEnabled) {
