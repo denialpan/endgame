@@ -55,6 +55,7 @@
   "container.dddsendgame.endgame_controller.sort.asc": "Asc",
   "container.dddsendgame.endgame_controller.sort.desc": "Desc",
   "container.dddsendgame.galaxy_freezer": "Galaxy Freezer",
+  "container.dddsendgame.galaxy_freezer.invalid": "Incomplete multiblock",
   "message.dddsendgame.weather.clear": "Weather set to clear",
   "message.dddsendgame.weather.rain": "Weather set to rain",
   "message.dddsendgame.weather.thunder": "Weather set to thunder",

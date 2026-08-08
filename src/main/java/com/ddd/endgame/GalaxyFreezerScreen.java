@@ -15,6 +15,7 @@ public class GalaxyFreezerScreen extends AbstractContainerScreen<GalaxyFreezerMe
     private static final int HOTBAR_Y = 141;
     private static final int SLOT_SPACING = 18;
     private static final int SLOT_SIZE = 18;
+    private static final int INVALID_MULTIBLOCK_TEXT_Y = 64;
 
     public GalaxyFreezerScreen(GalaxyFreezerMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -50,5 +51,19 @@ public class GalaxyFreezerScreen extends AbstractContainerScreen<GalaxyFreezerMe
         guiGraphics.fill(x, y, x + SLOT_SIZE, y + SLOT_SIZE, 0xFF373737);
         guiGraphics.fill(x + 1, y + 1, x + SLOT_SIZE, y + SLOT_SIZE, 0xFFFFFFFF);
         guiGraphics.fill(x + 1, y + 1, x + SLOT_SIZE - 1, y + SLOT_SIZE - 1, 0xFF8B8B8B);
+    }
+
+    @Override
+    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        super.renderLabels(guiGraphics, mouseX, mouseY);
+        if (this.menu.blockEntity() != null && !this.menu.blockEntity().isMultiblockValid()) {
+            guiGraphics.drawCenteredString(
+                    this.font,
+                    Component.translatable("container.dddsendgame.galaxy_freezer.invalid"),
+                    this.imageWidth / 2,
+                    INVALID_MULTIBLOCK_TEXT_Y,
+                    0xFF4040
+            );
+        }
     }
 }

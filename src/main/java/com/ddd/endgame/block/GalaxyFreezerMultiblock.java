@@ -1,0 +1,120 @@
+package com.ddd.endgame.block;
+
+import com.ddd.endgame.dddsendgame;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+
+public final class GalaxyFreezerMultiblock {
+    private static final Direction SCHEMATIC_FACING = Direction.NORTH;
+    private static final List<Requirement> REQUIREMENTS = List.of(
+            solid(-1, 0, 0), solid(1, 0, 0),
+            solid(-1, 0, 1), solid(0, 0, 1), solid(1, 0, 1),
+            solid(-1, 0, 2), solid(0, 0, 2), solid(1, 0, 2),
+
+            glass(-1, 1, 0), glass(0, 1, 0), glass(1, 1, 0),
+            glass(-1, 1, 1), glass(1, 1, 1),
+            glass(-1, 1, 2), glass(0, 1, 2), glass(1, 1, 2),
+
+            glass(-1, 2, 0), glass(0, 2, 0), glass(1, 2, 0),
+            glass(-1, 2, 1), glass(1, 2, 1),
+            glass(-1, 2, 2), glass(0, 2, 2), glass(1, 2, 2),
+
+            solid(-1, 3, 0), solid(0, 3, 0), solid(1, 3, 0),
+            solid(-1, 3, 1), connector(0, 3, 1), solid(1, 3, 1),
+            solid(-1, 3, 2), solid(0, 3, 2), solid(1, 3, 2)
+    );
+
+    private GalaxyFreezerMultiblock() {
+    }
+
+    public static boolean matches(Level level, BlockPos controllerPos, Direction controllerFacing) {
+        if (level == null) {
+            return false;
+        }
+
+        for (PreviewBlock previewBlock : previewBlocks(controllerPos, controllerFacing)) {
+            if (!previewBlock.matches(level.getBlockState(previewBlock.pos()))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static List<PreviewBlock> previewBlocks(BlockPos controllerPos, Direction controllerFacing) {
+        RotationSteps rotation = RotationSteps.from(SCHEMATIC_FACING, controllerFacing);
+        List<PreviewBlock> blocks = new ArrayList<>(REQUIREMENTS.size());
+        for (Requirement requirement : REQUIREMENTS) {
+            BlockPos targetPos = controllerPos.offset(rotation.rotateX(requirement.x(), requirement.z()), requirement.y(), rotation.rotateZ(requirement.x(), requirement.z()));
+            blocks.add(new PreviewBlock(targetPos, requirement.block().defaultBlockState(), requirement.predicate()));
+        }
+        return blocks;
+    }
+
+    private static Requirement solid(int x, int y, int z) {
+        return new Requirement(x, y, z, dddsendgame.ENDGAME_SOLID_BLOCK.get(), state -> state.is(dddsendgame.ENDGAME_SOLID_BLOCK.get()));
+    }
+
+    private static Requirement glass(int x, int y, int z) {
+        return new Requirement(x, y, z, dddsendgame.ENDGAME_GLASS_BLOCK.get(), state -> state.is(dddsendgame.ENDGAME_GLASS_BLOCK.get()));
+    }
+
+    private static Requirement connector(int x, int y, int z) {
+        return new Requirement(x, y, z, dddsendgame.ENDGAME_CONNECTOR_BLOCK.get(), state ->
+                state.is(dddsendgame.ENDGAME_CONNECTOR_BLOCK.get())
+                        && state.getValue(OrientableEntityBlock.AXIS) == Direction.Axis.Y
+        );
+    }
+
+    public record PreviewBlock(BlockPos pos, BlockState state, Predicate<BlockState> predicate) {
+        public boolean matches(BlockState actualState) {
+            return this.predicate.test(actualState);
+        }
+    }
+
+    private record Requirement(int x, int y, int z, Block block, Predicate<BlockState> predicate) {
+        private boolean matches(BlockState state) {
+            return this.predicate.test(state);
+        }
+    }
+
+    private enum RotationSteps {
+        NONE,
+        CLOCKWISE_90,
+        CLOCKWISE_180,
+        COUNTERCLOCKWISE_90;
+
+        private static RotationSteps from(Direction from, Direction to) {
+            int steps = Math.floorMod(to.get2DDataValue() - from.get2DDataValue(), 4);
+            return switch (steps) {
+                case 1 -> CLOCKWISE_90;
+                case 2 -> CLOCKWISE_180;
+                case 3 -> COUNTERCLOCKWISE_90;
+                default -> NONE;
+            };
+        }
+
+        private int rotateX(int x, int z) {
+            return switch (this) {
+                case NONE -> x;
+                case CLOCKWISE_90 -> -z;
+                case CLOCKWISE_180 -> -x;
+                case COUNTERCLOCKWISE_90 -> z;
+            };
+        }
+
+        private int rotateZ(int x, int z) {
+            return switch (this) {
+                case NONE -> z;
+                case CLOCKWISE_90 -> x;
+                case CLOCKWISE_180 -> -z;
+                case COUNTERCLOCKWISE_90 -> -x;
+            };
+        }
+    }
+}

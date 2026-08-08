@@ -53,6 +53,10 @@ public class dddsendgameClient {
             return;
         }
 
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+            GalaxyFreezerPreviewRenderer.render(event);
+        }
+
         Config.RenderStageMode mode = resolveRenderStageMode();
         if (mode == Config.RenderStageMode.DISABLED && event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
             EndgamePortalBlockEntityRenderer.discardSkyboxLayer();

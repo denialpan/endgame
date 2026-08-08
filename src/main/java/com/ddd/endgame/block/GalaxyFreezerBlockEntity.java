@@ -23,11 +23,14 @@ import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvider {
     public static final int SLOT_COUNT = 6;
+    private static final long MULTIBLOCK_CHECK_INTERVAL_TICKS = 20L;
     private static final String ITEMS_TAG = "Items";
+    private boolean multiblockValid;
+    private long lastMultiblockCheck = Long.MIN_VALUE;
     private final ItemStackHandler itemHandler = new ItemStackHandler(SLOT_COUNT) {
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
-            return stack.is(dddsendgame.GALAXY_INGOT.get());
+            return stack.is(dddsendgame.GALAXY_INGOT.get()) && GalaxyFreezerBlockEntity.this.isMultiblockValid();
         }
 
         @Override
@@ -42,6 +45,27 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
 
     public ItemStackHandler itemHandler() {
         return this.itemHandler;
+    }
+
+    public boolean isMultiblockValid() {
+        if (this.level == null) {
+            return false;
+        }
+
+        long gameTime = this.level.getGameTime();
+        if (this.lastMultiblockCheck == Long.MIN_VALUE || gameTime - this.lastMultiblockCheck >= MULTIBLOCK_CHECK_INTERVAL_TICKS) {
+            this.lastMultiblockCheck = gameTime;
+            this.multiblockValid = GalaxyFreezerMultiblock.matches(
+                    this.level,
+                    this.worldPosition,
+                    this.getBlockState().getValue(HorizontalFacingEntityBlock.FACING)
+            );
+        }
+        return this.multiblockValid;
+    }
+
+    public void invalidateMultiblockCache() {
+        this.lastMultiblockCheck = Long.MIN_VALUE;
     }
 
     public void dropContents(Level level, BlockPos pos) {
