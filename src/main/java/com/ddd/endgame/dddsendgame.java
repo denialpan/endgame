@@ -30,6 +30,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -70,9 +71,10 @@ public class dddsendgame {
     private static final String ENDGAME_STICK_CREATIVE_KEY = MODID + ".endgame_stick_creative";
     private static final String SURVIVAL_FLIGHT_GRANTED_KEY = MODID + ".survival_flight_granted";
     private static final int SPECTATOR_PHASE_TICKS = 15 * 20;
-    private static final int GALAXY_INSTABILITY_EFFECT_TICKS = 40;
-    private static final int GALAXY_INSTABILITY_SLOWNESS_AMPLIFIER = 5;
+    public static final int GALAXY_INSTABILITY_DETONATION_TICKS = 10 * 20;
+    public static final float GALAXY_INSTABILITY_EXPLOSION_RADIUS = 8.0F;
     private static final Map<UUID, SpectatorPhaseState> SPECTATOR_PHASES = new HashMap<>();
+    private static final Map<UUID, Integer> GALAXY_INSTABILITY_TIMERS = new HashMap<>();
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
@@ -424,18 +426,56 @@ public class dddsendgame {
     }
 
     private static void updateGalaxyInstability(ServerPlayer player) {
-        boolean hasUnstableGalaxyMaterial = player.getInventory().contains(stack ->
-                stack.is(GALAXY_INGOT.get()) || stack.is(GALAXY_BLOCK_ITEM.get())
+        UUID playerId = player.getUUID();
+        if (!hasGalaxyMaterial(player)) {
+            GALAXY_INSTABILITY_TIMERS.remove(playerId);
+            return;
+        }
+
+        int timer = GALAXY_INSTABILITY_TIMERS.getOrDefault(playerId, 0) + 1;
+        if (timer < GALAXY_INSTABILITY_DETONATION_TICKS) {
+            GALAXY_INSTABILITY_TIMERS.put(playerId, timer);
+            return;
+        }
+
+        GALAXY_INSTABILITY_TIMERS.remove(playerId);
+        removeGalaxyMaterials(player);
+        player.serverLevel().explode(
+                player,
+                player.getX(),
+                player.getY(),
+                player.getZ(),
+                GALAXY_INSTABILITY_EXPLOSION_RADIUS,
+                false,
+                Level.ExplosionInteraction.BLOCK
         );
-        if (hasUnstableGalaxyMaterial) {
-            player.addEffect(new MobEffectInstance(
-                    MobEffects.MOVEMENT_SLOWDOWN,
-                    GALAXY_INSTABILITY_EFFECT_TICKS,
-                    GALAXY_INSTABILITY_SLOWNESS_AMPLIFIER,
-                    true,
-                    false,
-                    true
-            ));
+        player.hurt(player.damageSources().genericKill(), Float.MAX_VALUE);
+    }
+
+    private static boolean hasGalaxyMaterial(ServerPlayer player) {
+        return player.getInventory().contains(dddsendgame::isGalaxyMaterial);
+    }
+
+    public static int galaxyInstabilityTimer(ServerPlayer player) {
+        return GALAXY_INSTABILITY_TIMERS.getOrDefault(player.getUUID(), 0);
+    }
+
+    private static boolean isGalaxyMaterial(ItemStack stack) {
+        return stack.is(GALAXY_INGOT.get()) || stack.is(GALAXY_BLOCK_ITEM.get());
+    }
+
+    private static void removeGalaxyMaterials(ServerPlayer player) {
+        removeGalaxyMaterials(player.getInventory().items);
+        removeGalaxyMaterials(player.getInventory().armor);
+        removeGalaxyMaterials(player.getInventory().offhand);
+        player.getInventory().setChanged();
+    }
+
+    private static void removeGalaxyMaterials(Iterable<ItemStack> stacks) {
+        for (ItemStack stack : stacks) {
+            if (isGalaxyMaterial(stack)) {
+                stack.setCount(0);
+            }
         }
     }
 

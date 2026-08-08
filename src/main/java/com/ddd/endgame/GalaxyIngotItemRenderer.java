@@ -46,12 +46,13 @@ public class GalaxyIngotItemRenderer extends BlockEntityWithoutLevelRenderer {
         RenderOptimizationCompat.beforeSkyboxItemRender(displayContext);
         renderOriginalGeneratedModel(stack, poseStack, buffer, packedLight, packedOverlay);
         flushItemBuffers(buffer);
+        float greenBlue = GalaxyInstabilityVisuals.tintGreenBlue(stack);
         if (displayContext == ItemDisplayContext.GROUND) {
-            EndgamePortalBlockEntityRenderer.registerPixelWindowMask(poseStack.last().pose(), pixelMasks().stencil(), MASK_SIZE, FRONT_Z, BACK_Z);
+            EndgamePortalBlockEntityRenderer.registerPixelWindowMask(poseStack.last().pose(), pixelMasks().stencil(), MASK_SIZE, FRONT_Z, BACK_Z, greenBlue);
             RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
             return;
         }
-        renderStencilWindow(displayContext, poseStack);
+        renderStencilWindow(displayContext, poseStack, greenBlue);
         RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
     }
 
@@ -61,12 +62,22 @@ public class GalaxyIngotItemRenderer extends BlockEntityWithoutLevelRenderer {
             return;
         }
 
+        float greenBlue = GalaxyInstabilityVisuals.tintGreenBlue(stack);
+        RenderSystem.setShaderColor(1.0F, greenBlue, greenBlue, 1.0F);
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         for (BakedModel renderPass : model.getRenderPasses(stack, true)) {
             for (RenderType renderType : renderPass.getRenderTypes(stack, true)) {
-                itemRenderer.renderModelLists(renderPass, stack, packedLight, packedOverlay, poseStack, ItemRenderer.getFoilBufferDirect(buffer, renderType, true, stack.hasFoil()));
+                itemRenderer.renderModelLists(
+                        renderPass,
+                        stack,
+                        packedLight,
+                        packedOverlay,
+                        poseStack,
+                        GalaxyInstabilityTint.wrap(ItemRenderer.getFoilBufferDirect(buffer, renderType, true, stack.hasFoil()), greenBlue)
+                );
             }
         }
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     private static void flushItemBuffers(MultiBufferSource buffer) {
@@ -75,7 +86,7 @@ public class GalaxyIngotItemRenderer extends BlockEntityWithoutLevelRenderer {
         }
     }
 
-    private static void renderStencilWindow(ItemDisplayContext displayContext, PoseStack poseStack) {
+    private static void renderStencilWindow(ItemDisplayContext displayContext, PoseStack poseStack, float greenBlue) {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getMainRenderTarget().enableStencil();
 
@@ -104,10 +115,10 @@ public class GalaxyIngotItemRenderer extends BlockEntityWithoutLevelRenderer {
             poseStack.pushPose();
             poseStack.translate(0.5F, 0.5F, CENTER_Z);
             EndgamePortalBlockEntityRenderer.applyConfiguredSkyboxRotation(poseStack);
-            EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), EndgameSkyboxItemRenderer.GUI_SKYBOX_SIZE);
+            EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), EndgameSkyboxItemRenderer.GUI_SKYBOX_SIZE, greenBlue);
             poseStack.popPose();
         } else {
-            EndgamePortalBlockEntityRenderer.renderGlobalSkybox();
+            EndgamePortalBlockEntityRenderer.renderGlobalSkybox(greenBlue);
         }
 
         RenderSystem.depthMask(true);

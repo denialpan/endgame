@@ -37,19 +37,23 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         }
 
         RenderOptimizationCompat.beforeSkyboxItemRender(displayContext);
-        renderStencilWindow(displayContext, poseStack);
-        renderBlockModel(blockItem.getBlock(), poseStack, buffer, packedLight, packedOverlay);
+        float greenBlue = GalaxyInstabilityVisuals.tintGreenBlue(stack);
+        renderStencilWindow(displayContext, poseStack, greenBlue);
+        renderBlockModel(blockItem.getBlock(), stack, poseStack, buffer, packedLight, packedOverlay);
         RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
     }
 
-    private static void renderBlockModel(Block block, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+    private static void renderBlockModel(Block block, ItemStack stack, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        float greenBlue = GalaxyInstabilityVisuals.tintGreenBlue(stack);
+        RenderSystem.setShaderColor(1.0F, greenBlue, greenBlue, 1.0F);
         BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
-        dispatcher.renderSingleBlock(block.defaultBlockState(), poseStack, buffer, packedLight, packedOverlay);
+        dispatcher.renderSingleBlock(block.defaultBlockState(), poseStack, GalaxyInstabilityTint.wrap(buffer, greenBlue), packedLight, packedOverlay);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    private static void renderStencilWindow(ItemDisplayContext displayContext, PoseStack poseStack) {
+    private static void renderStencilWindow(ItemDisplayContext displayContext, PoseStack poseStack, float greenBlue) {
         if (displayContext == ItemDisplayContext.GROUND) {
-            EndgamePortalBlockEntityRenderer.registerWindowMask(poseStack.last().pose());
+            EndgamePortalBlockEntityRenderer.registerWindowMask(poseStack.last().pose(), greenBlue);
             return;
         }
 
@@ -80,10 +84,10 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
             poseStack.pushPose();
             poseStack.translate(0.5F, 0.5F, 0.5F);
             EndgamePortalBlockEntityRenderer.applyConfiguredSkyboxRotation(poseStack);
-            EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), GUI_SKYBOX_SIZE);
+            EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), GUI_SKYBOX_SIZE, greenBlue);
             poseStack.popPose();
         } else {
-            EndgamePortalBlockEntityRenderer.renderGlobalSkybox();
+            EndgamePortalBlockEntityRenderer.renderGlobalSkybox(greenBlue);
         }
 
         RenderSystem.depthMask(true);

@@ -17,12 +17,14 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
+import com.ddd.endgame.block.EndgameDecorativeBlockEntity;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = dddsendgame.MODID, dist = Dist.CLIENT)
@@ -107,6 +109,20 @@ public class dddsendgameClient {
         event.registerBlockEntityRenderer(dddsendgame.ENDGAME_CONTROLLER_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
         event.registerBlockEntityRenderer(dddsendgame.ENDGAME_CONNECTOR_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
         event.registerBlockEntityRenderer(dddsendgame.ENDGAME_DECORATIVE_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
+    }
+
+    @SubscribeEvent
+    static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
+        event.register((state, level, pos, tintIndex) -> {
+            if (level == null || pos == null || tintIndex != 0) {
+                return 0xFFFFFF;
+            }
+            if (level.getBlockEntity(pos) instanceof EndgameDecorativeBlockEntity blockEntity) {
+                int greenBlue = Math.round(blockEntity.galaxyTintGreenBlue() * 255.0F);
+                return 0xFF0000 | greenBlue << 8 | greenBlue;
+            }
+            return 0xFFFFFF;
+        }, dddsendgame.GALAXY_BLOCK.get());
     }
 
     @SubscribeEvent
