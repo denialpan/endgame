@@ -7,6 +7,8 @@ import com.ddd.endgame.block.EndgameControllerBlockEntity;
 import com.ddd.endgame.block.EndgameDecorativeBlock;
 import com.ddd.endgame.block.EndgameDecorativeBlockEntity;
 import com.ddd.endgame.block.EndgameSkyboxBlockItem;
+import com.ddd.endgame.block.GalaxyFreezerBlock;
+import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
 import com.ddd.endgame.item.ChunkAnnihilatorItem;
 import com.ddd.endgame.item.DayNightToggleItem;
 import com.ddd.endgame.item.EntityPurgeItem;
@@ -176,6 +178,15 @@ public class dddsendgame {
             "galaxy_block",
             () -> new EndgameSkyboxBlockItem(GALAXY_BLOCK.get(), new Item.Properties())
     );
+    public static final DeferredBlock<GalaxyFreezerBlock> GALAXY_FREEZER_BLOCK = BLOCKS.registerBlock(
+            "galaxy_freezer",
+            GalaxyFreezerBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(Blocks.OBSIDIAN)
+    );
+    public static final DeferredItem<BlockItem> GALAXY_FREEZER_ITEM = ITEMS.register(
+            "galaxy_freezer",
+            () -> new EndgameSkyboxBlockItem(GALAXY_FREEZER_BLOCK.get(), new Item.Properties())
+    );
     public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_1_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_1");
     public static final DeferredItem<BlockItem> COMPRESSED_OBSIDIAN_1_ITEM = registerBlockItem("compressed_obsidian_1", COMPRESSED_OBSIDIAN_1_BLOCK);
     public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_2_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_2");
@@ -223,9 +234,13 @@ public class dddsendgame {
                     ENDGAME_FULL_GLASS_BLOCK.get(),
                     GALAXY_BLOCK.get()
             ).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GalaxyFreezerBlockEntity>> GALAXY_FREEZER_BLOCK_ENTITY =
+            BLOCK_ENTITY_TYPES.register("galaxy_freezer", () -> BlockEntityType.Builder.of(GalaxyFreezerBlockEntity::new, GALAXY_FREEZER_BLOCK.get()).build(null));
 
     public static final DeferredHolder<MenuType<?>, MenuType<EndgameControllerMenu>> ENDGAME_CONTROLLER_MENU =
             MENU_TYPES.register("endgame_controller", () -> IMenuTypeExtension.create(EndgameControllerMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<GalaxyFreezerMenu>> GALAXY_FREEZER_MENU =
+            MENU_TYPES.register("galaxy_freezer", () -> IMenuTypeExtension.create(GalaxyFreezerMenu::new));
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> ENDGAME_TAB = CREATIVE_MODE_TABS.register("endgame_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.dddsendgame"))
@@ -239,6 +254,7 @@ public class dddsendgame {
                 output.accept(ENDGAME_EMPTY_GLASS_ITEM.get());
                 output.accept(ENDGAME_FULL_GLASS_ITEM.get());
                 output.accept(GALAXY_BLOCK_ITEM.get());
+                output.accept(GALAXY_FREEZER_ITEM.get());
                 output.accept(COMPRESSED_OBSIDIAN_1_ITEM.get());
                 output.accept(COMPRESSED_OBSIDIAN_2_ITEM.get());
                 output.accept(COMPRESSED_OBSIDIAN_3_ITEM.get());
@@ -306,6 +322,11 @@ public class dddsendgame {
                 ENDGAME_CONNECTOR_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.fluidHandler()
         );
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                GALAXY_FREEZER_BLOCK_ENTITY.get(),
+                (blockEntity, side) -> blockEntity.itemHandler()
+        );
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -321,6 +342,7 @@ public class dddsendgame {
             event.accept(ENDGAME_EMPTY_GLASS_ITEM);
             event.accept(ENDGAME_FULL_GLASS_ITEM);
             event.accept(GALAXY_BLOCK_ITEM);
+            event.accept(GALAXY_FREEZER_ITEM);
             event.accept(COMPRESSED_OBSIDIAN_1_ITEM);
             event.accept(COMPRESSED_OBSIDIAN_2_ITEM);
             event.accept(COMPRESSED_OBSIDIAN_3_ITEM);

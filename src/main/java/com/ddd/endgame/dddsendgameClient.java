@@ -96,12 +96,14 @@ public class dddsendgameClient {
                 || state.is(dddsendgame.ENDGAME_SOLID_BLOCK.get())
                 || state.is(dddsendgame.ENDGAME_GLASS_BLOCK.get())
                 || state.is(dddsendgame.ENDGAME_FULL_GLASS_BLOCK.get())
-                || state.is(dddsendgame.GALAXY_BLOCK.get());
+                || state.is(dddsendgame.GALAXY_BLOCK.get())
+                || state.is(dddsendgame.GALAXY_FREEZER_BLOCK.get());
     }
 
     @SubscribeEvent
     static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(dddsendgame.ENDGAME_CONTROLLER_MENU.get(), EndgameControllerScreen::new);
+        event.register(dddsendgame.GALAXY_FREEZER_MENU.get(), GalaxyFreezerScreen::new);
     }
 
     @SubscribeEvent
@@ -109,6 +111,7 @@ public class dddsendgameClient {
         event.registerBlockEntityRenderer(dddsendgame.ENDGAME_CONTROLLER_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
         event.registerBlockEntityRenderer(dddsendgame.ENDGAME_CONNECTOR_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
         event.registerBlockEntityRenderer(dddsendgame.ENDGAME_DECORATIVE_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(dddsendgame.GALAXY_FREEZER_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
     }
 
     @SubscribeEvent

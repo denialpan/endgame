@@ -1,0 +1,13 @@
+{
+  "parent": "minecraft:block/cube",
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "particle": "dddsendgame:block/endgame_plated",
+    "north": "dddsendgame:block/endgame_plated",
+    "south": "dddsendgame:block/endgame_plated",
+    "east": "dddsendgame:block/endgame_plated",
+    "west": "dddsendgame:block/endgame_controller_front",
+    "up": "dddsendgame:block/endgame_plated",
+    "down": "dddsendgame:block/endgame_plated"
+  }
+}
