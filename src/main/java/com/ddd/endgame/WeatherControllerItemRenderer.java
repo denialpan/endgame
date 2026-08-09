@@ -2,10 +2,6 @@ package com.ddd.endgame;
 
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
 import com.ddd.endgame.compat.RenderOptimizationCompat;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -14,34 +10,36 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRenderer {
     public static final WeatherControllerItemRenderer INSTANCE = new WeatherControllerItemRenderer();
-    private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "models/item/weather_controller.json");
     private static final ResourceLocation MASK_TEXTURE = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/item/galaxy_weather_controller.png");
+    private static final float MASK_DEPTH_OFFSET = 0.0005F;
     private static List<EndgamePortalBlockEntityRenderer.MaskQuad> cachedMaskQuads;
 
     private WeatherControllerItemRenderer() {
@@ -153,26 +151,23 @@ public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRender
         }
 
         List<EndgamePortalBlockEntityRenderer.MaskQuad> quads = new ArrayList<>();
-        Minecraft minecraft = Minecraft.getInstance();
-        Optional<Resource> modelResource = minecraft.getResourceManager().getResource(MODEL);
-        Optional<Resource> textureResource = minecraft.getResourceManager().getResource(MASK_TEXTURE);
-        if (modelResource.isEmpty() || textureResource.isEmpty()) {
+        BakedModel model = WeatherControllerModel.originalModel();
+        if (model == null) {
             cachedMaskQuads = List.of();
             return cachedMaskQuads;
         }
 
-        try (
-                InputStream modelStream = modelResource.get().open();
-                InputStreamReader reader = new InputStreamReader(modelStream, StandardCharsets.UTF_8);
-                InputStream textureStream = textureResource.get().open();
-                NativeImage image = NativeImage.read(textureStream)
-        ) {
-            JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
-            JsonArray elements = root.getAsJsonArray("elements");
-            if (elements != null) {
-                for (JsonElement elementValue : elements) {
-                    collectElementMaskQuads(quads, elementValue.getAsJsonObject(), image);
-                }
+        Optional<Resource> textureResource = Minecraft.getInstance().getResourceManager().getResource(MASK_TEXTURE);
+        if (textureResource.isEmpty()) {
+            cachedMaskQuads = List.of();
+            return cachedMaskQuads;
+        }
+
+        try (InputStream textureStream = textureResource.get().open(); NativeImage image = NativeImage.read(textureStream)) {
+            RandomSource random = RandomSource.create(42L);
+            collectBakedMaskQuads(quads, model, image, random);
+            for (BakedModel renderPass : model.getRenderPasses(ItemStack.EMPTY, true)) {
+                collectBakedMaskQuads(quads, renderPass, image, random);
             }
         } catch (IOException | IllegalStateException exception) {
             dddsendgame.LOGGER.warn("Unable to build weather controller stencil mask", exception);
@@ -182,107 +177,121 @@ public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRender
         return cachedMaskQuads;
     }
 
-    private static void collectElementMaskQuads(List<EndgamePortalBlockEntityRenderer.MaskQuad> quads, JsonObject element, NativeImage image) {
-        float[] from = vec3(element.getAsJsonArray("from"));
-        float[] to = vec3(element.getAsJsonArray("to"));
-        JsonObject rotation = element.has("rotation") ? element.getAsJsonObject("rotation") : null;
-        JsonObject faces = element.getAsJsonObject("faces");
-        if (faces == null) {
-            return;
-        }
-
-        for (String direction : faces.keySet()) {
-            JsonObject face = faces.getAsJsonObject(direction);
-            if (!"#0".equals(face.get("texture").getAsString()) || !face.has("uv")) {
-                continue;
-            }
-            collectFaceMaskQuads(quads, direction, from, to, rotation, uv(face.getAsJsonArray("uv")), image);
+    private static void collectBakedMaskQuads(List<EndgamePortalBlockEntityRenderer.MaskQuad> maskQuads, BakedModel model, NativeImage image, RandomSource random) {
+        collectBakedMaskQuads(maskQuads, model.getQuads(null, null, random, ModelData.EMPTY, null), image);
+        for (Direction direction : Direction.values()) {
+            random.setSeed(42L);
+            collectBakedMaskQuads(maskQuads, model.getQuads(null, direction, random, ModelData.EMPTY, null), image);
         }
     }
 
-    private static void collectFaceMaskQuads(List<EndgamePortalBlockEntityRenderer.MaskQuad> quads, String direction, float[] from, float[] to, JsonObject rotation, float[] uv, NativeImage image) {
-        float uMin = Math.min(uv[0], uv[2]);
-        float uMax = Math.max(uv[0], uv[2]);
-        float vMin = Math.min(uv[1], uv[3]);
-        float vMax = Math.max(uv[1], uv[3]);
-        int minX = clampPixel((int)Math.floor(uMin / 16.0F * image.getWidth()), image.getWidth());
-        int maxX = clampPixel((int)Math.ceil(uMax / 16.0F * image.getWidth()), image.getWidth());
-        int minY = clampPixel((int)Math.floor(vMin / 16.0F * image.getHeight()), image.getHeight());
-        int maxY = clampPixel((int)Math.ceil(vMax / 16.0F * image.getHeight()), image.getHeight());
+    private static void collectBakedMaskQuads(List<EndgamePortalBlockEntityRenderer.MaskQuad> maskQuads, List<BakedQuad> bakedQuads, NativeImage image) {
+        for (BakedQuad bakedQuad : bakedQuads) {
+            collectBakedMaskQuad(maskQuads, bakedQuad, image);
+        }
+    }
+
+    private static void collectBakedMaskQuad(List<EndgamePortalBlockEntityRenderer.MaskQuad> maskQuads, BakedQuad bakedQuad, NativeImage image) {
+        QuadVertex[] vertices = vertices(bakedQuad);
+        float minU = Math.min(Math.min(vertices[0].u, vertices[1].u), Math.min(vertices[2].u, vertices[3].u));
+        float maxU = Math.max(Math.max(vertices[0].u, vertices[1].u), Math.max(vertices[2].u, vertices[3].u));
+        float minV = Math.min(Math.min(vertices[0].v, vertices[1].v), Math.min(vertices[2].v, vertices[3].v));
+        float maxV = Math.max(Math.max(vertices[0].v, vertices[1].v), Math.max(vertices[2].v, vertices[3].v));
+        int minX = clampPixel((int)Math.floor(minU * image.getWidth()), image.getWidth());
+        int maxX = clampPixel((int)Math.ceil(maxU * image.getWidth()), image.getWidth());
+        int minY = clampPixel((int)Math.floor(minV * image.getHeight()), image.getHeight());
+        int maxY = clampPixel((int)Math.ceil(maxV * image.getHeight()), image.getHeight());
 
         for (int y = minY; y < maxY; y++) {
             for (int x = minX; x < maxX; x++) {
                 if (!isRedMarker(image.getPixelRGBA(x, y))) {
                     continue;
                 }
-                float u0 = x * 16.0F / image.getWidth();
-                float u1 = (x + 1) * 16.0F / image.getWidth();
-                float v0 = y * 16.0F / image.getHeight();
-                float v1 = (y + 1) * 16.0F / image.getHeight();
-                float s0 = normalized(u0, uv[0], uv[2]);
-                float s1 = normalized(u1, uv[0], uv[2]);
-                float t0 = normalized(v0, uv[1], uv[3]);
-                float t1 = normalized(v1, uv[1], uv[3]);
-                addFaceQuad(quads, direction, from, to, rotation, clamp01(s0), clamp01(t0), clamp01(s1), clamp01(t1));
+
+                float u0 = x / (float)image.getWidth();
+                float u1 = (x + 1) / (float)image.getWidth();
+                float v0 = y / (float)image.getHeight();
+                float v1 = (y + 1) / (float)image.getHeight();
+                Vector3f p0 = positionForUv(vertices, u0, v1);
+                Vector3f p1 = positionForUv(vertices, u1, v1);
+                Vector3f p2 = positionForUv(vertices, u1, v0);
+                Vector3f p3 = positionForUv(vertices, u0, v0);
+                if (p0 == null || p1 == null || p2 == null || p3 == null) {
+                    continue;
+                }
+
+                offsetSlightly(p0, p1, p2, p3);
+                maskQuads.add(new EndgamePortalBlockEntityRenderer.MaskQuad(
+                        p0.x, p0.y, p0.z,
+                        p1.x, p1.y, p1.z,
+                        p2.x, p2.y, p2.z,
+                        p3.x, p3.y, p3.z
+                ));
             }
         }
     }
 
-    private static void addFaceQuad(List<EndgamePortalBlockEntityRenderer.MaskQuad> quads, String direction, float[] from, float[] to, JsonObject rotation, float s0, float t0, float s1, float t1) {
-        Vector3f p0 = facePoint(direction, from, to, s0, t1);
-        Vector3f p1 = facePoint(direction, from, to, s1, t1);
-        Vector3f p2 = facePoint(direction, from, to, s1, t0);
-        Vector3f p3 = facePoint(direction, from, to, s0, t0);
-        rotate(p0, rotation);
-        rotate(p1, rotation);
-        rotate(p2, rotation);
-        rotate(p3, rotation);
-        quads.add(new EndgamePortalBlockEntityRenderer.MaskQuad(
-                p0.x, p0.y, p0.z,
-                p1.x, p1.y, p1.z,
-                p2.x, p2.y, p2.z,
-                p3.x, p3.y, p3.z
-        ));
+    private static QuadVertex[] vertices(BakedQuad bakedQuad) {
+        int[] packed = bakedQuad.getVertices();
+        TextureAtlasSprite sprite = bakedQuad.getSprite();
+        QuadVertex[] vertices = new QuadVertex[4];
+        for (int i = 0; i < 4; i++) {
+            int offset = i * 8;
+            vertices[i] = new QuadVertex(
+                    Float.intBitsToFloat(packed[offset]),
+                    Float.intBitsToFloat(packed[offset + 1]),
+                    Float.intBitsToFloat(packed[offset + 2]),
+                    clamp01(sprite.getUOffset(Float.intBitsToFloat(packed[offset + 4]))),
+                    clamp01(sprite.getVOffset(Float.intBitsToFloat(packed[offset + 5])))
+            );
+        }
+        return vertices;
     }
 
-    private static Vector3f facePoint(String direction, float[] from, float[] to, float s, float t) {
-        float minX = from[0] / 16.0F;
-        float minY = from[1] / 16.0F;
-        float minZ = from[2] / 16.0F;
-        float maxX = to[0] / 16.0F;
-        float maxY = to[1] / 16.0F;
-        float maxZ = to[2] / 16.0F;
-        float y = lerp(maxY, minY, t);
-
-        return switch (direction) {
-            case "north" -> new Vector3f(lerp(minX, maxX, s), y, minZ);
-            case "south" -> new Vector3f(lerp(maxX, minX, s), y, maxZ);
-            case "east" -> new Vector3f(maxX, y, lerp(minZ, maxZ, s));
-            case "west" -> new Vector3f(minX, y, lerp(maxZ, minZ, s));
-            case "up" -> new Vector3f(lerp(minX, maxX, s), maxY, lerp(maxZ, minZ, t));
-            case "down" -> new Vector3f(lerp(minX, maxX, s), minY, lerp(minZ, maxZ, t));
-            default -> new Vector3f();
-        };
+    private static Vector3f positionForUv(QuadVertex[] vertices, float u, float v) {
+        Vector3f position = positionInTriangle(vertices[0], vertices[1], vertices[2], u, v);
+        if (position != null) {
+            return position;
+        }
+        return positionInTriangle(vertices[0], vertices[2], vertices[3], u, v);
     }
 
-    private static void rotate(Vector3f point, JsonObject rotation) {
-        if (rotation == null) {
+    private static Vector3f positionInTriangle(QuadVertex a, QuadVertex b, QuadVertex c, float u, float v) {
+        float v0u = b.u - a.u;
+        float v0v = b.v - a.v;
+        float v1u = c.u - a.u;
+        float v1v = c.v - a.v;
+        float v2u = u - a.u;
+        float v2v = v - a.v;
+        float denominator = v0u * v1v - v1u * v0v;
+        if (Math.abs(denominator) < 0.000001F) {
+            return null;
+        }
+
+        float s = (v2u * v1v - v1u * v2v) / denominator;
+        float t = (v0u * v2v - v2u * v0v) / denominator;
+        if (s < -0.001F || t < -0.001F || s + t > 1.001F) {
+            return null;
+        }
+
+        float w = 1.0F - s - t;
+        return new Vector3f(
+                a.x * w + b.x * s + c.x * t,
+                a.y * w + b.y * s + c.y * t,
+                a.z * w + b.z * s + c.z * t
+        );
+    }
+
+    private static void offsetSlightly(Vector3f p0, Vector3f p1, Vector3f p2, Vector3f p3) {
+        Vector3f normal = new Vector3f(p1).sub(p0).cross(new Vector3f(p2).sub(p0));
+        if (normal.lengthSquared() <= 0.0000001F) {
             return;
         }
-        float angle = rotation.get("angle").getAsFloat();
-        if (angle == 0.0F) {
-            return;
-        }
-        float[] origin = vec3(rotation.getAsJsonArray("origin"));
-        point.sub(origin[0] / 16.0F, origin[1] / 16.0F, origin[2] / 16.0F);
-        switch (rotation.get("axis").getAsString()) {
-            case "x" -> point.rotate(Axis.XP.rotationDegrees(angle));
-            case "y" -> point.rotate(Axis.YP.rotationDegrees(angle));
-            case "z" -> point.rotate(Axis.ZP.rotationDegrees(angle));
-            default -> {
-            }
-        }
-        point.add(origin[0] / 16.0F, origin[1] / 16.0F, origin[2] / 16.0F);
+        normal.normalize().mul(MASK_DEPTH_OFFSET);
+        p0.add(normal);
+        p1.add(normal);
+        p2.add(normal);
+        p3.add(normal);
     }
 
     private static boolean isRedMarker(int pixel) {
@@ -293,19 +302,6 @@ public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRender
         return alpha > 0 && red == 255 && green == 0 && blue == 0;
     }
 
-    private static float[] vec3(JsonArray array) {
-        return new float[]{array.get(0).getAsFloat(), array.get(1).getAsFloat(), array.get(2).getAsFloat()};
-    }
-
-    private static float[] uv(JsonArray array) {
-        return new float[]{array.get(0).getAsFloat(), array.get(1).getAsFloat(), array.get(2).getAsFloat(), array.get(3).getAsFloat()};
-    }
-
-    private static float normalized(float value, float start, float end) {
-        float length = end - start;
-        return length == 0.0F ? 0.0F : (value - start) / length;
-    }
-
     private static float clamp01(float value) {
         return Math.max(0.0F, Math.min(1.0F, value));
     }
@@ -314,7 +310,6 @@ public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRender
         return Math.max(0, Math.min(size, value));
     }
 
-    private static float lerp(float start, float end, float amount) {
-        return start + (end - start) * amount;
+    private record QuadVertex(float x, float y, float z, float u, float v) {
     }
 }
