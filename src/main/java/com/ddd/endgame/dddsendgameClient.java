@@ -31,6 +31,10 @@ import com.ddd.endgame.block.EndgameDecorativeBlockEntity;
 // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
 @EventBusSubscriber(modid = dddsendgame.MODID, value = Dist.CLIENT)
 public class dddsendgameClient {
+    private static final ModelResourceLocation WEATHER_CONTROLLER_HAND_MODEL = ModelResourceLocation.standalone(
+            ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "item/weather_controller")
+    );
+
     public dddsendgameClient(ModContainer container) {
         // Allows NeoForge to create a config screen for this mod's configs.
         // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking on config.
@@ -133,6 +137,11 @@ public class dddsendgameClient {
     }
 
     @SubscribeEvent
+    static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
+        event.register(WEATHER_CONTROLLER_HAND_MODEL);
+    }
+
+    @SubscribeEvent
     static void wrapGalaxyIngotModel(ModelEvent.ModifyBakingResult event) {
         ModelResourceLocation location = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "galaxy_ingot"));
         BakedModel original = event.getModels().get(location);
@@ -142,8 +151,9 @@ public class dddsendgameClient {
 
         ModelResourceLocation weatherLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "weather_cycler"));
         BakedModel weatherOriginal = event.getModels().get(weatherLocation);
+        BakedModel weatherController = event.getModels().get(WEATHER_CONTROLLER_HAND_MODEL);
         if (weatherOriginal != null && !(weatherOriginal instanceof WeatherControllerModel)) {
-            event.getModels().put(weatherLocation, new WeatherControllerModel(weatherOriginal));
+            event.getModels().put(weatherLocation, new WeatherControllerModel(weatherOriginal, weatherController));
         }
     }
 }

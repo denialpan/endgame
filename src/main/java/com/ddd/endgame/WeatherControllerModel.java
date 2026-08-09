@@ -6,15 +6,21 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.neoforged.neoforge.client.model.BakedModelWrapper;
 
 public class WeatherControllerModel extends BakedModelWrapper<BakedModel> {
-    private static BakedModel originalModel;
+    private static BakedModel inventoryModel;
+    private static BakedModel handModel;
 
-    public WeatherControllerModel(BakedModel originalModel) {
-        super(originalModel);
-        WeatherControllerModel.originalModel = originalModel;
+    public WeatherControllerModel(BakedModel inventoryModel, BakedModel handModel) {
+        super(inventoryModel);
+        WeatherControllerModel.inventoryModel = inventoryModel;
+        WeatherControllerModel.handModel = handModel;
     }
 
-    public static BakedModel originalModel() {
-        return originalModel;
+    public static BakedModel inventoryModel() {
+        return inventoryModel;
+    }
+
+    public static BakedModel handModel() {
+        return handModel;
     }
 
     @Override
@@ -24,7 +30,10 @@ public class WeatherControllerModel extends BakedModelWrapper<BakedModel> {
 
     @Override
     public BakedModel applyTransform(ItemDisplayContext cameraTransformType, PoseStack poseStack, boolean applyLeftHandTransform) {
-        originalModel.applyTransform(cameraTransformType, poseStack, applyLeftHandTransform);
+        BakedModel model = cameraTransformType == ItemDisplayContext.GUI ? inventoryModel : handModel;
+        if (model != null) {
+            model.applyTransform(cameraTransformType, poseStack, applyLeftHandTransform);
+        }
         return this;
     }
 }

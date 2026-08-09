@@ -50,8 +50,16 @@ public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRender
     @Override
     public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
         RenderOptimizationCompat.beforeSkyboxItemRender(displayContext);
-        renderOriginalModel(stack, poseStack, buffer, packedLight, packedOverlay);
+        BakedModel model = displayContext == ItemDisplayContext.GUI
+                ? WeatherControllerModel.inventoryModel()
+                : WeatherControllerModel.handModel();
+        renderModel(model, stack, poseStack, buffer, packedLight, packedOverlay);
         flushItemBuffers(buffer);
+
+        if (displayContext == ItemDisplayContext.GUI) {
+            RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
+            return;
+        }
 
         List<EndgamePortalBlockEntityRenderer.MaskQuad> quads = maskQuads();
         if (displayContext == ItemDisplayContext.GROUND) {
@@ -64,8 +72,7 @@ public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRender
         RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
     }
 
-    private static void renderOriginalModel(ItemStack stack, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
-        BakedModel model = WeatherControllerModel.originalModel();
+    private static void renderModel(BakedModel model, ItemStack stack, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
         if (model == null) {
             return;
         }
@@ -152,7 +159,7 @@ public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRender
         }
 
         List<EndgamePortalBlockEntityRenderer.MaskQuad> quads = new ArrayList<>();
-        BakedModel model = WeatherControllerModel.originalModel();
+        BakedModel model = WeatherControllerModel.handModel();
         if (model == null) {
             cachedMaskQuads = List.of();
             return cachedMaskQuads;

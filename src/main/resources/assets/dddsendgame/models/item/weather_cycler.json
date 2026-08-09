@@ -1,3 +1,6 @@
 {
-  "parent": "dddsendgame:item/weather_controller"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "dddsendgame:item/galaxy_weather_2d"
+  }
 }
