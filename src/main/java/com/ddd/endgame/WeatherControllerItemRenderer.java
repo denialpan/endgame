@@ -40,6 +40,7 @@ public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRender
     public static final WeatherControllerItemRenderer INSTANCE = new WeatherControllerItemRenderer();
     private static final ResourceLocation MASK_TEXTURE = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/item/galaxy_weather_controller.png");
     private static final float MASK_DEPTH_OFFSET = 0.0005F;
+    private static final float MASK_EDGE_OVERLAP = 0.0015F;
     private static List<EndgamePortalBlockEntityRenderer.MaskQuad> cachedMaskQuads;
 
     private WeatherControllerItemRenderer() {
@@ -220,6 +221,7 @@ public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRender
                     continue;
                 }
 
+                expandInPlaneSlightly(p0, p1, p2, p3);
                 offsetSlightly(p0, p1, p2, p3);
                 maskQuads.add(new EndgamePortalBlockEntityRenderer.MaskQuad(
                         p0.x, p0.y, p0.z,
@@ -280,6 +282,21 @@ public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRender
                 a.y * w + b.y * s + c.y * t,
                 a.z * w + b.z * s + c.z * t
         );
+    }
+
+    private static void expandInPlaneSlightly(Vector3f p0, Vector3f p1, Vector3f p2, Vector3f p3) {
+        Vector3f u = new Vector3f(p1).sub(p0);
+        Vector3f v = new Vector3f(p3).sub(p0);
+        if (u.lengthSquared() <= 0.0000001F || v.lengthSquared() <= 0.0000001F) {
+            return;
+        }
+
+        u.normalize().mul(MASK_EDGE_OVERLAP);
+        v.normalize().mul(MASK_EDGE_OVERLAP);
+        p0.sub(u).sub(v);
+        p1.add(u).sub(v);
+        p2.add(u).add(v);
+        p3.sub(u).add(v);
     }
 
     private static void offsetSlightly(Vector3f p0, Vector3f p1, Vector3f p2, Vector3f p3) {
