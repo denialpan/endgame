@@ -139,5 +139,11 @@ public class dddsendgameClient {
         if (original != null && !(original instanceof GalaxyIngotGeneratedModel)) {
             event.getModels().put(location, new GalaxyIngotGeneratedModel(original));
         }
+
+        ModelResourceLocation weatherLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "weather_cycler"));
+        BakedModel weatherOriginal = event.getModels().get(weatherLocation);
+        if (weatherOriginal != null && !(weatherOriginal instanceof WeatherControllerModel)) {
+            event.getModels().put(weatherLocation, new WeatherControllerModel(weatherOriginal));
+        }
     }
 }

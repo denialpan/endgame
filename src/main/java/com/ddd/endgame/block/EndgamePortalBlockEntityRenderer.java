@@ -270,6 +270,21 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         ITEM_WINDOW_MASKS.add(new PixelWindowMask(itemPose, transformedUnitCubeBounds(itemPose), pixels, pixelCount, frontZ, backZ, greenBlue));
     }
 
+    public static void registerMeshWindowMask(Matrix4f pose, List<MaskQuad> quads, float greenBlue) {
+        if (!Config.DROPPED_ITEM_WINDOWS.getAsBoolean() || IrisCompat.isRenderingShadowPass() || quads.isEmpty()) {
+            return;
+        }
+
+        Matrix4f itemPose = new Matrix4f(pose);
+        if (tooFar(transformedUnitCubeBounds(itemPose))) {
+            return;
+        }
+        if (!ITEM_WINDOW_MASK_KEYS.add(MatrixKey.from(itemPose))) {
+            return;
+        }
+        ITEM_WINDOW_MASKS.add(new MeshWindowMask(itemPose, transformedUnitCubeBounds(itemPose), quads, greenBlue));
+    }
+
     public static int lastBlockEntityWindowsQueued() {
         return lastBlockEntityWindowsQueued;
     }
@@ -635,6 +650,13 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         builder.addVertex(pose, minX, minY, backZ);
     }
 
+    public static void appendMaskQuad(BufferBuilder builder, Matrix4f pose, MaskQuad quad) {
+        builder.addVertex(pose, quad.x0(), quad.y0(), quad.z0());
+        builder.addVertex(pose, quad.x1(), quad.y1(), quad.z1());
+        builder.addVertex(pose, quad.x2(), quad.y2(), quad.z2());
+        builder.addVertex(pose, quad.x3(), quad.y3(), quad.z3());
+    }
+
     private static void renderSkyboxCube(Matrix4f pose) {
         renderSkyboxCube(pose, SKYBOX_SIZE);
     }
@@ -761,6 +783,35 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
                 }
             }
         }
+    }
+
+    private record MeshWindowMask(Matrix4f pose, AABB cameraRelativeBounds, List<MaskQuad> quads, float tintGreenBlue) implements WindowMask {
+        @Override
+        public AABB worldBounds(Vec3 cameraPosition) {
+            return new AABB(
+                    cameraRelativeBounds.minX + cameraPosition.x,
+                    cameraRelativeBounds.minY + cameraPosition.y,
+                    cameraRelativeBounds.minZ + cameraPosition.z,
+                    cameraRelativeBounds.maxX + cameraPosition.x,
+                    cameraRelativeBounds.maxY + cameraPosition.y,
+                    cameraRelativeBounds.maxZ + cameraPosition.z
+            );
+        }
+
+        @Override
+        public void append(BufferBuilder builder, float min, float max) {
+            for (MaskQuad quad : this.quads) {
+                appendMaskQuad(builder, this.pose, quad);
+            }
+        }
+    }
+
+    public record MaskQuad(
+            float x0, float y0, float z0,
+            float x1, float y1, float z1,
+            float x2, float y2, float z2,
+            float x3, float y3, float z3
+    ) {
     }
 
     private static class StaticWorldWindowMask implements WindowMask {
