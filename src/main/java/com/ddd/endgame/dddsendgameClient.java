@@ -149,6 +149,12 @@ public class dddsendgameClient {
             event.getModels().put(location, new GalaxyIngotGeneratedModel(original));
         }
 
+        ModelResourceLocation dayLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "day_night_toggle"));
+        BakedModel dayOriginal = event.getModels().get(dayLocation);
+        if (dayOriginal != null && !(dayOriginal instanceof DayControllerModel)) {
+            event.getModels().put(dayLocation, new DayControllerModel(dayOriginal));
+        }
+
         ModelResourceLocation weatherLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "weather_cycler"));
         BakedModel weatherOriginal = event.getModels().get(weatherLocation);
         BakedModel weatherController = event.getModels().get(WEATHER_CONTROLLER_HAND_MODEL);
