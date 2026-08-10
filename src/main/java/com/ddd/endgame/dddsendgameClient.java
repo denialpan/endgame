@@ -155,6 +155,18 @@ public class dddsendgameClient {
             event.getModels().put(dayLocation, new DayControllerModel(dayOriginal));
         }
 
+        ModelResourceLocation mobAnnihilatorLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "entity_purge_core"));
+        BakedModel mobAnnihilatorOriginal = event.getModels().get(mobAnnihilatorLocation);
+        if (mobAnnihilatorOriginal != null && !(mobAnnihilatorOriginal instanceof MobAnnihilatorModel)) {
+            event.getModels().put(mobAnnihilatorLocation, new MobAnnihilatorModel(mobAnnihilatorOriginal));
+        }
+
+        ModelResourceLocation realityShifterLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "reality_restorer"));
+        BakedModel realityShifterOriginal = event.getModels().get(realityShifterLocation);
+        if (realityShifterOriginal != null && !(realityShifterOriginal instanceof RealityShifterModel)) {
+            event.getModels().put(realityShifterLocation, new RealityShifterModel(realityShifterOriginal));
+        }
+
         ModelResourceLocation weatherLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "weather_cycler"));
         BakedModel weatherOriginal = event.getModels().get(weatherLocation);
         BakedModel weatherController = event.getModels().get(WEATHER_CONTROLLER_HAND_MODEL);

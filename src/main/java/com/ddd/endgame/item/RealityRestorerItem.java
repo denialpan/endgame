@@ -1,7 +1,9 @@
 package com.ddd.endgame.item;
 
+import com.ddd.endgame.RealityShifterItemRenderer;
 import com.ddd.endgame.dddsendgame;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -43,12 +45,14 @@ import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class RealityRestorerItem extends Item {
@@ -362,5 +366,15 @@ public class RealityRestorerItem extends Item {
         for (Entity entity : entities) {
             entity.remove(Entity.RemovalReason.DISCARDED);
         }
+    }
+
+    @Override
+    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
+        consumer.accept(new IClientItemExtensions() {
+            @Override
+            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+                return RealityShifterItemRenderer.INSTANCE;
+            }
+        });
     }
 }
