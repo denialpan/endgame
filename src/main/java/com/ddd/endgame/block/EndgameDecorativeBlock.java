@@ -50,7 +50,7 @@ public class EndgameDecorativeBlock extends BaseEntityBlock {
         }
 
         if (level.getBlockEntity(pos) instanceof EndgameDecorativeBlockEntity blockEntity) {
-            blockEntity.setGalaxyInstabilityTicks(GalaxyInstability.ticks(stack));
+            blockEntity.setGalaxyInstabilityTicks(GalaxyInstability.carriedTicks(stack, placer));
         }
     }
 

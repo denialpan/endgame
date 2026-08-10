@@ -64,7 +64,7 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
         RenderOptimizationCompat.beforeSkyboxItemRender(displayContext);
         PixelMasks masks = pixelMasks();
         float greenBlue = greenBlueSupplier.apply(stack);
-        renderOriginalGeneratedModel(stack, poseStack, buffer, packedLight, packedOverlay, greenBlue);
+        renderOriginalGeneratedModel(stack, displayContext, poseStack, buffer, packedLight, packedOverlay, greenBlue);
         flushItemBuffers(buffer);
 
         boolean[][] stencil = masks.stencil();
@@ -78,34 +78,35 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
         RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
     }
 
-    private void renderOriginalGeneratedModel(ItemStack stack, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, float greenBlue) {
+    private void renderOriginalGeneratedModel(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, float greenBlue) {
         BakedModel model = originalModel.get();
         if (model == null || GeneratedStencilItemShader.shader() == null) {
             return;
         }
 
         RenderSystem.setShaderColor(1.0F, greenBlue, greenBlue, 1.0F);
+        RenderType renderType = GeneratedStencilItemShader.renderType(displayContext == ItemDisplayContext.GROUND);
         for (BakedModel renderPass : model.getRenderPasses(stack, true)) {
-            renderModelLists(renderPass, stack, packedLight, packedOverlay, poseStack, buffer, greenBlue);
+            renderModelLists(renderPass, stack, packedLight, packedOverlay, poseStack, buffer, greenBlue, renderType);
         }
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    private static void renderModelLists(BakedModel model, ItemStack stack, int packedLight, int packedOverlay, PoseStack poseStack, MultiBufferSource buffer, float greenBlue) {
+    private static void renderModelLists(BakedModel model, ItemStack stack, int packedLight, int packedOverlay, PoseStack poseStack, MultiBufferSource buffer, float greenBlue, RenderType renderType) {
         RandomSource randomSource = RandomSource.create();
         for (Direction direction : Direction.values()) {
             randomSource.setSeed(42L);
-            renderQuadList(poseStack, buffer, model.getQuads(null, direction, randomSource), stack, packedLight, packedOverlay, greenBlue);
+            renderQuadList(poseStack, buffer, model.getQuads(null, direction, randomSource), stack, packedLight, packedOverlay, greenBlue, renderType);
         }
 
         randomSource.setSeed(42L);
-        renderQuadList(poseStack, buffer, model.getQuads(null, null, randomSource), stack, packedLight, packedOverlay, greenBlue);
+        renderQuadList(poseStack, buffer, model.getQuads(null, null, randomSource), stack, packedLight, packedOverlay, greenBlue, renderType);
     }
 
-    private static void renderQuadList(PoseStack poseStack, MultiBufferSource buffer, java.util.List<BakedQuad> quads, ItemStack stack, int packedLight, int packedOverlay, float greenBlue) {
+    private static void renderQuadList(PoseStack poseStack, MultiBufferSource buffer, java.util.List<BakedQuad> quads, ItemStack stack, int packedLight, int packedOverlay, float greenBlue, RenderType renderType) {
         ItemColors itemColors = Minecraft.getInstance().getItemColors();
         PoseStack.Pose pose = poseStack.last();
-        var consumer = GalaxyInstabilityTint.wrap(ItemRenderer.getFoilBufferDirect(buffer, GeneratedStencilItemShader.renderType(), true, stack.hasFoil()), greenBlue);
+        var consumer = GalaxyInstabilityTint.wrap(buffer.getBuffer(renderType), greenBlue);
         for (BakedQuad quad : quads) {
             int color = -1;
             if (!stack.isEmpty() && quad.isTinted()) {

@@ -16,13 +16,8 @@ import java.io.IOException;
 public final class GeneratedStencilItemShader {
     private static ShaderInstance shader;
     private static final RenderStateShard.ShaderStateShard SHADER_STATE = new RenderStateShard.ShaderStateShard(GeneratedStencilItemShader::shader);
-    private static final RenderType RENDER_TYPE = RenderType.create(
+    private static final RenderType MAIN_TARGET_RENDER_TYPE = createRenderType(
             dddsendgame.MODID + ":generated_stencil_item",
-            DefaultVertexFormat.BLOCK,
-            com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS,
-            1536,
-            true,
-            true,
             RenderType.CompositeState.builder()
                     .setShaderState(SHADER_STATE)
                     .setTextureState(RenderStateShard.BLOCK_SHEET)
@@ -32,6 +27,30 @@ public final class GeneratedStencilItemShader {
                     .setWriteMaskState(RenderStateShard.COLOR_DEPTH_WRITE)
                     .createCompositeState(true)
     );
+    private static final RenderType ITEM_ENTITY_TARGET_RENDER_TYPE = createRenderType(
+            dddsendgame.MODID + ":generated_stencil_item_entity",
+            RenderType.CompositeState.builder()
+                    .setShaderState(SHADER_STATE)
+                    .setTextureState(RenderStateShard.BLOCK_SHEET)
+                    .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                    .setOutputState(RenderStateShard.ITEM_ENTITY_TARGET)
+                    .setLightmapState(RenderStateShard.LIGHTMAP)
+                    .setOverlayState(RenderStateShard.OVERLAY)
+                    .setWriteMaskState(RenderStateShard.COLOR_DEPTH_WRITE)
+                    .createCompositeState(true)
+    );
+
+    private static RenderType createRenderType(String name, RenderType.CompositeState state) {
+        return RenderType.create(
+            name,
+            DefaultVertexFormat.BLOCK,
+            com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS,
+            1536,
+            true,
+            true,
+            state
+        );
+    }
 
     private GeneratedStencilItemShader() {
     }
@@ -52,7 +71,7 @@ public final class GeneratedStencilItemShader {
         return shader;
     }
 
-    public static RenderType renderType() {
-        return RENDER_TYPE;
+    public static RenderType renderType(boolean itemEntityTarget) {
+        return itemEntityTarget ? ITEM_ENTITY_TARGET_RENDER_TYPE : MAIN_TARGET_RENDER_TYPE;
     }
 }

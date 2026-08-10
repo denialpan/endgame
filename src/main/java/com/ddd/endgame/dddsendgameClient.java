@@ -16,6 +16,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
@@ -52,6 +53,11 @@ public class dddsendgameClient {
         NeoForge.EVENT_BUS.addListener(dddsendgameClient::onRenderLevelStage);
         NeoForge.EVENT_BUS.addListener(dddsendgameClient::onRenderBlockHighlight);
         NeoForge.EVENT_BUS.addListener(dddsendgameClient::onMouseScrolled);
+        NeoForge.EVENT_BUS.addListener(dddsendgameClient::onClientTick);
+    }
+
+    private static void onClientTick(ClientTickEvent.Post event) {
+        GalaxyInstabilityVisuals.clientTick();
     }
 
     private static void onMouseScrolled(InputEvent.MouseScrollingEvent event) {

@@ -40,6 +40,7 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         float greenBlue = GalaxyInstabilityVisuals.tintGreenBlue(stack);
         renderStencilWindow(displayContext, poseStack, greenBlue);
         renderBlockModel(blockItem.getBlock(), stack, poseStack, buffer, packedLight, packedOverlay);
+        flushItemBuffers(buffer);
         RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
     }
 
@@ -49,6 +50,12 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
         dispatcher.renderSingleBlock(block.defaultBlockState(), poseStack, GalaxyInstabilityTint.wrap(buffer, greenBlue), packedLight, packedOverlay);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    private static void flushItemBuffers(MultiBufferSource buffer) {
+        if (buffer instanceof MultiBufferSource.BufferSource bufferSource) {
+            bufferSource.endBatch();
+        }
     }
 
     private static void renderStencilWindow(ItemDisplayContext displayContext, PoseStack poseStack, float greenBlue) {

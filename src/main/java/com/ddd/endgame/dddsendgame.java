@@ -35,6 +35,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.DebugStickState;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -93,7 +94,7 @@ public class dddsendgame {
     );
     public static final DeferredItem<Item> ENDGAME_TEST_STICK = ITEMS.register(
             "endgame_test_stick",
-            () -> new EndgameTestStickItem(new Item.Properties().stacksTo(1))
+            () -> new EndgameTestStickItem(new Item.Properties().stacksTo(1).component(net.minecraft.core.component.DataComponents.DEBUG_STICK_STATE, DebugStickState.EMPTY))
     );
     public static final DeferredItem<Item> WEATHER_CYCLER = ITEMS.register(
             "weather_cycler",

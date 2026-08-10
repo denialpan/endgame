@@ -749,7 +749,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
 
         @Override
         public float tintGreenBlue() {
-            return 1.0F;
+            return this.tintGreenBlue;
         }
     }
 

@@ -4,6 +4,7 @@ import com.ddd.endgame.EndgameTestStickItemRenderer;
 import com.ddd.endgame.dddsendgame;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -13,10 +14,12 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 import java.util.List;
@@ -49,7 +52,7 @@ public class EndgameTestStickItem extends Item {
             case REALITY_SHIFTER -> dddsendgame.REALITY_RESTORER.get().use(level, player, usedHand);
             case NOCLIP -> dddsendgame.SPECTATOR_PHASE_CORE.get().use(level, player, usedHand);
             case CHUNK_ANNIHILATOR -> dddsendgame.CHUNK_ANNIHILATOR.get().use(level, player, usedHand);
-            case BLOCK_FABRICATOR -> InteractionResultHolder.pass(stack);
+            case BLOCK_FABRICATOR, DEBUG_STICK -> InteractionResultHolder.pass(stack);
         };
     }
 
@@ -58,7 +61,19 @@ public class EndgameTestStickItem extends Item {
         if (mode(context.getItemInHand()) == Mode.BLOCK_FABRICATOR) {
             return dddsendgame.RANDOM_BLOCK_PLACER.get().useOn(context);
         }
+        if (mode(context.getItemInHand()) == Mode.DEBUG_STICK) {
+            return Items.DEBUG_STICK.useOn(context);
+        }
         return super.useOn(context);
+    }
+
+    @Override
+    public boolean canAttackBlock(BlockState state, Level level, BlockPos pos, Player player) {
+        ItemStack stack = player.getMainHandItem();
+        if (stack.is(this) && mode(stack) == Mode.DEBUG_STICK) {
+            return Items.DEBUG_STICK.canAttackBlock(state, level, pos, player);
+        }
+        return super.canAttackBlock(state, level, pos, player);
     }
 
     public static Mode mode(ItemStack stack) {
@@ -93,7 +108,8 @@ public class EndgameTestStickItem extends Item {
         BLOCK_FABRICATOR("item.dddsendgame.random_block_placer"),
         REALITY_SHIFTER("item.dddsendgame.reality_restorer"),
         NOCLIP("item.dddsendgame.spectator_phase_core"),
-        CHUNK_ANNIHILATOR("item.dddsendgame.chunk_annihilator");
+        CHUNK_ANNIHILATOR("item.dddsendgame.chunk_annihilator"),
+        DEBUG_STICK("item.minecraft.debug_stick");
 
         private static final Mode[] VALUES = values();
         private final String translationKey;
