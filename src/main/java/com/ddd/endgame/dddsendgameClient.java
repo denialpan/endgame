@@ -185,6 +185,12 @@ public class dddsendgameClient {
             event.getModels().put(chunkAnnihilatorLocation, new ChunkAnnihilatorModel(chunkAnnihilatorOriginal));
         }
 
+        ModelResourceLocation endgameTestStickLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "endgame_test_stick"));
+        BakedModel endgameTestStickOriginal = event.getModels().get(endgameTestStickLocation);
+        if (endgameTestStickOriginal != null && !(endgameTestStickOriginal instanceof EndgameTestStickModel)) {
+            event.getModels().put(endgameTestStickLocation, new EndgameTestStickModel(endgameTestStickOriginal));
+        }
+
         ModelResourceLocation weatherLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "weather_cycler"));
         BakedModel weatherOriginal = event.getModels().get(weatherLocation);
         BakedModel weatherController = event.getModels().get(WEATHER_CONTROLLER_HAND_MODEL);

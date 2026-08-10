@@ -12,6 +12,7 @@ import com.ddd.endgame.block.GalaxyFreezerBlock;
 import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
 import com.ddd.endgame.item.ChunkAnnihilatorItem;
 import com.ddd.endgame.item.DayNightToggleItem;
+import com.ddd.endgame.item.EndgameTestStickItem;
 import com.ddd.endgame.item.EntityPurgeItem;
 import com.ddd.endgame.item.GalaxyIngotItem;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
@@ -89,7 +90,10 @@ public class dddsendgame {
             "galaxy_ingot",
             () -> new GalaxyIngotItem(new Item.Properties())
     );
-    public static final DeferredItem<Item> ENDGAME_TEST_STICK = ITEMS.registerSimpleItem("endgame_test_stick", new Item.Properties().stacksTo(1));
+    public static final DeferredItem<Item> ENDGAME_TEST_STICK = ITEMS.register(
+            "endgame_test_stick",
+            () -> new EndgameTestStickItem(new Item.Properties().stacksTo(1))
+    );
     public static final DeferredItem<Item> WEATHER_CYCLER = ITEMS.register(
             "weather_cycler",
             () -> new WeatherCycleItem(new Item.Properties().stacksTo(1))
