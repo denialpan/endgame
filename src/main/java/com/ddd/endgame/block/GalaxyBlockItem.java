@@ -24,4 +24,9 @@ public class GalaxyBlockItem extends EndgameSkyboxBlockItem {
     public boolean onEntityItemUpdate(ItemStack stack, ItemEntity entity) {
         return GalaxyInstability.tickDroppedStack(stack, entity);
     }
+
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        return true;
+    }
 }

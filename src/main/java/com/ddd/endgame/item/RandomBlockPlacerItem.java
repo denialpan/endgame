@@ -49,6 +49,11 @@ public class RandomBlockPlacerItem extends Item {
     }
 
     @Override
+    public boolean isFoil(ItemStack stack) {
+        return true;
+    }
+
+    @Override
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
         BlockPlaceContext placeContext = new BlockPlaceContext(context);
