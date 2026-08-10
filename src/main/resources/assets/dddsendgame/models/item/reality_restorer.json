@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "dddsendgame:item/galaxy_reality_shifter_clean"
+    "layer0": "dddsendgame:item/galaxy_reality_shifter"
   }
 }

@@ -167,6 +167,24 @@ public class dddsendgameClient {
             event.getModels().put(realityShifterLocation, new RealityShifterModel(realityShifterOriginal));
         }
 
+        ModelResourceLocation freeFlightLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "survival_flight_core"));
+        BakedModel freeFlightOriginal = event.getModels().get(freeFlightLocation);
+        if (freeFlightOriginal != null && !(freeFlightOriginal instanceof FreeFlightModel)) {
+            event.getModels().put(freeFlightLocation, new FreeFlightModel(freeFlightOriginal));
+        }
+
+        ModelResourceLocation noclipLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "spectator_phase_core"));
+        BakedModel noclipOriginal = event.getModels().get(noclipLocation);
+        if (noclipOriginal != null && !(noclipOriginal instanceof NoclipModel)) {
+            event.getModels().put(noclipLocation, new NoclipModel(noclipOriginal));
+        }
+
+        ModelResourceLocation chunkAnnihilatorLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "chunk_annihilator"));
+        BakedModel chunkAnnihilatorOriginal = event.getModels().get(chunkAnnihilatorLocation);
+        if (chunkAnnihilatorOriginal != null && !(chunkAnnihilatorOriginal instanceof ChunkAnnihilatorModel)) {
+            event.getModels().put(chunkAnnihilatorLocation, new ChunkAnnihilatorModel(chunkAnnihilatorOriginal));
+        }
+
         ModelResourceLocation weatherLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "weather_cycler"));
         BakedModel weatherOriginal = event.getModels().get(weatherLocation);
         BakedModel weatherController = event.getModels().get(WEATHER_CONTROLLER_HAND_MODEL);

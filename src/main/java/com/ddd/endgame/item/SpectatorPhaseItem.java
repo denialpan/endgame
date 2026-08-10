@@ -1,7 +1,9 @@
 package com.ddd.endgame.item;
 
+import com.ddd.endgame.NoclipItemRenderer;
 import com.ddd.endgame.dddsendgame;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,8 +14,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class SpectatorPhaseItem extends Item {
     private static final int COOLDOWN_TICKS = 20;
@@ -37,5 +41,15 @@ public class SpectatorPhaseItem extends Item {
         dddsendgame.startSpectatorPhase(serverPlayer);
         player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
         return InteractionResultHolder.consume(stack);
+    }
+
+    @Override
+    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
+        consumer.accept(new IClientItemExtensions() {
+            @Override
+            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+                return NoclipItemRenderer.INSTANCE;
+            }
+        });
     }
 }

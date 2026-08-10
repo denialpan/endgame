@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "dddsendgame:item/galaxy_mob_annihilator_clean"
+    "layer0": "dddsendgame:item/galaxy_mob_annihilator"
   }
 }
