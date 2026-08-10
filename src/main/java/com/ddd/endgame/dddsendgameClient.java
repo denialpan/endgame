@@ -16,6 +16,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
@@ -25,6 +26,7 @@ import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import com.ddd.endgame.block.EndgameDecorativeBlockEntity;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = dddsendgame.MODID, dist = Dist.CLIENT)
@@ -49,6 +51,26 @@ public class dddsendgameClient {
         dddsendgame.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
         NeoForge.EVENT_BUS.addListener(dddsendgameClient::onRenderLevelStage);
         NeoForge.EVENT_BUS.addListener(dddsendgameClient::onRenderBlockHighlight);
+        NeoForge.EVENT_BUS.addListener(dddsendgameClient::onMouseScrolled);
+    }
+
+    private static void onMouseScrolled(InputEvent.MouseScrollingEvent event) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null || minecraft.screen != null || !minecraft.player.isShiftKeyDown()) {
+            return;
+        }
+        if (!minecraft.player.getMainHandItem().is(dddsendgame.ENDGAME_TEST_STICK.get())
+                && !minecraft.player.getOffhandItem().is(dddsendgame.ENDGAME_TEST_STICK.get())) {
+            return;
+        }
+
+        double scroll = event.getScrollDeltaY();
+        if (scroll == 0.0D) {
+            return;
+        }
+
+        PacketDistributor.sendToServer(new EndgameTestStickModePayload(scroll > 0.0D ? 1 : -1));
+        event.setCanceled(true);
     }
 
     private static void onRenderLevelStage(RenderLevelStageEvent event) {

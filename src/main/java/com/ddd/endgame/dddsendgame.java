@@ -57,6 +57,7 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -292,6 +293,7 @@ public class dddsendgame {
     public dddsendgame(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerCapabilities);
+        modEventBus.addListener(this::registerPayloads);
 
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
@@ -330,6 +332,14 @@ public class dddsendgame {
                 Capabilities.ItemHandler.BLOCK,
                 GALAXY_FREEZER_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.itemHandler()
+        );
+    }
+
+    private void registerPayloads(RegisterPayloadHandlersEvent event) {
+        event.registrar("1").playToServer(
+                EndgameTestStickModePayload.TYPE,
+                EndgameTestStickModePayload.STREAM_CODEC,
+                EndgameTestStickModePayload::handle
         );
     }
 
