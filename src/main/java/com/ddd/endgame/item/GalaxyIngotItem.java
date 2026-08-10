@@ -2,11 +2,14 @@ package com.ddd.endgame.item;
 
 import com.ddd.endgame.GalaxyIngotItemRenderer;
 import com.ddd.endgame.GalaxyInstability;
+import com.ddd.endgame.GalaxyTooltip;
+import java.util.List;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
@@ -32,6 +35,11 @@ public class GalaxyIngotItem extends Item {
     @Override
     public boolean isFoil(ItemStack stack) {
         return true;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<net.minecraft.network.chat.Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        tooltipComponents.add(GalaxyTooltip.rainbow("unstable cosmic matter"));
     }
 
     @Override
