@@ -1,10 +1,12 @@
 package com.ddd.endgame;
 
 import com.ddd.endgame.item.RandomBlockPlacerItem;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -31,7 +33,7 @@ public class RandomBlockPlacerItemRenderer extends BlockEntityWithoutLevelRender
         if (!(item instanceof BlockItem blockItem)) {
             poseStack.pushPose();
             poseStack.translate(0.5F, 0.5F, 0.5F);
-            minecraft.getItemRenderer().renderStatic(new ItemStack(item), ItemDisplayContext.NONE, packedLight, packedOverlay, poseStack, buffer, minecraft.level, 0);
+            renderSelectedItemModel(minecraft, new ItemStack(item), displayContext, poseStack, buffer, packedLight, packedOverlay);
             poseStack.popPose();
             return;
         }
@@ -45,6 +47,22 @@ public class RandomBlockPlacerItemRenderer extends BlockEntityWithoutLevelRender
         applyBlockDisplayTransform(displayContext, poseStack);
         minecraft.getBlockRenderer().renderSingleBlock(state, poseStack, buffer, packedLight, packedOverlay);
         poseStack.popPose();
+    }
+
+    private static void renderSelectedItemModel(Minecraft minecraft, ItemStack selectedStack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        BakedModel selectedModel = minecraft.getItemRenderer().getModel(selectedStack, minecraft.level, null, 0);
+        boolean flatGuiLighting = displayContext == ItemDisplayContext.GUI && !selectedModel.usesBlockLight();
+        if (flatGuiLighting) {
+            Lighting.setupForFlatItems();
+        }
+
+        minecraft.getItemRenderer().renderStatic(selectedStack, ItemDisplayContext.NONE, packedLight, packedOverlay, poseStack, buffer, minecraft.level, 0);
+        if (flatGuiLighting) {
+            if (buffer instanceof MultiBufferSource.BufferSource bufferSource) {
+                bufferSource.endBatch();
+            }
+            Lighting.setupFor3DItems();
+        }
     }
 
     private static void applyBlockDisplayTransform(ItemDisplayContext displayContext, PoseStack poseStack) {
