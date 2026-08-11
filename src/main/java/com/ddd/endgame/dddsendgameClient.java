@@ -150,7 +150,7 @@ public class dddsendgameClient {
             galaxyHotbarNameTimer = (int)(40.0D * minecraft.options.notificationDisplayTime().get());
             lastGalaxyHotbarItem = selected.getItem();
             lastGalaxyHotbarName = hoverName;
-        } else if (galaxyHotbarNameTimer > 0) {
+        } else if (!minecraft.isPaused() && galaxyHotbarNameTimer > 0) {
             galaxyHotbarNameTimer--;
         }
     }
