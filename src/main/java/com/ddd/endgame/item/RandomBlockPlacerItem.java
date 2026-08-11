@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -83,6 +84,21 @@ public class RandomBlockPlacerItem extends Item {
             return extractSelectedStack(level, player, stack)
                     ? InteractionResult.sidedSuccess(level.isClientSide)
                     : InteractionResult.FAIL;
+        }
+
+        ItemStack selectedStack = selectedItemStack(stack, Integer.MAX_VALUE);
+        if (!selectedStack.isEmpty()) {
+            UseOnContext selectedContext = new UseOnContext(
+                    level,
+                    player,
+                    context.getHand(),
+                    selectedStack,
+                    new BlockHitResult(context.getClickLocation(), context.getClickedFace(), context.getClickedPos(), context.isInside())
+            );
+            InteractionResult selectedResult = selectedStack.useOn(selectedContext);
+            if (selectedResult != InteractionResult.PASS) {
+                return selectedResult;
+            }
         }
 
         BlockPlaceContext placeContext = new BlockPlaceContext(context);
