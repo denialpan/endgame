@@ -7,8 +7,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record BlockFabricatorSelectionPayload(int direction) implements CustomPacketPayload {
@@ -35,8 +35,8 @@ public record BlockFabricatorSelectionPayload(int direction) implements CustomPa
             return;
         }
 
-        Block block = RandomBlockPlacerItem.cycleSelectedBlock(stack, payload.direction());
-        player.displayClientMessage(Component.translatable("message.dddsendgame.random_block_placer.selected", block.getName()), true);
+        Item item = RandomBlockPlacerItem.cycleSelectedItem(stack, payload.direction());
+        player.displayClientMessage(Component.translatable("message.dddsendgame.random_block_placer.selected", item.getDescription()), true);
     }
 
     private static ItemStack selectedFabricator(ServerPlayer player) {

@@ -16,6 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
@@ -38,7 +39,7 @@ import java.util.function.Consumer;
 
 public class RandomBlockPlacerItem extends Item {
     private static final String BLOCK_INDEX_TAG = "BlockFabricatorIndex";
-    private static List<Block> placeableBlocks;
+    private static List<Item> selectableItems;
 
     public RandomBlockPlacerItem(Properties properties) {
         super(properties);
@@ -57,7 +58,7 @@ public class RandomBlockPlacerItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.translatable("item.dddsendgame.random_block_placer.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-        tooltipComponents.add(Component.translatable("item.dddsendgame.random_block_placer.selected", selectedBlock(stack).getName()).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.dddsendgame.random_block_placer.selected", selectedItem(stack).getDescription()).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override
@@ -152,15 +153,20 @@ public class RandomBlockPlacerItem extends Item {
     }
 
     public static Block selectedBlock(ItemStack stack) {
-        List<Block> blocks = placeableBlocks();
-        if (blocks.isEmpty()) {
-            return Blocks.AIR;
+        Item item = selectedItem(stack);
+        return item instanceof BlockItem blockItem ? blockItem.getBlock() : Blocks.AIR;
+    }
+
+    public static Item selectedItem(ItemStack stack) {
+        List<Item> items = selectableItems();
+        if (items.isEmpty()) {
+            return net.minecraft.world.item.Items.AIR;
         }
-        return blocks.get(Mth.positiveModulo(selectedIndex(stack), blocks.size()));
+        return items.get(Mth.positiveModulo(selectedIndex(stack), items.size()));
     }
 
     public static ItemStack selectedItemStack(ItemStack fabricatorStack, int amount) {
-        Item item = selectedBlock(fabricatorStack).asItem();
+        Item item = selectedItem(fabricatorStack);
         if (item == net.minecraft.world.item.Items.AIR || amount <= 0) {
             return ItemStack.EMPTY;
         }
@@ -189,16 +195,16 @@ public class RandomBlockPlacerItem extends Item {
         return true;
     }
 
-    public static Block cycleSelectedBlock(ItemStack stack, int direction) {
-        List<Block> blocks = placeableBlocks();
-        if (blocks.isEmpty()) {
-            return Blocks.AIR;
+    public static Item cycleSelectedItem(ItemStack stack, int direction) {
+        List<Item> items = selectableItems();
+        if (items.isEmpty()) {
+            return net.minecraft.world.item.Items.AIR;
         }
 
         int step = direction >= 0 ? 1 : -1;
-        int index = Mth.positiveModulo(selectedIndex(stack) + step, blocks.size());
+        int index = Mth.positiveModulo(selectedIndex(stack) + step, items.size());
         setSelectedIndex(stack, index);
-        return blocks.get(index);
+        return items.get(index);
     }
 
     private static int selectedIndex(ItemStack stack) {
@@ -221,23 +227,23 @@ public class RandomBlockPlacerItem extends Item {
         return Blocks.AIR.defaultBlockState();
     }
 
-    private static List<Block> placeableBlocks() {
-        if (placeableBlocks != null) {
-            return placeableBlocks;
+    private static List<Item> selectableItems() {
+        if (selectableItems != null) {
+            return selectableItems;
         }
 
-        List<Block> blocks = new ArrayList<>();
-        for (Block block : BuiltInRegistries.BLOCK) {
-            if (block == Blocks.AIR || block.asItem() == net.minecraft.world.item.Items.AIR || block.defaultBlockState().isAir()) {
+        List<Item> items = new ArrayList<>();
+        for (Item item : BuiltInRegistries.ITEM) {
+            if (item == net.minecraft.world.item.Items.AIR) {
                 continue;
             }
-            blocks.add(block);
+            items.add(item);
         }
-        blocks.sort(Comparator
-                .comparing((Block block) -> block.getName().getString(), String.CASE_INSENSITIVE_ORDER)
-                .thenComparing(block -> BuiltInRegistries.BLOCK.getKey(block).toString()));
-        placeableBlocks = List.copyOf(blocks);
-        return placeableBlocks;
+        items.sort(Comparator
+                .comparing((Item item) -> item.getDescription().getString(), String.CASE_INSENSITIVE_ORDER)
+                .thenComparing(item -> BuiltInRegistries.ITEM.getKey(item).toString()));
+        selectableItems = List.copyOf(items);
+        return selectableItems;
     }
 
     private static class InfiniteSelectedBlockHandler implements IItemHandler {
