@@ -2,6 +2,7 @@ package com.ddd.endgame;
 
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
 import com.ddd.endgame.compat.IrisCompat;
+import com.ddd.endgame.item.RandomBlockPlacerItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -190,6 +191,10 @@ public class dddsendgameClient {
 
         if (minecraft.player.getMainHandItem().is(dddsendgame.RANDOM_BLOCK_PLACER.get())
                 || minecraft.player.getOffhandItem().is(dddsendgame.RANDOM_BLOCK_PLACER.get())) {
+            ItemStack fabricator = minecraft.player.getMainHandItem().is(dddsendgame.RANDOM_BLOCK_PLACER.get())
+                    ? minecraft.player.getMainHandItem()
+                    : minecraft.player.getOffhandItem();
+            RandomBlockPlacerItem.cycleSelectedBlock(fabricator, direction);
             PacketDistributor.sendToServer(new BlockFabricatorSelectionPayload(direction));
             event.setCanceled(true);
         }

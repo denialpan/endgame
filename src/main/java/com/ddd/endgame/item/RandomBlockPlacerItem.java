@@ -142,7 +142,7 @@ public class RandomBlockPlacerItem extends Item {
 
         List<Block> blocks = new ArrayList<>();
         for (Block block : BuiltInRegistries.BLOCK) {
-            if (block == Blocks.AIR || block.defaultBlockState().isAir()) {
+            if (block == Blocks.AIR || block.asItem() == net.minecraft.world.item.Items.AIR || block.defaultBlockState().isAir()) {
                 continue;
             }
             blocks.add(block);
