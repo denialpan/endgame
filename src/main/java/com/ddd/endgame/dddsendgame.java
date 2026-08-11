@@ -342,6 +342,11 @@ public class dddsendgame {
                 EndgameTestStickModePayload.STREAM_CODEC,
                 EndgameTestStickModePayload::handle
         );
+        event.registrar("1").playToServer(
+                BlockFabricatorSelectionPayload.TYPE,
+                BlockFabricatorSelectionPayload.STREAM_CODEC,
+                BlockFabricatorSelectionPayload::handle
+        );
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

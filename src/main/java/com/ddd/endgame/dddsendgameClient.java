@@ -174,18 +174,25 @@ public class dddsendgameClient {
         if (minecraft.player == null || minecraft.screen != null || !minecraft.player.isShiftKeyDown()) {
             return;
         }
-        if (!minecraft.player.getMainHandItem().is(dddsendgame.ENDGAME_TEST_STICK.get())
-                && !minecraft.player.getOffhandItem().is(dddsendgame.ENDGAME_TEST_STICK.get())) {
-            return;
-        }
 
         double scroll = event.getScrollDeltaY();
         if (scroll == 0.0D) {
             return;
         }
 
-        PacketDistributor.sendToServer(new EndgameTestStickModePayload(scroll > 0.0D ? 1 : -1));
-        event.setCanceled(true);
+        int direction = scroll > 0.0D ? 1 : -1;
+        if (minecraft.player.getMainHandItem().is(dddsendgame.ENDGAME_TEST_STICK.get())
+                || minecraft.player.getOffhandItem().is(dddsendgame.ENDGAME_TEST_STICK.get())) {
+            PacketDistributor.sendToServer(new EndgameTestStickModePayload(direction));
+            event.setCanceled(true);
+            return;
+        }
+
+        if (minecraft.player.getMainHandItem().is(dddsendgame.RANDOM_BLOCK_PLACER.get())
+                || minecraft.player.getOffhandItem().is(dddsendgame.RANDOM_BLOCK_PLACER.get())) {
+            PacketDistributor.sendToServer(new BlockFabricatorSelectionPayload(direction));
+            event.setCanceled(true);
+        }
     }
 
     private static void onRenderLevelStage(RenderLevelStageEvent event) {

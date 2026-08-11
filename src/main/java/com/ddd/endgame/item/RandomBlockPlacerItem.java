@@ -3,31 +3,36 @@ package com.ddd.endgame.item;
 import com.ddd.endgame.RandomBlockPlacerItemRenderer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public class RandomBlockPlacerItem extends Item {
-    private static final int MAX_RANDOM_ATTEMPTS = 256;
+    private static final String BLOCK_INDEX_TAG = "BlockFabricatorIndex";
+    private static List<Block> placeableBlocks;
 
     public RandomBlockPlacerItem(Properties properties) {
         super(properties);
@@ -46,6 +51,7 @@ public class RandomBlockPlacerItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.translatable("item.dddsendgame.random_block_placer.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.dddsendgame.random_block_placer.selected", selectedBlock(stack).getName()).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override
@@ -70,8 +76,8 @@ public class RandomBlockPlacerItem extends Item {
             return InteractionResult.SUCCESS;
         }
 
-        BlockState state = randomPlaceableState(level, placePos, player);
-        if (state == null || !level.setBlock(placePos, state, 11)) {
+        BlockState state = selectedPlaceableState(stack, level, placePos, player);
+        if (state.isAir() || !level.setBlock(placePos, state, 11)) {
             return InteractionResult.FAIL;
         }
 
@@ -89,23 +95,62 @@ public class RandomBlockPlacerItem extends Item {
         return InteractionResult.CONSUME;
     }
 
-    private static BlockState randomPlaceableState(Level level, BlockPos placePos, Player player) {
-        CollisionContext collisionContext = player == null ? CollisionContext.empty() : CollisionContext.of(player);
-        for (int attempt = 0; attempt < MAX_RANDOM_ATTEMPTS; attempt++) {
-            Optional<Holder.Reference<Block>> blockHolder = BuiltInRegistries.BLOCK.getRandom(level.random);
-            if (blockHolder.isEmpty()) {
-                continue;
-            }
+    public static Block selectedBlock(ItemStack stack) {
+        List<Block> blocks = placeableBlocks();
+        if (blocks.isEmpty()) {
+            return Blocks.AIR;
+        }
+        return blocks.get(Mth.positiveModulo(selectedIndex(stack), blocks.size()));
+    }
 
-            BlockState state = blockHolder.get().value().defaultBlockState();
-            if (state.isAir()
-                    || !state.getBlock().isEnabled(level.enabledFeatures())
-                    || !state.canSurvive(level, placePos)
-                    || !level.isUnobstructed(state, placePos, collisionContext)) {
-                continue;
-            }
+    public static Block cycleSelectedBlock(ItemStack stack, int direction) {
+        List<Block> blocks = placeableBlocks();
+        if (blocks.isEmpty()) {
+            return Blocks.AIR;
+        }
+
+        int step = direction >= 0 ? 1 : -1;
+        int index = Mth.positiveModulo(selectedIndex(stack) + step, blocks.size());
+        setSelectedIndex(stack, index);
+        return blocks.get(index);
+    }
+
+    private static int selectedIndex(ItemStack stack) {
+        return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getInt(BLOCK_INDEX_TAG);
+    }
+
+    private static void setSelectedIndex(ItemStack stack, int index) {
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putInt(BLOCK_INDEX_TAG, index));
+    }
+
+    private static BlockState selectedPlaceableState(ItemStack stack, Level level, BlockPos placePos, Player player) {
+        CollisionContext collisionContext = player == null ? CollisionContext.empty() : CollisionContext.of(player);
+        BlockState state = selectedBlock(stack).defaultBlockState();
+        if (!state.isAir()
+                && state.getBlock().isEnabled(level.enabledFeatures())
+                && state.canSurvive(level, placePos)
+                && level.isUnobstructed(state, placePos, collisionContext)) {
             return state;
         }
-        return null;
+        return Blocks.AIR.defaultBlockState();
+    }
+
+    private static List<Block> placeableBlocks() {
+        if (placeableBlocks != null) {
+            return placeableBlocks;
+        }
+
+        List<Block> blocks = new ArrayList<>();
+        for (Block block : BuiltInRegistries.BLOCK) {
+            if (block == Blocks.AIR || block.defaultBlockState().isAir()) {
+                continue;
+            }
+            blocks.add(block);
+        }
+        blocks.sort(Comparator
+                .comparing((Block block) -> block.getName().getString(), String.CASE_INSENSITIVE_ORDER)
+                .thenComparing(block -> BuiltInRegistries.BLOCK.getKey(block).toString()));
+        placeableBlocks = List.copyOf(blocks);
+        return placeableBlocks;
     }
 }
