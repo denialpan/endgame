@@ -2,8 +2,9 @@ package com.ddd.endgame.item;
 
 import com.ddd.endgame.GalaxyIngotItemRenderer;
 import com.ddd.endgame.GalaxyInstability;
-import com.ddd.endgame.GalaxyTooltip;
 import java.util.List;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -38,8 +39,8 @@ public class GalaxyIngotItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<net.minecraft.network.chat.Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(GalaxyTooltip.rainbow("unstable cosmic matter"));
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        tooltipComponents.add(Component.translatable("item.dddsendgame.galaxy_ingot.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override

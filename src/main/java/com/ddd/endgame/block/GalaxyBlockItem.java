@@ -1,8 +1,8 @@
 package com.ddd.endgame.block;
 
 import com.ddd.endgame.GalaxyInstability;
-import com.ddd.endgame.GalaxyTooltip;
 import java.util.List;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -36,6 +36,6 @@ public class GalaxyBlockItem extends EndgameSkyboxBlockItem {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(GalaxyTooltip.rainbow("a block of unstable cosmic matter"));
+        tooltipComponents.add(Component.translatable("block.dddsendgame.galaxy_block.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 }

@@ -1,7 +1,6 @@
 package com.ddd.endgame.item;
 
 import com.ddd.endgame.EndgameTestStickItemRenderer;
-import com.ddd.endgame.GalaxyTooltip;
 import com.ddd.endgame.dddsendgame;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -35,8 +34,7 @@ public class EndgameTestStickItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(GalaxyTooltip.rainbow("Absolute dominion over creation"));
-        tooltipComponents.add(Component.translatable("item.dddsendgame.endgame_test_stick.mode", mode(stack).displayName()).withStyle(ChatFormatting.GRAY));
+        tooltipComponents.add(Component.translatable("item.dddsendgame.endgame_test_stick.mode", mode(stack).displayName()).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override
