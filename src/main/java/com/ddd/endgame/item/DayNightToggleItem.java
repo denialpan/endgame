@@ -1,6 +1,7 @@
 package com.ddd.endgame.item;
 
 import com.ddd.endgame.DayControllerItemRenderer;
+import com.ddd.endgame.GalaxyTooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -34,6 +35,11 @@ public class DayNightToggleItem extends Item {
     @Override
     public boolean isFoil(ItemStack stack) {
         return true;
+    }
+
+    @Override
+    public Component getName(ItemStack stack) {
+        return GalaxyTooltip.purpleWhite(Component.translatable(this.getDescriptionId(stack)).getString());
     }
 
     @Override
