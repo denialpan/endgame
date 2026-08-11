@@ -8,8 +8,13 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -24,6 +29,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -60,14 +66,28 @@ public class RandomBlockPlacerItem extends Item {
     }
 
     @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+        ItemStack stack = player.getItemInHand(usedHand);
+        return extractSelectedStack(level, player, stack)
+                ? InteractionResultHolder.sidedSuccess(stack, level.isClientSide)
+                : InteractionResultHolder.fail(stack);
+    }
+
+    @Override
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
+        Player player = context.getPlayer();
+        ItemStack stack = context.getItemInHand();
+        if (player != null && context.isSecondaryUseActive()) {
+            return extractSelectedStack(level, player, stack)
+                    ? InteractionResult.sidedSuccess(level.isClientSide)
+                    : InteractionResult.FAIL;
+        }
+
         BlockPlaceContext placeContext = new BlockPlaceContext(context);
         BlockPos placePos = level.getBlockState(context.getClickedPos()).canBeReplaced(placeContext)
                 ? context.getClickedPos()
                 : context.getClickedPos().relative(context.getClickedFace());
-        Player player = context.getPlayer();
-        ItemStack stack = context.getItemInHand();
 
         if (player != null && !player.mayUseItemAt(placePos, context.getClickedFace(), stack)) {
             return InteractionResult.FAIL;
@@ -95,12 +115,78 @@ public class RandomBlockPlacerItem extends Item {
         return InteractionResult.CONSUME;
     }
 
+    @Override
+    public boolean overrideStackedOnOther(ItemStack stack, Slot slot, ClickAction action, Player player) {
+        if (action != ClickAction.SECONDARY) {
+            return false;
+        }
+        ItemStack selected = selectedItemStack(stack, Integer.MAX_VALUE);
+        if (selected.isEmpty()) {
+            return false;
+        }
+
+        ItemStack remainder = slot.safeInsert(selected.copy(), selected.getCount());
+        return remainder.getCount() != selected.getCount();
+    }
+
+    @Override
+    public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack other, Slot slot, ClickAction action, Player player, SlotAccess access) {
+        if (action != ClickAction.SECONDARY) {
+            return false;
+        }
+        ItemStack selected = selectedItemStack(stack, Integer.MAX_VALUE);
+        if (selected.isEmpty()) {
+            return false;
+        }
+        if (!other.isEmpty()) {
+            if (!ItemStack.isSameItemSameComponents(other, selected) || other.getCount() >= other.getMaxStackSize()) {
+                return false;
+            }
+            ItemStack filled = other.copy();
+            filled.setCount(Math.min(filled.getMaxStackSize(), filled.getCount() + selected.getCount()));
+            access.set(filled);
+            return true;
+        }
+        access.set(selected);
+        return true;
+    }
+
     public static Block selectedBlock(ItemStack stack) {
         List<Block> blocks = placeableBlocks();
         if (blocks.isEmpty()) {
             return Blocks.AIR;
         }
         return blocks.get(Mth.positiveModulo(selectedIndex(stack), blocks.size()));
+    }
+
+    public static ItemStack selectedItemStack(ItemStack fabricatorStack, int amount) {
+        Item item = selectedBlock(fabricatorStack).asItem();
+        if (item == net.minecraft.world.item.Items.AIR || amount <= 0) {
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack stack = new ItemStack(item);
+        stack.setCount(Math.min(amount, stack.getMaxStackSize()));
+        return stack;
+    }
+
+    public static IItemHandler infiniteItemHandler(ItemStack fabricatorStack) {
+        return new InfiniteSelectedBlockHandler(fabricatorStack);
+    }
+
+    private static boolean extractSelectedStack(Level level, Player player, ItemStack fabricatorStack) {
+        ItemStack extracted = selectedItemStack(fabricatorStack, Integer.MAX_VALUE);
+        if (extracted.isEmpty()) {
+            return false;
+        }
+
+        if (!level.isClientSide) {
+            ItemStack toGive = extracted.copy();
+            if (!player.getInventory().add(toGive) || !toGive.isEmpty()) {
+                player.drop(toGive, false);
+            }
+        }
+        return true;
     }
 
     public static Block cycleSelectedBlock(ItemStack stack, int direction) {
@@ -152,5 +238,43 @@ public class RandomBlockPlacerItem extends Item {
                 .thenComparing(block -> BuiltInRegistries.BLOCK.getKey(block).toString()));
         placeableBlocks = List.copyOf(blocks);
         return placeableBlocks;
+    }
+
+    private static class InfiniteSelectedBlockHandler implements IItemHandler {
+        private final ItemStack fabricatorStack;
+
+        private InfiniteSelectedBlockHandler(ItemStack fabricatorStack) {
+            this.fabricatorStack = fabricatorStack;
+        }
+
+        @Override
+        public int getSlots() {
+            return 1;
+        }
+
+        @Override
+        public ItemStack getStackInSlot(int slot) {
+            return slot == 0 ? selectedItemStack(this.fabricatorStack, Integer.MAX_VALUE) : ItemStack.EMPTY;
+        }
+
+        @Override
+        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+            return stack;
+        }
+
+        @Override
+        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            return slot == 0 ? selectedItemStack(this.fabricatorStack, amount) : ItemStack.EMPTY;
+        }
+
+        @Override
+        public int getSlotLimit(int slot) {
+            return slot == 0 ? selectedItemStack(this.fabricatorStack, Integer.MAX_VALUE).getMaxStackSize() : 0;
+        }
+
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return false;
+        }
     }
 }

@@ -10,6 +10,7 @@ import com.ddd.endgame.block.EndgameSkyboxBlockItem;
 import com.ddd.endgame.block.GalaxyBlockItem;
 import com.ddd.endgame.block.GalaxyFreezerBlock;
 import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
+import com.ddd.endgame.compat.BlockFabricatorInventoryHandler;
 import com.ddd.endgame.item.ChunkAnnihilatorItem;
 import com.ddd.endgame.item.DayNightToggleItem;
 import com.ddd.endgame.item.EndgameTestStickItem;
@@ -29,6 +30,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.Container;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -39,11 +42,14 @@ import net.minecraft.world.item.component.DebugStickState;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.GameType;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -63,6 +69,9 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.items.VanillaHopperItemHandler;
+import net.neoforged.neoforge.items.wrapper.InvWrapper;
+import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
@@ -293,7 +302,7 @@ public class dddsendgame {
 
     public dddsendgame(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(this::registerCapabilities);
+        modEventBus.addListener(EventPriority.HIGH, this::registerCapabilities);
         modEventBus.addListener(this::registerPayloads);
 
         BLOCKS.register(modEventBus);
@@ -309,6 +318,7 @@ public class dddsendgame {
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
+        registerBlockFabricatorAutomationCapabilities(event);
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 ENDGAME_CONTROLLER_BLOCK_ENTITY.get(),
@@ -333,6 +343,58 @@ public class dddsendgame {
                 Capabilities.ItemHandler.BLOCK,
                 GALAXY_FREEZER_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.itemHandler()
+        );
+        event.registerItem(
+                Capabilities.ItemHandler.ITEM,
+                (stack, context) -> RandomBlockPlacerItem.infiniteItemHandler(stack),
+                RANDOM_BLOCK_PLACER.get()
+        );
+    }
+
+    private static void registerBlockFabricatorAutomationCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlock(
+                Capabilities.ItemHandler.BLOCK,
+                (level, pos, state, blockEntity, side) -> {
+                    Container container = ChestBlock.getContainer((ChestBlock) state.getBlock(), state, level, pos, true);
+                    return container == null ? null : new BlockFabricatorInventoryHandler(new InvWrapper(container));
+                },
+                Blocks.CHEST,
+                Blocks.TRAPPED_CHEST
+        );
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                BlockEntityType.HOPPER,
+                (hopper, side) -> new BlockFabricatorInventoryHandler(new VanillaHopperItemHandler(hopper))
+        );
+
+        registerFabricatorSidedContainer(event, BlockEntityType.BLAST_FURNACE);
+        registerFabricatorSidedContainer(event, BlockEntityType.BREWING_STAND);
+        registerFabricatorSidedContainer(event, BlockEntityType.FURNACE);
+        registerFabricatorSidedContainer(event, BlockEntityType.SMOKER);
+        registerFabricatorSidedContainer(event, BlockEntityType.SHULKER_BOX);
+
+        registerFabricatorContainer(event, BlockEntityType.BARREL);
+        registerFabricatorContainer(event, BlockEntityType.CHISELED_BOOKSHELF);
+        registerFabricatorContainer(event, BlockEntityType.DISPENSER);
+        registerFabricatorContainer(event, BlockEntityType.DROPPER);
+        registerFabricatorContainer(event, BlockEntityType.JUKEBOX);
+        registerFabricatorContainer(event, BlockEntityType.CRAFTER);
+        registerFabricatorContainer(event, BlockEntityType.DECORATED_POT);
+    }
+
+    private static <T extends net.minecraft.world.level.block.entity.BlockEntity & Container> void registerFabricatorContainer(RegisterCapabilitiesEvent event, BlockEntityType<T> type) {
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                type,
+                (container, side) -> new BlockFabricatorInventoryHandler(new InvWrapper(container))
+        );
+    }
+
+    private static <T extends net.minecraft.world.level.block.entity.BlockEntity & WorldlyContainer> void registerFabricatorSidedContainer(RegisterCapabilitiesEvent event, BlockEntityType<T> type) {
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                type,
+                (container, side) -> new BlockFabricatorInventoryHandler(new SidedInvWrapper(container, side))
         );
     }
 
