@@ -59,7 +59,7 @@ public class RandomBlockPlacerItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.translatable("item.dddsendgame.random_block_placer.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-        tooltipComponents.add(Component.translatable("item.dddsendgame.random_block_placer.selected", selectedItem(stack).getDescription()).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.dddsendgame.random_block_placer.selected", selectedItem(stack).getDescription()));
     }
 
     @Override
