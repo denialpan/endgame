@@ -24,6 +24,8 @@ import com.ddd.endgame.item.WeatherCycleItem;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -43,11 +45,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TransparentBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.GameType;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -70,6 +75,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.items.VanillaHopperItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
 import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
 import org.slf4j.Logger;
@@ -89,6 +95,7 @@ public class dddsendgame {
     public static final int GALAXY_INSTABILITY_DETONATION_TICKS = 10 * 20;
     public static final float GALAXY_INSTABILITY_EXPLOSION_RADIUS = 8.0F;
     private static final Map<UUID, SpectatorPhaseState> SPECTATOR_PHASES = new HashMap<>();
+    private static final Map<ResourceKey<Level>, Map<BlockPos, Long>> FABRICATOR_HOPPER_COOLDOWNS = new HashMap<>();
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
@@ -553,6 +560,77 @@ public class dddsendgame {
         player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, SPECTATOR_PHASE_TICKS, 0, false, false, false));
         player.setGameMode(GameType.SPECTATOR);
         player.displayClientMessage(Component.translatable("message.dddsendgame.spectator_phase.enter"), true);
+    }
+
+    public static boolean handleFabricatorHopperTick(Level level, BlockPos pos, BlockState state, HopperBlockEntity hopper) {
+        if (level.isClientSide || !(level instanceof ServerLevel serverLevel) || !hopperContainsFabricator(hopper)) {
+            return false;
+        }
+
+        if (!state.is(Blocks.HOPPER) || !state.getValue(HopperBlock.ENABLED)) {
+            return true;
+        }
+
+        Map<BlockPos, Long> cooldowns = FABRICATOR_HOPPER_COOLDOWNS.computeIfAbsent(serverLevel.dimension(), ignored -> new HashMap<>());
+        long gameTime = serverLevel.getGameTime();
+        BlockPos immutablePos = pos.immutable();
+        if (cooldowns.getOrDefault(immutablePos, 0L) > gameTime) {
+            return true;
+        }
+
+        if (tryPushFabricatorHopperOutput(serverLevel, immutablePos, state, hopper)) {
+            hopper.setCooldown(8);
+            cooldowns.put(immutablePos, gameTime + 8L);
+            hopper.setChanged();
+        }
+        return true;
+    }
+
+    private static boolean hopperContainsFabricator(HopperBlockEntity hopper) {
+        for (int slot = 0; slot < hopper.getContainerSize(); slot++) {
+            if (hopper.getItem(slot).getItem() instanceof RandomBlockPlacerItem) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean tryPushFabricatorHopperOutput(ServerLevel level, BlockPos pos, BlockState state, HopperBlockEntity hopper) {
+        ItemStack output = ItemStack.EMPTY;
+        for (int slot = 0; slot < hopper.getContainerSize(); slot++) {
+            ItemStack stack = hopper.getItem(slot);
+            if (stack.getItem() instanceof RandomBlockPlacerItem) {
+                output = RandomBlockPlacerItem.selectedItemStack(stack, 1);
+                break;
+            }
+        }
+        if (output.isEmpty()) {
+            return false;
+        }
+
+        Direction facing = state.getValue(HopperBlock.FACING);
+        Direction insertSide = facing.getOpposite();
+        BlockPos destinationPos = pos.relative(facing);
+        IItemHandler destinationHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, destinationPos, insertSide);
+        if (destinationHandler != null && insertIntoHandler(destinationHandler, output)) {
+            return true;
+        }
+
+        Container container = HopperBlockEntity.getContainerAt(level, destinationPos);
+        if (container == null) {
+            return false;
+        }
+        return HopperBlockEntity.addItem(hopper, container, output.copy(), insertSide).isEmpty();
+    }
+
+    private static boolean insertIntoHandler(IItemHandler handler, ItemStack stack) {
+        for (int slot = 0; slot < handler.getSlots(); slot++) {
+            ItemStack remainder = handler.insertItem(slot, stack.copy(), false);
+            if (remainder.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void tickSpectatorPhases(MinecraftServer server) {
