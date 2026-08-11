@@ -2,6 +2,7 @@ package com.ddd.endgame;
 
 import com.ddd.endgame.item.RandomBlockPlacerItem;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -15,6 +16,9 @@ import org.joml.Vector3f;
 
 public class RandomBlockPlacerItemRenderer extends BlockEntityWithoutLevelRenderer {
     public static final RandomBlockPlacerItemRenderer INSTANCE = new RandomBlockPlacerItemRenderer();
+    private static final float TINT_RED = 0.78F;
+    private static final float TINT_GREEN = 0.45F;
+    private static final float TINT_BLUE = 1.0F;
 
     private RandomBlockPlacerItemRenderer() {
         super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
@@ -40,11 +44,13 @@ public class RandomBlockPlacerItemRenderer extends BlockEntityWithoutLevelRender
             Lighting.setupForFlatItems();
         }
 
+        RenderSystem.setShaderColor(TINT_RED, TINT_GREEN, TINT_BLUE, 1.0F);
         minecraft.getItemRenderer().renderStatic(selectedStack, displayContext, packedLight, packedOverlay, poseStack, buffer, minecraft.level, 0);
+        if (buffer instanceof MultiBufferSource.BufferSource bufferSource) {
+            bufferSource.endBatch();
+        }
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         if (flatGuiLighting) {
-            if (buffer instanceof MultiBufferSource.BufferSource bufferSource) {
-                bufferSource.endBatch();
-            }
             Lighting.setupFor3DItems();
         }
     }
