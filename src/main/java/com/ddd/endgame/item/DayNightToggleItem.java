@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 
 public class DayNightToggleItem extends Item {
     private static final long DAY_LENGTH = 24000L;
-    private static final long TOGGLE_INTERVAL = 12000L;
+    private static final long NIGHT_START = 13000L;
     private static final int COOLDOWN_TICKS = 20;
 
     public DayNightToggleItem(Properties properties) {
@@ -44,12 +44,12 @@ public class DayNightToggleItem extends Item {
         }
 
         long dayTime = serverLevel.getDayTime();
-        long remainder = Math.floorMod(dayTime, TOGGLE_INTERVAL);
-        long delta = remainder == 0L ? TOGGLE_INTERVAL : TOGGLE_INTERVAL - remainder;
+        long cycleTime = Math.floorMod(dayTime, DAY_LENGTH);
+        long delta = cycleTime < NIGHT_START ? NIGHT_START - cycleTime : DAY_LENGTH - cycleTime;
         long targetTime = dayTime + delta;
         serverLevel.setDayTime(targetTime);
 
-        if (Math.floorMod(targetTime, DAY_LENGTH) == TOGGLE_INTERVAL) {
+        if (Math.floorMod(targetTime, DAY_LENGTH) == NIGHT_START) {
             player.displayClientMessage(Component.translatable("message.dddsendgame.time.night"), true);
         } else {
             player.displayClientMessage(Component.translatable("message.dddsendgame.time.day"), true);
