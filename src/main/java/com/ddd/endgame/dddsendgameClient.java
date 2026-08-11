@@ -194,8 +194,9 @@ public class dddsendgameClient {
             ItemStack fabricator = minecraft.player.getMainHandItem().is(dddsendgame.RANDOM_BLOCK_PLACER.get())
                     ? minecraft.player.getMainHandItem()
                     : minecraft.player.getOffhandItem();
-            RandomBlockPlacerItem.cycleSelectedItem(fabricator, direction);
-            PacketDistributor.sendToServer(new BlockFabricatorSelectionPayload(direction));
+            int fabricatorDirection = -direction;
+            RandomBlockPlacerItem.cycleSelectedItem(fabricator, fabricatorDirection);
+            PacketDistributor.sendToServer(new BlockFabricatorSelectionPayload(fabricatorDirection));
             event.setCanceled(true);
         }
     }
