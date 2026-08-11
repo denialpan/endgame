@@ -7,12 +7,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -30,22 +27,9 @@ public class RandomBlockPlacerItemRenderer extends BlockEntityWithoutLevelRender
         if (item instanceof RandomBlockPlacerItem) {
             return;
         }
-        if (!(item instanceof BlockItem blockItem)) {
-            poseStack.pushPose();
-            poseStack.translate(0.5F, 0.5F, 0.5F);
-            renderSelectedItemModel(minecraft, new ItemStack(item), displayContext, poseStack, buffer, packedLight, packedOverlay);
-            poseStack.popPose();
-            return;
-        }
-
-        Block block = blockItem.getBlock();
-        BlockState state = block.defaultBlockState();
-        if (state.isAir()) {
-            return;
-        }
         poseStack.pushPose();
-        applyBlockDisplayTransform(displayContext, poseStack);
-        minecraft.getBlockRenderer().renderSingleBlock(state, poseStack, buffer, packedLight, packedOverlay);
+        applySelectedItemDisplayTransform(displayContext, poseStack);
+        renderSelectedItemModel(minecraft, new ItemStack(item), displayContext, poseStack, buffer, packedLight, packedOverlay);
         poseStack.popPose();
     }
 
@@ -56,7 +40,7 @@ public class RandomBlockPlacerItemRenderer extends BlockEntityWithoutLevelRender
             Lighting.setupForFlatItems();
         }
 
-        minecraft.getItemRenderer().renderStatic(selectedStack, ItemDisplayContext.NONE, packedLight, packedOverlay, poseStack, buffer, minecraft.level, 0);
+        minecraft.getItemRenderer().renderStatic(selectedStack, displayContext, packedLight, packedOverlay, poseStack, buffer, minecraft.level, 0);
         if (flatGuiLighting) {
             if (buffer instanceof MultiBufferSource.BufferSource bufferSource) {
                 bufferSource.endBatch();
@@ -65,11 +49,9 @@ public class RandomBlockPlacerItemRenderer extends BlockEntityWithoutLevelRender
         }
     }
 
-    private static void applyBlockDisplayTransform(ItemDisplayContext displayContext, PoseStack poseStack) {
+    private static void applySelectedItemDisplayTransform(ItemDisplayContext displayContext, PoseStack poseStack) {
         poseStack.translate(0.5F, 0.5F, 0.5F);
         applyInverseTransform(generatedTransform(displayContext), poseStack);
-        applyTransform(blockTransform(displayContext), poseStack);
-        poseStack.translate(-0.5F, -0.5F, -0.5F);
     }
 
     private static Transform generatedTransform(ItemDisplayContext displayContext) {
@@ -82,23 +64,6 @@ public class RandomBlockPlacerItemRenderer extends BlockEntityWithoutLevelRender
             case FIRST_PERSON_LEFT_HAND -> new Transform(0.0F, 90.0F, -25.0F, 1.13F, 3.2F, 1.13F, 0.68F);
             default -> Transform.IDENTITY;
         };
-    }
-
-    private static Transform blockTransform(ItemDisplayContext displayContext) {
-        return switch (displayContext) {
-            case GUI -> new Transform(30.0F, 225.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.625F);
-            case GROUND -> new Transform(0.0F, 0.0F, 0.0F, 0.0F, 3.0F, 0.0F, 0.25F);
-            case FIXED -> new Transform(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.5F);
-            case THIRD_PERSON_RIGHT_HAND, THIRD_PERSON_LEFT_HAND -> new Transform(75.0F, 45.0F, 0.0F, 0.0F, 2.5F, 0.0F, 0.375F);
-            case FIRST_PERSON_RIGHT_HAND, FIRST_PERSON_LEFT_HAND -> new Transform(0.0F, 45.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.4F);
-            default -> Transform.IDENTITY;
-        };
-    }
-
-    private static void applyTransform(Transform transform, PoseStack poseStack) {
-        poseStack.translate(transform.translation.x(), transform.translation.y(), transform.translation.z());
-        poseStack.mulPose(transform.rotation());
-        poseStack.scale(transform.scale, transform.scale, transform.scale);
     }
 
     private static void applyInverseTransform(Transform transform, PoseStack poseStack) {
