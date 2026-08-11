@@ -2,11 +2,17 @@ package com.ddd.endgame;
 
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
 import com.ddd.endgame.compat.IrisCompat;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
@@ -21,11 +27,14 @@ import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import com.ddd.endgame.block.EndgameDecorativeBlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -37,6 +46,9 @@ public class dddsendgameClient {
     private static final ModelResourceLocation WEATHER_CONTROLLER_HAND_MODEL = ModelResourceLocation.standalone(
             ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "item/weather_controller")
     );
+    private static Item lastGalaxyHotbarItem;
+    private static Component lastGalaxyHotbarName = Component.empty();
+    private static int galaxyHotbarNameTimer;
 
     public dddsendgameClient(ModContainer container) {
         // Allows NeoForge to create a config screen for this mod's configs.
@@ -54,10 +66,107 @@ public class dddsendgameClient {
         NeoForge.EVENT_BUS.addListener(dddsendgameClient::onRenderBlockHighlight);
         NeoForge.EVENT_BUS.addListener(dddsendgameClient::onMouseScrolled);
         NeoForge.EVENT_BUS.addListener(dddsendgameClient::onClientTick);
+        NeoForge.EVENT_BUS.addListener(dddsendgameClient::onItemTooltip);
+        NeoForge.EVENT_BUS.addListener(dddsendgameClient::onRenderGuiLayerPre);
     }
 
     private static void onClientTick(ClientTickEvent.Post event) {
         GalaxyInstabilityVisuals.clientTick();
+        updateGalaxyHotbarName();
+    }
+
+    private static void onItemTooltip(ItemTooltipEvent event) {
+        ItemStack stack = event.getItemStack();
+        if (event.getToolTip().isEmpty() || !usesGalaxyName(stack)) {
+            return;
+        }
+
+        event.getToolTip().set(0, GalaxyTooltip.purpleWhite(stack.getHoverName().getString()));
+    }
+
+    private static void onRenderGuiLayerPre(RenderGuiLayerEvent.Pre event) {
+        if (!event.getName().equals(VanillaGuiLayers.SELECTED_ITEM_NAME)) {
+            return;
+        }
+
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null) {
+            return;
+        }
+
+        ItemStack selected = minecraft.player.getInventory().getSelected();
+        if (!usesGalaxyName(selected) || galaxyHotbarNameTimer <= 0) {
+            return;
+        }
+
+        event.setCanceled(true);
+        renderGalaxyHotbarName(event, selected);
+    }
+
+    private static void renderGalaxyHotbarName(RenderGuiLayerEvent.Pre event, ItemStack selected) {
+        Minecraft minecraft = Minecraft.getInstance();
+        Font font = minecraft.font;
+        Component name = GalaxyTooltip.purpleWhite(selected.getHoverName().getString());
+        int width = font.width(name);
+        int x = (event.getGuiGraphics().guiWidth() - width) / 2;
+        int y = event.getGuiGraphics().guiHeight() - 59;
+        if (minecraft.gameMode != null && !minecraft.gameMode.canHurtPlayer()) {
+            y += 14;
+        }
+
+        int alpha = (int)((float)galaxyHotbarNameTimer * 256.0F / 10.0F);
+        if (alpha > 255) {
+            alpha = 255;
+        }
+        if (alpha <= 0) {
+            return;
+        }
+
+        if (selected.has(net.minecraft.core.component.DataComponents.CUSTOM_NAME)) {
+            name = name.copy().withStyle(ChatFormatting.ITALIC);
+        }
+        event.getGuiGraphics().drawStringWithBackdrop(font, name, x, y, width, FastColor.ARGB32.color(alpha, -1));
+    }
+
+    private static void updateGalaxyHotbarName() {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null) {
+            galaxyHotbarNameTimer = 0;
+            lastGalaxyHotbarItem = null;
+            lastGalaxyHotbarName = Component.empty();
+            return;
+        }
+
+        ItemStack selected = minecraft.player.getInventory().getSelected();
+        if (selected.isEmpty() || !usesGalaxyName(selected)) {
+            galaxyHotbarNameTimer = 0;
+            lastGalaxyHotbarItem = null;
+            lastGalaxyHotbarName = Component.empty();
+            return;
+        }
+
+        Component hoverName = selected.getHoverName();
+        if (lastGalaxyHotbarItem == null || !selected.is(lastGalaxyHotbarItem) || !hoverName.equals(lastGalaxyHotbarName)) {
+            galaxyHotbarNameTimer = (int)(40.0D * minecraft.options.notificationDisplayTime().get());
+            lastGalaxyHotbarItem = selected.getItem();
+            lastGalaxyHotbarName = hoverName;
+        } else if (galaxyHotbarNameTimer > 0) {
+            galaxyHotbarNameTimer--;
+        }
+    }
+
+    private static boolean usesGalaxyName(ItemStack stack) {
+        return stack.is(dddsendgame.WEATHER_CYCLER.get())
+                || stack.is(dddsendgame.DAY_NIGHT_TOGGLE.get())
+                || stack.is(dddsendgame.ENTITY_PURGE_CORE.get())
+                || stack.is(dddsendgame.RANDOM_BLOCK_PLACER.get())
+                || stack.is(dddsendgame.REALITY_RESTORER.get())
+                || stack.is(dddsendgame.SURVIVAL_FLIGHT_CORE.get())
+                || stack.is(dddsendgame.SPECTATOR_PHASE_CORE.get())
+                || stack.is(dddsendgame.CHUNK_ANNIHILATOR.get())
+                || stack.is(dddsendgame.GALAXY_INGOT.get())
+                || stack.is(dddsendgame.GALAXY_BLOCK_ITEM.get())
+                || stack.is(dddsendgame.ENDGAME_TEST_STICK.get());
     }
 
     private static void onMouseScrolled(InputEvent.MouseScrollingEvent event) {

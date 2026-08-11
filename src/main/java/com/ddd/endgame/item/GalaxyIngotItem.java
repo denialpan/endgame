@@ -2,7 +2,6 @@ package com.ddd.endgame.item;
 
 import com.ddd.endgame.GalaxyIngotItemRenderer;
 import com.ddd.endgame.GalaxyInstability;
-import com.ddd.endgame.GalaxyTooltip;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -37,11 +36,6 @@ public class GalaxyIngotItem extends Item {
     @Override
     public boolean isFoil(ItemStack stack) {
         return true;
-    }
-
-    @Override
-    public Component getName(ItemStack stack) {
-        return GalaxyTooltip.purpleWhite(Component.translatable(this.getDescriptionId(stack)).getString());
     }
 
     @Override

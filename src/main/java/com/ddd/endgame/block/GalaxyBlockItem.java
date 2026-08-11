@@ -1,7 +1,6 @@
 package com.ddd.endgame.block;
 
 import com.ddd.endgame.GalaxyInstability;
-import com.ddd.endgame.GalaxyTooltip;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -33,11 +32,6 @@ public class GalaxyBlockItem extends EndgameSkyboxBlockItem {
     @Override
     public boolean isFoil(ItemStack stack) {
         return true;
-    }
-
-    @Override
-    public Component getName(ItemStack stack) {
-        return GalaxyTooltip.purpleWhite(Component.translatable(this.getDescriptionId()).getString());
     }
 
     @Override
