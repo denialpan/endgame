@@ -85,6 +85,7 @@ public final class GalaxyInstability {
         normalizeNearbyDroppedEntityTimers(entity);
         int ticks = Math.min(droppedTicks(entity) + 1, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS);
         setDroppedTicks(entity, ticks);
+        setTicks(stack, ticks);
         if (ticks >= dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS) {
             stack.setCount(0);
             entity.setItem(ItemStack.EMPTY);
