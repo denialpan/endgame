@@ -8,6 +8,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ResultSlot;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
@@ -22,16 +25,19 @@ public final class GalaxyInstability {
     }
 
     public static void tickPlayerStacks(ServerPlayer player) {
+        Iterable<ItemStack> activeContainerStacks = activeContainerGalaxyStacks(player);
         int ticks = playerTicks(player);
         ticks = Math.max(ticks, maxTicks(player.getInventory().items));
         ticks = Math.max(ticks, maxTicks(player.getInventory().armor));
         ticks = Math.max(ticks, maxTicks(player.getInventory().offhand));
+        ticks = Math.max(ticks, maxTicks(activeContainerStacks));
         ItemStack carried = player.containerMenu.getCarried();
         ticks = Math.max(ticks, ticks(carried));
 
         if (!hasGalaxyMaterial(player.getInventory().items)
                 && !hasGalaxyMaterial(player.getInventory().armor)
                 && !hasGalaxyMaterial(player.getInventory().offhand)
+                && !hasGalaxyMaterial(activeContainerStacks)
                 && !isGalaxyMaterial(carried)) {
             player.getPersistentData().remove(PLAYER_TICKS_TAG);
             return;
@@ -42,6 +48,7 @@ public final class GalaxyInstability {
             removeGalaxyMaterials(player.getInventory().items);
             removeGalaxyMaterials(player.getInventory().armor);
             removeGalaxyMaterials(player.getInventory().offhand);
+            removeGalaxyMaterials(activeContainerStacks);
             if (isGalaxyMaterial(carried)) {
                 player.containerMenu.setCarried(ItemStack.EMPTY);
             }
@@ -53,6 +60,8 @@ public final class GalaxyInstability {
         }
 
         setPlayerTicks(player, ticks);
+        setTicks(activeContainerStacks, ticks);
+        player.containerMenu.broadcastChanges();
     }
 
     public static void tickStack(ItemStack stack, Level level, @Nullable Entity holder) {
@@ -176,6 +185,25 @@ public final class GalaxyInstability {
         for (ItemStack stack : stacks) {
             setTicks(stack, ticks);
         }
+    }
+
+    private static Iterable<ItemStack> activeContainerGalaxyStacks(ServerPlayer player) {
+        if (player.containerMenu instanceof GalaxyFreezerMenu) {
+            return java.util.List.of();
+        }
+
+        java.util.List<ItemStack> stacks = new java.util.ArrayList<>();
+        for (Slot slot : player.containerMenu.slots) {
+            if (slot instanceof ResultSlot || slot.container instanceof Inventory) {
+                continue;
+            }
+
+            ItemStack stack = slot.getItem();
+            if (isGalaxyMaterial(stack)) {
+                stacks.add(stack);
+            }
+        }
+        return stacks;
     }
 
     private static void removeGalaxyMaterials(Iterable<ItemStack> stacks) {
