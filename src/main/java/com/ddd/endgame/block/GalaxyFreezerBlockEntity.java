@@ -13,6 +13,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -173,6 +174,10 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
     }
 
     private static void detonate(Level level, BlockPos pos, GalaxyFreezerBlockEntity blockEntity) {
+        double x = pos.getX() + 0.5D;
+        double y = pos.getY() + 0.5D;
+        double z = pos.getZ() + 0.5D;
+        ItemEntity explosionSource = new ItemEntity(level, x, y, z, new ItemStack(dddsendgame.GALAXY_INGOT.get()));
         for (int slot = 0; slot < blockEntity.itemHandler.getSlots(); slot++) {
             ItemStack stack = blockEntity.itemHandler.getStackInSlot(slot);
             if (GalaxyInstability.isGalaxyMaterial(stack)) {
@@ -180,15 +185,17 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
             }
         }
         blockEntity.setChanged();
+        level.removeBlock(pos, false);
         level.explode(
-                null,
-                pos.getX() + 0.5D,
-                pos.getY() + 0.5D,
-                pos.getZ() + 0.5D,
+                explosionSource,
+                x,
+                y,
+                z,
                 dddsendgame.GALAXY_INSTABILITY_EXPLOSION_RADIUS,
                 false,
                 Level.ExplosionInteraction.BLOCK
         );
+        explosionSource.discard();
     }
 
     private class DirectAutomationItemHandler implements IItemHandler {
