@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ChunkAnnihilatorItem extends Item {
-    private static final int COOLDOWN_TICKS = 100;
+    private static final int COOLDOWN_TICKS = 30;
 
     public ChunkAnnihilatorItem(Properties properties) {
         super(properties);

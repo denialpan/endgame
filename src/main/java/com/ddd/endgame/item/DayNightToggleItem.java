@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 public class DayNightToggleItem extends Item {
     private static final long DAY_LENGTH = 24000L;
     private static final long NIGHT_START = 13000L;
-    private static final int COOLDOWN_TICKS = 20;
+    private static final int COOLDOWN_TICKS = 30;
 
     public DayNightToggleItem(Properties properties) {
         super(properties);

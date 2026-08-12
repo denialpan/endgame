@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class EntityPurgeItem extends Item {
-    private static final int COOLDOWN_TICKS = 40;
+    private static final int COOLDOWN_TICKS = 30;
 
     public EntityPurgeItem(Properties properties) {
         super(properties);

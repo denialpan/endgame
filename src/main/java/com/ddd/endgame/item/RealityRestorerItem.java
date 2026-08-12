@@ -56,7 +56,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class RealityRestorerItem extends Item {
-    private static final int COOLDOWN_TICKS = 100;
+    private static final int COOLDOWN_TICKS = 30;
     private static final int TEMPORARY_CONTEXT_RADIUS = 1;
 
     public RealityRestorerItem(Properties properties) {

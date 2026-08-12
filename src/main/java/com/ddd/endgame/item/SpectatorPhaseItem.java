@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class SpectatorPhaseItem extends Item {
-    private static final int COOLDOWN_TICKS = 20;
+    private static final int COOLDOWN_TICKS = 30;
 
     public SpectatorPhaseItem(Properties properties) {
         super(properties);

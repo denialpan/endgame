@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 
 public class WeatherCycleItem extends Item {
     private static final int WEATHER_DURATION = 6000;
-    private static final int COOLDOWN_TICKS = 20;
+    private static final int COOLDOWN_TICKS = 30;
 
     public WeatherCycleItem(Properties properties) {
         super(properties);
