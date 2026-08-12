@@ -2,7 +2,6 @@ package com.ddd.endgame;
 
 import com.ddd.endgame.item.RandomBlockPlacerItem;
 import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -44,12 +43,11 @@ public class RandomBlockPlacerItemRenderer extends BlockEntityWithoutLevelRender
             Lighting.setupForFlatItems();
         }
 
-        RenderSystem.setShaderColor(TINT_RED, TINT_GREEN, TINT_BLUE, 1.0F);
-        minecraft.getItemRenderer().renderStatic(selectedStack, displayContext, packedLight, packedOverlay, poseStack, buffer, minecraft.level, 0);
-        if (buffer instanceof MultiBufferSource.BufferSource bufferSource) {
+        MultiBufferSource tintedBuffer = GalaxyInstabilityTint.wrap(buffer, TINT_RED, TINT_GREEN, TINT_BLUE);
+        minecraft.getItemRenderer().renderStatic(selectedStack, displayContext, packedLight, packedOverlay, poseStack, tintedBuffer, minecraft.level, 0);
+        if (flatGuiLighting && buffer instanceof MultiBufferSource.BufferSource bufferSource) {
             bufferSource.endBatch();
         }
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         if (flatGuiLighting) {
             Lighting.setupFor3DItems();
         }

@@ -1,6 +1,7 @@
 package com.ddd.endgame.item;
 
 import com.ddd.endgame.RandomBlockPlacerItemRenderer;
+import com.ddd.endgame.dddsendgame;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -251,6 +252,9 @@ public class RandomBlockPlacerItem extends Item {
         List<Item> items = new ArrayList<>();
         for (Item item : BuiltInRegistries.ITEM) {
             if (item == net.minecraft.world.item.Items.AIR) {
+                continue;
+            }
+            if (BuiltInRegistries.ITEM.getKey(item).getNamespace().equals(dddsendgame.MODID)) {
                 continue;
             }
             items.add(item);
