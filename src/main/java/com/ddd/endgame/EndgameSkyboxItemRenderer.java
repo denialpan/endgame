@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -48,7 +49,9 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         float greenBlue = GalaxyInstabilityVisuals.tintGreenBlue(stack);
         RenderSystem.setShaderColor(1.0F, greenBlue, greenBlue, 1.0F);
         BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
-        dispatcher.renderSingleBlock(block.defaultBlockState(), poseStack, GalaxyInstabilityTint.wrap(buffer, greenBlue), packedLight, packedOverlay);
+        MultiBufferSource tintedBuffer = GalaxyInstabilityTint.wrap(buffer, greenBlue);
+        MultiBufferSource foilBuffer = renderType -> ItemRenderer.getFoilBufferDirect(tintedBuffer, renderType, true, stack.hasFoil());
+        dispatcher.renderSingleBlock(block.defaultBlockState(), poseStack, foilBuffer, packedLight, packedOverlay);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 

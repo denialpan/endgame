@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -32,7 +33,11 @@ public class RandomBlockPlacerItemRenderer extends BlockEntityWithoutLevelRender
         }
         poseStack.pushPose();
         applySelectedItemDisplayTransform(displayContext, poseStack);
-        renderSelectedItemModel(minecraft, new ItemStack(item), displayContext, poseStack, buffer, packedLight, packedOverlay);
+        ItemStack selectedStack = new ItemStack(item);
+        if (stack.hasFoil()) {
+            selectedStack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+        }
+        renderSelectedItemModel(minecraft, selectedStack, displayContext, poseStack, buffer, packedLight, packedOverlay);
         poseStack.popPose();
     }
 

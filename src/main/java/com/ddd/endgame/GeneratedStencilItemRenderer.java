@@ -106,7 +106,7 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
     private static void renderQuadList(PoseStack poseStack, MultiBufferSource buffer, java.util.List<BakedQuad> quads, ItemStack stack, int packedLight, int packedOverlay, float greenBlue, RenderType renderType) {
         ItemColors itemColors = Minecraft.getInstance().getItemColors();
         PoseStack.Pose pose = poseStack.last();
-        var consumer = GalaxyInstabilityTint.wrap(buffer.getBuffer(renderType), greenBlue);
+        var consumer = GalaxyInstabilityTint.wrap(ItemRenderer.getFoilBufferDirect(buffer, renderType, true, stack.hasFoil()), greenBlue);
         for (BakedQuad quad : quads) {
             int color = -1;
             if (!stack.isEmpty() && quad.isTinted()) {
