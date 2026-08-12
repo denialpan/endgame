@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.minecraft.core.Direction;
 
 public class EndgameConnectorBlockEntity extends BlockEntity {
     private static final int SLOT_INPUT = 0;
@@ -39,6 +40,29 @@ public class EndgameConnectorBlockEntity extends BlockEntity {
         return status.hasMultipleControllers() ? null : status.singleController(this.level);
     }
 
+    @Nullable
+    private GalaxyFreezerBlockEntity connectedGalaxyFreezer() {
+        if (this.level == null) {
+            return null;
+        }
+
+        for (Direction facing : Direction.Plane.HORIZONTAL) {
+            BlockPos controllerPos = GalaxyFreezerMultiblock.controllerPosForInputConnector(this.worldPosition, facing);
+            if (!(this.level.getBlockEntity(controllerPos) instanceof GalaxyFreezerBlockEntity freezer)) {
+                continue;
+            }
+            if (!freezer.getBlockState().is(dddsendgame.GALAXY_FREEZER_BLOCK.get())
+                    || freezer.getBlockState().getValue(HorizontalFacingEntityBlock.FACING) != facing) {
+                continue;
+            }
+            if (GalaxyFreezerMultiblock.inputConnectorPos(controllerPos, facing).equals(this.worldPosition)
+                    && freezer.isMultiblockValid()) {
+                return freezer;
+            }
+        }
+        return null;
+    }
+
     private class InputItemHandler implements IItemHandler {
         @Override
         public int getSlots() {
@@ -60,6 +84,19 @@ public class EndgameConnectorBlockEntity extends BlockEntity {
             validateSlot(slot);
             if (stack.isEmpty()) {
                 return stack;
+            }
+
+            GalaxyFreezerBlockEntity freezer = EndgameConnectorBlockEntity.this.connectedGalaxyFreezer();
+            if (freezer != null) {
+                if (slot != SLOT_INPUT) {
+                    return stack;
+                }
+
+                ItemStack remainder = stack;
+                for (int freezerSlot = 0; freezerSlot < freezer.connectorInputHandler().getSlots() && !remainder.isEmpty(); freezerSlot++) {
+                    remainder = freezer.connectorInputHandler().insertItem(freezerSlot, remainder, simulate);
+                }
+                return remainder;
             }
 
             EndgameControllerBlockEntity controller = EndgameConnectorBlockEntity.this.connectedController();
@@ -90,6 +127,11 @@ public class EndgameConnectorBlockEntity extends BlockEntity {
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
             validateSlot(slot);
+            GalaxyFreezerBlockEntity freezer = EndgameConnectorBlockEntity.this.connectedGalaxyFreezer();
+            if (freezer != null) {
+                return slot == SLOT_INPUT && freezer.connectorInputHandler().isItemValid(0, stack);
+            }
+
             EndgameControllerBlockEntity controller = EndgameConnectorBlockEntity.this.connectedController();
             return slot == SLOT_INPUT && controller != null && controller.itemHandler().isItemValid(SLOT_INPUT, stack);
         }

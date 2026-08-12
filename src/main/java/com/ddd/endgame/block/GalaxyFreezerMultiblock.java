@@ -12,6 +12,9 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public final class GalaxyFreezerMultiblock {
     private static final Direction SCHEMATIC_FACING = Direction.NORTH;
+    private static final int INPUT_CONNECTOR_X = 0;
+    private static final int INPUT_CONNECTOR_Y = 3;
+    private static final int INPUT_CONNECTOR_Z = 1;
     private static final List<Requirement> REQUIREMENTS = List.of(
             solid(-1, 0, 0), solid(1, 0, 0),
             solid(-1, 0, 1), solid(0, 0, 1), solid(1, 0, 1),
@@ -54,6 +57,24 @@ public final class GalaxyFreezerMultiblock {
             blocks.add(new PreviewBlock(targetPos, requirement.block().defaultBlockState(), requirement.predicate()));
         }
         return blocks;
+    }
+
+    public static BlockPos inputConnectorPos(BlockPos controllerPos, Direction controllerFacing) {
+        RotationSteps rotation = RotationSteps.from(SCHEMATIC_FACING, controllerFacing);
+        return controllerPos.offset(
+                rotation.rotateX(INPUT_CONNECTOR_X, INPUT_CONNECTOR_Z),
+                INPUT_CONNECTOR_Y,
+                rotation.rotateZ(INPUT_CONNECTOR_X, INPUT_CONNECTOR_Z)
+        );
+    }
+
+    public static BlockPos controllerPosForInputConnector(BlockPos connectorPos, Direction controllerFacing) {
+        RotationSteps rotation = RotationSteps.from(SCHEMATIC_FACING, controllerFacing);
+        return connectorPos.offset(
+                -rotation.rotateX(INPUT_CONNECTOR_X, INPUT_CONNECTOR_Z),
+                -INPUT_CONNECTOR_Y,
+                -rotation.rotateZ(INPUT_CONNECTOR_X, INPUT_CONNECTOR_Z)
+        );
     }
 
     private static Requirement solid(int x, int y, int z) {

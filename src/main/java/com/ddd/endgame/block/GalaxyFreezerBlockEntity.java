@@ -20,6 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvider {
@@ -28,6 +29,8 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
     private static final String ITEMS_TAG = "Items";
     private boolean multiblockValid;
     private long lastMultiblockCheck = Long.MIN_VALUE;
+    private final IItemHandler directAutomationHandler = new DirectAutomationItemHandler();
+    private final IItemHandler connectorInputHandler = new ConnectorInputItemHandler();
     private final ItemStackHandler itemHandler = new ItemStackHandler(SLOT_COUNT) {
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
@@ -47,7 +50,6 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
 
         @Override
         protected void onContentsChanged(int slot) {
-            GalaxyInstability.resetTicks(this.getStackInSlot(slot));
             GalaxyFreezerBlockEntity.this.setChanged();
         }
     };
@@ -58,6 +60,49 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
 
     public ItemStackHandler itemHandler() {
         return this.itemHandler;
+    }
+
+    public IItemHandler directAutomationHandler() {
+        return this.directAutomationHandler;
+    }
+
+    public IItemHandler connectorInputHandler() {
+        return this.connectorInputHandler;
+    }
+
+    public static void tick(Level level, BlockPos pos, BlockState state, GalaxyFreezerBlockEntity blockEntity) {
+        if (level.isClientSide) {
+            return;
+        }
+
+        boolean valid = blockEntity.isMultiblockValid();
+        boolean changed = false;
+        for (int slot = 0; slot < blockEntity.itemHandler.getSlots(); slot++) {
+            ItemStack stack = blockEntity.itemHandler.getStackInSlot(slot);
+            if (!GalaxyInstability.isGalaxyMaterial(stack)) {
+                continue;
+            }
+
+            if (valid) {
+                if (GalaxyInstability.ticks(stack) > 0) {
+                    GalaxyInstability.resetTicks(stack);
+                    changed = true;
+                }
+                continue;
+            }
+
+            int ticks = Math.min(GalaxyInstability.ticks(stack) + 1, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS);
+            GalaxyInstability.setTicks(stack, ticks);
+            changed = true;
+            if (ticks >= dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS) {
+                detonate(level, pos, blockEntity);
+                return;
+            }
+        }
+
+        if (changed) {
+            blockEntity.setChanged();
+        }
     }
 
     public boolean isMultiblockValid() {
@@ -106,7 +151,6 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         this.itemHandler.deserializeNBT(registries, tag.getCompound(ITEMS_TAG));
-        resetStoredInstabilityTimers();
     }
 
     @Override
@@ -128,9 +172,86 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         return tag;
     }
 
-    private void resetStoredInstabilityTimers() {
-        for (int slot = 0; slot < this.itemHandler.getSlots(); slot++) {
-            GalaxyInstability.resetTicks(this.itemHandler.getStackInSlot(slot));
+    private static void detonate(Level level, BlockPos pos, GalaxyFreezerBlockEntity blockEntity) {
+        for (int slot = 0; slot < blockEntity.itemHandler.getSlots(); slot++) {
+            ItemStack stack = blockEntity.itemHandler.getStackInSlot(slot);
+            if (GalaxyInstability.isGalaxyMaterial(stack)) {
+                stack.setCount(0);
+            }
+        }
+        blockEntity.setChanged();
+        level.explode(
+                null,
+                pos.getX() + 0.5D,
+                pos.getY() + 0.5D,
+                pos.getZ() + 0.5D,
+                dddsendgame.GALAXY_INSTABILITY_EXPLOSION_RADIUS,
+                false,
+                Level.ExplosionInteraction.BLOCK
+        );
+    }
+
+    private class DirectAutomationItemHandler implements IItemHandler {
+        @Override
+        public int getSlots() {
+            return GalaxyFreezerBlockEntity.this.itemHandler.getSlots();
+        }
+
+        @Override
+        public ItemStack getStackInSlot(int slot) {
+            return GalaxyFreezerBlockEntity.this.itemHandler.getStackInSlot(slot);
+        }
+
+        @Override
+        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+            return stack;
+        }
+
+        @Override
+        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            return GalaxyFreezerBlockEntity.this.itemHandler.extractItem(slot, amount, simulate);
+        }
+
+        @Override
+        public int getSlotLimit(int slot) {
+            return GalaxyFreezerBlockEntity.this.itemHandler.getSlotLimit(slot);
+        }
+
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return false;
+        }
+    }
+
+    private class ConnectorInputItemHandler implements IItemHandler {
+        @Override
+        public int getSlots() {
+            return GalaxyFreezerBlockEntity.this.itemHandler.getSlots();
+        }
+
+        @Override
+        public ItemStack getStackInSlot(int slot) {
+            return ItemStack.EMPTY;
+        }
+
+        @Override
+        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+            return GalaxyFreezerBlockEntity.this.itemHandler.insertItem(slot, stack, simulate);
+        }
+
+        @Override
+        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            return ItemStack.EMPTY;
+        }
+
+        @Override
+        public int getSlotLimit(int slot) {
+            return GalaxyFreezerBlockEntity.this.itemHandler.getSlotLimit(slot);
+        }
+
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return GalaxyFreezerBlockEntity.this.itemHandler.isItemValid(slot, stack);
         }
     }
 }

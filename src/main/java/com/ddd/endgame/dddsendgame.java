@@ -349,7 +349,7 @@ public class dddsendgame {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 GALAXY_FREEZER_BLOCK_ENTITY.get(),
-                (blockEntity, side) -> blockEntity.itemHandler()
+                (blockEntity, side) -> blockEntity.directAutomationHandler()
         );
         event.registerItem(
                 Capabilities.ItemHandler.ITEM,

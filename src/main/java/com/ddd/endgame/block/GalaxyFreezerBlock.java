@@ -17,6 +17,8 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -42,6 +44,14 @@ public class GalaxyFreezerBlock extends HorizontalFacingEntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new GalaxyFreezerBlockEntity(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
+        return blockEntityType == dddsendgame.GALAXY_FREEZER_BLOCK_ENTITY.get()
+                ? (tickerLevel, pos, tickerState, blockEntity) -> GalaxyFreezerBlockEntity.tick(tickerLevel, pos, tickerState, (GalaxyFreezerBlockEntity) blockEntity)
+                : null;
     }
 
     @Override
