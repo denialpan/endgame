@@ -60,7 +60,12 @@ public final class GalaxyInstability {
         }
 
         setPlayerTicks(player, ticks);
+        setTicks(player.getInventory().items, ticks);
+        setTicks(player.getInventory().armor, ticks);
+        setTicks(player.getInventory().offhand, ticks);
         setTicks(activeContainerStacks, ticks);
+        setTicks(carried, ticks);
+        player.getInventory().setChanged();
         player.containerMenu.broadcastChanges();
     }
 
