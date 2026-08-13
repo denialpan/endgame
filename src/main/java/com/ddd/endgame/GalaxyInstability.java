@@ -1,34 +1,19 @@
 package com.ddd.endgame;
 
-import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
-import com.ddd.endgame.mixin.ChunkMapAccessor;
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.CraftingMenu;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
 public final class GalaxyInstability {
     private static final String TICKS_TAG = "GalaxyInstabilityTicks";
@@ -41,6 +26,10 @@ public final class GalaxyInstability {
 
     public static void tickPlayerStacks(ServerPlayer player) {
         Iterable<ItemStack> activeContainerStacks = activeContainerGalaxyStacks(player);
+        boolean hasPlayerOwnedGalaxyMaterial = hasGalaxyMaterial(player.getInventory().items)
+                || hasGalaxyMaterial(player.getInventory().armor)
+                || hasGalaxyMaterial(player.getInventory().offhand)
+                || isGalaxyMaterial(player.containerMenu.getCarried());
         int ticks = playerTicks(player);
         ticks = Math.max(ticks, maxTicks(player.getInventory().items));
         ticks = Math.max(ticks, maxTicks(player.getInventory().armor));
@@ -59,11 +48,10 @@ public final class GalaxyInstability {
         }
 
         ticks = Math.min(ticks + 1, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS);
-        if (ticks >= dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS) {
+        if (ticks >= dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS && hasPlayerOwnedGalaxyMaterial) {
             removeGalaxyMaterials(player.getInventory().items);
             removeGalaxyMaterials(player.getInventory().armor);
             removeGalaxyMaterials(player.getInventory().offhand);
-            removeGalaxyMaterials(activeContainerStacks);
             if (isGalaxyMaterial(carried)) {
                 player.containerMenu.setCarried(ItemStack.EMPTY);
             }
@@ -122,51 +110,6 @@ public final class GalaxyInstability {
             entity.discard();
         }
         return false;
-    }
-
-    public static void tickLoadedInventories(MinecraftServer server) {
-        for (ServerLevel level : server.getAllLevels()) {
-            tickBlockEntityInventories(level);
-            tickEntityInventories(level);
-        }
-    }
-
-    public static void tickContainer(Container container, Level level, double x, double y, double z, @Nullable Entity source) {
-        int ticks = maxTicks(container);
-        if (ticks < 0) {
-            return;
-        }
-
-        ticks = Math.min(ticks + 1, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS);
-        if (ticks >= dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS) {
-            removeGalaxyMaterials(container);
-            container.setChanged();
-            level.explode(source, x, y, z, dddsendgame.GALAXY_INSTABILITY_EXPLOSION_RADIUS, false, Level.ExplosionInteraction.BLOCK);
-            killHolder(source);
-            return;
-        }
-
-        setTicks(container, ticks);
-        container.setChanged();
-    }
-
-    public static void tickItemHandler(IItemHandler handler, Level level, double x, double y, double z, @Nullable Entity source, @Nullable BlockEntity owner) {
-        int ticks = maxTicks(handler);
-        if (ticks < 0) {
-            return;
-        }
-
-        ticks = Math.min(ticks + 1, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS);
-        if (ticks >= dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS) {
-            removeGalaxyMaterials(handler);
-            setChanged(owner);
-            level.explode(source, x, y, z, dddsendgame.GALAXY_INSTABILITY_EXPLOSION_RADIUS, false, Level.ExplosionInteraction.BLOCK);
-            killHolder(source);
-            return;
-        }
-
-        setTicks(handler, ticks);
-        setChanged(owner);
     }
 
     public static int ticks(ItemStack stack) {
@@ -237,28 +180,6 @@ public final class GalaxyInstability {
         return max;
     }
 
-    private static int maxTicks(Container container) {
-        int max = -1;
-        for (int slot = 0; slot < container.getContainerSize(); slot++) {
-            ItemStack stack = container.getItem(slot);
-            if (isGalaxyMaterial(stack)) {
-                max = Math.max(max, ticks(stack));
-            }
-        }
-        return max;
-    }
-
-    private static int maxTicks(IItemHandler handler) {
-        int max = -1;
-        for (int slot = 0; slot < handler.getSlots(); slot++) {
-            ItemStack stack = handler.getStackInSlot(slot);
-            if (isGalaxyMaterial(stack)) {
-                max = Math.max(max, ticks(stack));
-            }
-        }
-        return max;
-    }
-
     private static boolean hasGalaxyMaterial(Iterable<ItemStack> stacks) {
         for (ItemStack stack : stacks) {
             if (isGalaxyMaterial(stack)) {
@@ -274,32 +195,8 @@ public final class GalaxyInstability {
         }
     }
 
-    private static void setTicks(Container container, int ticks) {
-        for (int slot = 0; slot < container.getContainerSize(); slot++) {
-            setTicks(container.getItem(slot), ticks);
-        }
-    }
-
-    private static void setTicks(IItemHandler handler, int ticks) {
-        for (int slot = 0; slot < handler.getSlots(); slot++) {
-            ItemStack stack = handler.getStackInSlot(slot);
-            if (!isGalaxyMaterial(stack)) {
-                continue;
-            }
-
-            if (handler instanceof IItemHandlerModifiable modifiable) {
-                ItemStack copy = stack.copy();
-                setTicks(copy, ticks);
-                modifiable.setStackInSlot(slot, copy);
-            } else {
-                setTicks(stack, ticks);
-            }
-        }
-    }
-
     private static Iterable<ItemStack> activeContainerGalaxyStacks(ServerPlayer player) {
-        if (player.containerMenu instanceof GalaxyFreezerMenu
-                || !(player.containerMenu instanceof CraftingMenu || player.containerMenu instanceof InventoryMenu)) {
+        if (player.containerMenu instanceof GalaxyFreezerMenu) {
             return java.util.List.of();
         }
 
@@ -322,107 +219,6 @@ public final class GalaxyInstability {
             if (isGalaxyMaterial(stack)) {
                 stack.setCount(0);
             }
-        }
-    }
-
-    private static void removeGalaxyMaterials(Container container) {
-        for (int slot = 0; slot < container.getContainerSize(); slot++) {
-            if (isGalaxyMaterial(container.getItem(slot))) {
-                container.setItem(slot, ItemStack.EMPTY);
-            }
-        }
-    }
-
-    private static void removeGalaxyMaterials(IItemHandler handler) {
-        for (int slot = 0; slot < handler.getSlots(); slot++) {
-            ItemStack stack = handler.getStackInSlot(slot);
-            if (!isGalaxyMaterial(stack)) {
-                continue;
-            }
-
-            if (handler instanceof IItemHandlerModifiable modifiable) {
-                modifiable.setStackInSlot(slot, ItemStack.EMPTY);
-                continue;
-            }
-
-            int safety = 0;
-            while (isGalaxyMaterial(handler.getStackInSlot(slot)) && safety++ < 64) {
-                ItemStack current = handler.getStackInSlot(slot);
-                ItemStack extracted = handler.extractItem(slot, current.getCount(), false);
-                if (extracted.isEmpty()) {
-                    break;
-                }
-            }
-        }
-    }
-
-    private static void tickBlockEntityInventories(ServerLevel level) {
-        for (ChunkHolder holder : ((ChunkMapAccessor)level.getChunkSource().chunkMap).dddsendgame$getChunks()) {
-            LevelChunk chunk = holder.getTickingChunk();
-            if (chunk == null) {
-                continue;
-            }
-
-            for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-                if (blockEntity instanceof GalaxyFreezerBlockEntity) {
-                    continue;
-                }
-
-                BlockPos pos = blockEntity.getBlockPos();
-                double x = pos.getX() + 0.5D;
-                double y = pos.getY() + 0.5D;
-                double z = pos.getZ() + 0.5D;
-                if (blockEntity instanceof Container container) {
-                    tickContainer(container, level, x, y, z, null);
-                    continue;
-                }
-
-                IItemHandler handler = itemHandler(level, pos);
-                if (handler != null) {
-                    tickItemHandler(handler, level, x, y, z, null, blockEntity);
-                }
-            }
-        }
-    }
-
-    private static void tickEntityInventories(ServerLevel level) {
-        for (Entity entity : level.getAllEntities()) {
-            if (entity instanceof Player || entity instanceof ItemEntity) {
-                continue;
-            }
-
-            IItemHandler handler = entity.getCapability(Capabilities.ItemHandler.ENTITY);
-            if (handler != null) {
-                tickItemHandler(handler, level, entity.getX(), entity.getY(), entity.getZ(), entity, null);
-            }
-        }
-    }
-
-    @Nullable
-    private static IItemHandler itemHandler(ServerLevel level, BlockPos pos) {
-        IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, null);
-        if (handler != null) {
-            return handler;
-        }
-
-        for (Direction direction : Direction.values()) {
-            handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, direction);
-            if (handler != null) {
-                return handler;
-            }
-        }
-        return null;
-    }
-
-    private static void setChanged(@Nullable BlockEntity owner) {
-        if (owner != null) {
-            owner.setChanged();
-        }
-    }
-
-    private static void killHolder(@Nullable Entity source) {
-        if (source instanceof LivingEntity livingEntity) {
-            livingEntity.hurt(livingEntity.damageSources().genericKill(), Float.MAX_VALUE);
         }
     }
 

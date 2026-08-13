@@ -537,7 +537,6 @@ public class dddsendgame {
 
     @SubscribeEvent
     public void onServerTick(ServerTickEvent.Post event) {
-        GalaxyInstability.tickLoadedInventories(event.getServer());
         tickSpectatorPhases(event.getServer());
     }
 
