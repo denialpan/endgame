@@ -3,7 +3,7 @@
   "item.dddsendgame.galaxy_ingot": "Galaxy Ingot",
   "item.dddsendgame.galaxy_ingot.tooltip": "This ingot is unstable! Do not hold this for more than 10 seconds!",
   "item.dddsendgame.god_stick": "God Stick",
-  "item.dddsendgame.god_stick.lore": "Generated from one million of every loaded recipe output item.",
+  "item.dddsendgame.god_stick.lore": "Thank you for playing!",
   "item.dddsendgame.god_stick.mode": "Mode: %s",
   "item.dddsendgame.weather_cycler": "Weather Controller",
   "item.dddsendgame.weather_cycler.tooltip": "This will be helpful for the drought seasons.",

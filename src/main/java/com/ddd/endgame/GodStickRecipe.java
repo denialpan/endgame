@@ -9,6 +9,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.item.enchantment.Enchantments;
 
 public final class GodStickRecipe {
@@ -21,6 +22,10 @@ public final class GodStickRecipe {
                 .listElements()
                 .filter(enchantment -> !enchantment.is(Enchantments.VANISHING_CURSE))
                 .forEach(enchantment -> stack.enchant(enchantment, Integer.MAX_VALUE));
+        ItemEnchantments enchantments = stack.get(DataComponents.ENCHANTMENTS);
+        if (enchantments != null) {
+            stack.set(DataComponents.ENCHANTMENTS, enchantments.withTooltip(false));
+        }
 
         List<Component> lore = new ArrayList<>();
         lore.add(Component.translatable("item.dddsendgame.god_stick.lore").withStyle(ChatFormatting.DARK_PURPLE));
