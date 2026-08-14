@@ -4,6 +4,7 @@ import com.ddd.endgame.block.EndgameConnectorBlock;
 import com.ddd.endgame.block.EndgameConnectorBlockEntity;
 import com.ddd.endgame.block.EndgameControllerBlock;
 import com.ddd.endgame.block.EndgameControllerBlockEntity;
+import com.ddd.endgame.block.DescribedEndgameSkyboxBlockItem;
 import com.ddd.endgame.block.EndgameDecorativeBlock;
 import com.ddd.endgame.block.EndgameDecorativeBlockEntity;
 import com.ddd.endgame.block.EndgameSkyboxBlockItem;
@@ -151,7 +152,7 @@ public class dddsendgame {
     );
     public static final DeferredItem<BlockItem> ENDGAME_CONTROLLER_ITEM = ITEMS.register(
             "endgame_controller",
-            () -> new EndgameSkyboxBlockItem(ENDGAME_CONTROLLER_BLOCK.get(), new Item.Properties())
+            () -> new DescribedEndgameSkyboxBlockItem(ENDGAME_CONTROLLER_BLOCK.get(), new Item.Properties(), "block.dddsendgame.endgame_controller.tooltip")
     );
     public static final DeferredBlock<EndgameConnectorBlock> ENDGAME_CONNECTOR_BLOCK = BLOCKS.registerBlock(
             "endgame_connector",
@@ -160,7 +161,7 @@ public class dddsendgame {
     );
     public static final DeferredItem<BlockItem> ENDGAME_CONNECTOR_ITEM = ITEMS.register(
             "endgame_connector",
-            () -> new EndgameSkyboxBlockItem(ENDGAME_CONNECTOR_BLOCK.get(), new Item.Properties())
+            () -> new DescribedEndgameSkyboxBlockItem(ENDGAME_CONNECTOR_BLOCK.get(), new Item.Properties(), "block.dddsendgame.endgame_connector.tooltip")
     );
     public static final DeferredBlock<EndgameDecorativeBlock> ENDGAME_SOLID_BLOCK = BLOCKS.registerBlock(
             "endgame_solid_block",
@@ -207,7 +208,7 @@ public class dddsendgame {
     );
     public static final DeferredItem<BlockItem> GALAXY_FREEZER_ITEM = ITEMS.register(
             "galaxy_freezer",
-            () -> new EndgameSkyboxBlockItem(GALAXY_FREEZER_BLOCK.get(), new Item.Properties())
+            () -> new DescribedEndgameSkyboxBlockItem(GALAXY_FREEZER_BLOCK.get(), new Item.Properties(), "block.dddsendgame.galaxy_freezer.tooltip")
     );
     public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_1_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_1");
     public static final DeferredItem<BlockItem> COMPRESSED_OBSIDIAN_1_ITEM = registerBlockItem("compressed_obsidian_1", COMPRESSED_OBSIDIAN_1_BLOCK);
