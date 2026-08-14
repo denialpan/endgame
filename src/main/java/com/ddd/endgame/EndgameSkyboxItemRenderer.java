@@ -1,5 +1,9 @@
 package com.ddd.endgame;
 
+import com.ddd.endgame.galaxy.GalaxyInstabilityVisuals;
+
+import com.ddd.endgame.galaxy.GalaxyInstabilityTint;
+
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
 import com.ddd.endgame.compat.RenderOptimizationCompat;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -24,7 +28,7 @@ import org.lwjgl.opengl.GL11;
 
 public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
     public static final EndgameSkyboxItemRenderer INSTANCE = new EndgameSkyboxItemRenderer();
-    static final float GUI_SKYBOX_SIZE = 0.95F;
+    public static final float GUI_SKYBOX_SIZE = 0.95F;
     static final float LOCAL_SKYBOX_SIZE = 8.0F;
 
     private EndgameSkyboxItemRenderer() {

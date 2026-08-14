@@ -1,7 +1,7 @@
 package com.ddd.endgame.item;
 
 import com.ddd.endgame.Config;
-import com.ddd.endgame.MobAnnihilatorItemRenderer;
+import com.ddd.endgame.item.models.MobAnnihilatorItemRenderer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.network.chat.Component;

@@ -1,7 +1,7 @@
 package com.ddd.endgame.item;
 
-import com.ddd.endgame.GalaxyIngotItemRenderer;
-import com.ddd.endgame.GalaxyInstability;
+import com.ddd.endgame.item.models.GalaxyIngotItemRenderer;
+import com.ddd.endgame.galaxy.GalaxyInstability;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;

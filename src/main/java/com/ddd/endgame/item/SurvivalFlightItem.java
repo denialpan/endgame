@@ -1,6 +1,6 @@
 package com.ddd.endgame.item;
 
-import com.ddd.endgame.FreeFlightItemRenderer;
+import com.ddd.endgame.item.models.FreeFlightItemRenderer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.network.chat.Component;

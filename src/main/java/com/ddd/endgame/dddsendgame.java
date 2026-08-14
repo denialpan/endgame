@@ -1,5 +1,11 @@
 package com.ddd.endgame;
 
+import com.ddd.endgame.galaxy.GalaxyInstability;
+
+import com.ddd.endgame.galaxy.GalaxyFreezerMenu;
+
+import com.ddd.endgame.galaxy.GalaxyControllerMenu;
+
 import com.ddd.endgame.block.GalaxyConnectorBlock;
 import com.ddd.endgame.block.GalaxyConnectorBlockEntity;
 import com.ddd.endgame.block.GalaxyControllerBlock;
@@ -22,6 +28,8 @@ import com.ddd.endgame.item.RealityRestorerItem;
 import com.ddd.endgame.item.SpectatorPhaseItem;
 import com.ddd.endgame.item.SurvivalFlightItem;
 import com.ddd.endgame.item.WeatherCycleItem;
+import com.ddd.endgame.payload.BlockFabricatorSelectionPayload;
+import com.ddd.endgame.payload.EndgameTestStickModePayload;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.registries.Registries;

@@ -1,6 +1,6 @@
 package com.ddd.endgame.block;
 
-import com.ddd.endgame.GalaxyControllerNetwork;
+import com.ddd.endgame.galaxy.GalaxyControllerNetwork;
 import com.ddd.endgame.dddsendgame;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;

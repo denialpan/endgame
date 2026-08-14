@@ -1,6 +1,6 @@
 package com.ddd.endgame.item;
 
-import com.ddd.endgame.WeatherControllerItemRenderer;
+import com.ddd.endgame.item.models.WeatherControllerItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.server.level.ServerLevel;

@@ -1,6 +1,6 @@
 package com.ddd.endgame.item;
 
-import com.ddd.endgame.DayControllerItemRenderer;
+import com.ddd.endgame.item.models.DayControllerItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;

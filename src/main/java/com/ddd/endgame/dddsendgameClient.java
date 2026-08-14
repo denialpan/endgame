@@ -1,8 +1,21 @@
 package com.ddd.endgame;
 
+import com.ddd.endgame.galaxy.GalaxyTooltip;
+
+import com.ddd.endgame.galaxy.GalaxyInstabilityVisuals;
+
+import com.ddd.endgame.galaxy.GalaxyFreezerScreen;
+
+import com.ddd.endgame.galaxy.GalaxyFreezerPreviewRenderer;
+
+import com.ddd.endgame.galaxy.GalaxyControllerScreen;
+
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
 import com.ddd.endgame.compat.IrisCompat;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
+import com.ddd.endgame.item.models.*;
+import com.ddd.endgame.payload.BlockFabricatorSelectionPayload;
+import com.ddd.endgame.payload.EndgameTestStickModePayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

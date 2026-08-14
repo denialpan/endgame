@@ -1,6 +1,6 @@
 package com.ddd.endgame.item;
 
-import com.ddd.endgame.RealityShifterItemRenderer;
+import com.ddd.endgame.item.models.RealityShifterItemRenderer;
 import com.ddd.endgame.dddsendgame;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;

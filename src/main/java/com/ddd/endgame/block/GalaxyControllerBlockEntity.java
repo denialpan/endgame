@@ -1,8 +1,8 @@
 package com.ddd.endgame.block;
 
 import com.ddd.endgame.Config;
-import com.ddd.endgame.GalaxyControllerMenu;
-import com.ddd.endgame.GalaxyControllerNetwork;
+import com.ddd.endgame.galaxy.GalaxyControllerMenu;
+import com.ddd.endgame.galaxy.GalaxyControllerNetwork;
 import com.ddd.endgame.EndgameRequirement;
 import com.ddd.endgame.dddsendgame;
 import java.lang.reflect.Field;

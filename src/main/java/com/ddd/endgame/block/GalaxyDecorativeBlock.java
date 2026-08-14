@@ -2,7 +2,7 @@ package com.ddd.endgame.block;
 
 import com.mojang.serialization.MapCodec;
 import java.util.function.Consumer;
-import com.ddd.endgame.GalaxyInstability;
+import com.ddd.endgame.galaxy.GalaxyInstability;
 import javax.annotation.Nullable;
 import com.ddd.endgame.dddsendgame;
 import net.minecraft.client.particle.ParticleEngine;

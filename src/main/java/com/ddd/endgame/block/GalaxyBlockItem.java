@@ -1,6 +1,6 @@
 package com.ddd.endgame.block;
 
-import com.ddd.endgame.GalaxyInstability;
+import com.ddd.endgame.galaxy.GalaxyInstability;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;

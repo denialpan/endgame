@@ -1,7 +1,7 @@
 package com.ddd.endgame.block;
 
-import com.ddd.endgame.GalaxyFreezerMenu;
-import com.ddd.endgame.GalaxyInstability;
+import com.ddd.endgame.galaxy.GalaxyFreezerMenu;
+import com.ddd.endgame.galaxy.GalaxyInstability;
 import com.ddd.endgame.dddsendgame;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;

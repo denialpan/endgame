@@ -1,7 +1,7 @@
 package com.ddd.endgame.block;
 
 import com.ddd.endgame.Config;
-import com.ddd.endgame.GalaxyFreezerPreviewRenderer;
+import com.ddd.endgame.galaxy.GalaxyFreezerPreviewRenderer;
 import com.ddd.endgame.compat.IrisCompat;
 import com.ddd.endgame.dddsendgame;
 import com.mojang.math.Axis;
