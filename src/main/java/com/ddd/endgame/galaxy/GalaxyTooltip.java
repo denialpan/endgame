@@ -16,11 +16,17 @@ public final class GalaxyTooltip {
     }
 
     public static Component purpleWhite(String text) {
+        return purpleWhite(text, false);
+    }
+
+    public static Component purpleWhite(String text, boolean bold) {
         float phase = (Util.getMillis() % (long)CYCLE_MILLIS) / CYCLE_MILLIS;
         MutableComponent component = Component.empty();
         for (int i = 0; i < text.length(); i++) {
             float blend = (float)(0.5D + 0.5D * Math.sin((phase * Math.PI * 4.0D) + i * WAVE_STEP));
-            component.append(Component.literal(String.valueOf(text.charAt(i))).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(lerpColor(PURPLE, WHITE, blend)))));
+            component.append(Component.literal(String.valueOf(text.charAt(i))).withStyle(Style.EMPTY
+                    .withColor(TextColor.fromRgb(lerpColor(PURPLE, WHITE, blend)))
+                    .withBold(bold)));
         }
         return component;
     }

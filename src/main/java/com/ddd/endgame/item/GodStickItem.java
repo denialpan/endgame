@@ -37,6 +37,7 @@ public class GodStickItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        tooltipComponents.add(Component.translatable("item.dddsendgame.god_stick.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         tooltipComponents.add(Component.translatable("item.dddsendgame.god_stick.mode", mode(stack).displayName()).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 

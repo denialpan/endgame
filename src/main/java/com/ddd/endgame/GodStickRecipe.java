@@ -30,7 +30,7 @@ public final class GodStickRecipe {
         List<Component> lore = new ArrayList<>();
         lore.add(Component.translatable("item.dddsendgame.god_stick.lore").withStyle(ChatFormatting.DARK_PURPLE));
         stack.set(DataComponents.LORE, new ItemLore(lore));
-        stack.set(DataComponents.ITEM_NAME, Component.translatable("item.dddsendgame.god_stick").withStyle(ChatFormatting.LIGHT_PURPLE));
+        stack.set(DataComponents.ITEM_NAME, Component.translatable("item.dddsendgame.god_stick").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD));
         return stack;
     }
 }

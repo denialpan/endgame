@@ -95,7 +95,7 @@ public class dddsendgameClient {
             return;
         }
 
-        event.getToolTip().set(0, GalaxyTooltip.purpleWhite(stack.getHoverName().getString()));
+        event.getToolTip().set(0, GalaxyTooltip.purpleWhite(stack.getHoverName().getString(), stack.is(dddsendgame.GOD_STICK.get())));
     }
 
     private static void onRenderGuiLayerPre(RenderGuiLayerEvent.Pre event) {
@@ -120,7 +120,7 @@ public class dddsendgameClient {
     private static void renderGalaxyHotbarName(RenderGuiLayerEvent.Pre event, ItemStack selected) {
         Minecraft minecraft = Minecraft.getInstance();
         Font font = minecraft.font;
-        Component name = GalaxyTooltip.purpleWhite(selected.getHoverName().getString());
+        Component name = GalaxyTooltip.purpleWhite(selected.getHoverName().getString(), selected.is(dddsendgame.GOD_STICK.get()));
         int width = font.width(name);
         int x = (event.getGuiGraphics().guiWidth() - width) / 2;
         int y = event.getGuiGraphics().guiHeight() - 59;
