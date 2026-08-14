@@ -20,7 +20,7 @@ import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
 import com.ddd.endgame.compat.BlockFabricatorInventoryHandler;
 import com.ddd.endgame.item.ChunkAnnihilatorItem;
 import com.ddd.endgame.item.DayNightToggleItem;
-import com.ddd.endgame.item.EndgameTestStickItem;
+import com.ddd.endgame.item.GodStickItem;
 import com.ddd.endgame.item.EntityPurgeItem;
 import com.ddd.endgame.item.GalaxyIngotItem;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
@@ -29,7 +29,7 @@ import com.ddd.endgame.item.SpectatorPhaseItem;
 import com.ddd.endgame.item.SurvivalFlightItem;
 import com.ddd.endgame.item.WeatherCycleItem;
 import com.ddd.endgame.payload.BlockFabricatorSelectionPayload;
-import com.ddd.endgame.payload.EndgameTestStickModePayload;
+import com.ddd.endgame.payload.GodStickModePayload;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.registries.Registries;
@@ -98,7 +98,7 @@ import java.util.UUID;
 public class dddsendgame {
     public static final String MODID = "dddsendgame";
     public static final long ENDGAME_ITEM_REQUIREMENT = 1_048_576L;
-    private static final String ENDGAME_STICK_CREATIVE_KEY = MODID + ".endgame_stick_creative";
+    private static final String GOD_STICK_CREATIVE_KEY = MODID + ".god_stick_creative";
     private static final String SURVIVAL_FLIGHT_GRANTED_KEY = MODID + ".survival_flight_granted";
     private static final int SPECTATOR_PHASE_TICKS = 15 * 20;
     public static final int GALAXY_INSTABILITY_DETONATION_TICKS = 10 * 20;
@@ -117,9 +117,9 @@ public class dddsendgame {
             "galaxy_ingot",
             () -> new GalaxyIngotItem(new Item.Properties())
     );
-    public static final DeferredItem<Item> ENDGAME_TEST_STICK = ITEMS.register(
-            "endgame_test_stick",
-            () -> new EndgameTestStickItem(new Item.Properties().stacksTo(1).component(net.minecraft.core.component.DataComponents.DEBUG_STICK_STATE, DebugStickState.EMPTY))
+    public static final DeferredItem<Item> GOD_STICK = ITEMS.register(
+            "god_stick",
+            () -> new GodStickItem(new Item.Properties().stacksTo(1).component(net.minecraft.core.component.DataComponents.DEBUG_STICK_STATE, DebugStickState.EMPTY))
     );
     public static final DeferredItem<Item> WEATHER_CYCLER = ITEMS.register(
             "weather_cycler",
@@ -313,7 +313,7 @@ public class dddsendgame {
                 output.accept(CHUNK_ANNIHILATOR.get());
                 output.accept(GALAXY_INGOT.get());
                 output.accept(GALAXY_BLOCK_ITEM.get());
-                output.accept(EndgameTestRecipe.createResult(parameters.holders()));
+                output.accept(GodStickRecipe.createResult(parameters.holders()));
             }).build());
 
     public dddsendgame(IEventBus modEventBus, ModContainer modContainer) {
@@ -416,9 +416,9 @@ public class dddsendgame {
 
     private void registerPayloads(RegisterPayloadHandlersEvent event) {
         event.registrar("1").playToServer(
-                EndgameTestStickModePayload.TYPE,
-                EndgameTestStickModePayload.STREAM_CODEC,
-                EndgameTestStickModePayload::handle
+                GodStickModePayload.TYPE,
+                GodStickModePayload.STREAM_CODEC,
+                GodStickModePayload::handle
         );
         event.registrar("1").playToServer(
                 BlockFabricatorSelectionPayload.TYPE,
@@ -490,22 +490,22 @@ public class dddsendgame {
 
         updateSurvivalFlight(player);
         GalaxyInstability.tickPlayerStacks(player);
-        boolean changedByStick = player.getPersistentData().getBoolean(ENDGAME_STICK_CREATIVE_KEY);
-        if (!Config.ENDGAME_STICK_GRANTS_CREATIVE.getAsBoolean()) {
+        boolean changedByStick = player.getPersistentData().getBoolean(GOD_STICK_CREATIVE_KEY);
+        if (!Config.GOD_STICK_GRANTS_CREATIVE.getAsBoolean()) {
             if (changedByStick) {
                 if (player.isCreative()) {
                     player.setGameMode(GameType.SURVIVAL);
                 }
-                player.getPersistentData().remove(ENDGAME_STICK_CREATIVE_KEY);
+                player.getPersistentData().remove(GOD_STICK_CREATIVE_KEY);
             }
             return;
         }
 
-        boolean hasEndgameStick = player.getInventory().contains(stack -> stack.is(ENDGAME_TEST_STICK.get()));
-        if (hasEndgameStick) {
+        boolean hasGodStick = player.getInventory().contains(stack -> stack.is(GOD_STICK.get()));
+        if (hasGodStick) {
             if (!player.isCreative()) {
                 if (player.setGameMode(GameType.CREATIVE)) {
-                    player.getPersistentData().putBoolean(ENDGAME_STICK_CREATIVE_KEY, true);
+                    player.getPersistentData().putBoolean(GOD_STICK_CREATIVE_KEY, true);
                 }
             }
             return;
@@ -515,7 +515,7 @@ public class dddsendgame {
             if (player.isCreative()) {
                 player.setGameMode(GameType.SURVIVAL);
             }
-            player.getPersistentData().remove(ENDGAME_STICK_CREATIVE_KEY);
+            player.getPersistentData().remove(GOD_STICK_CREATIVE_KEY);
         }
     }
 

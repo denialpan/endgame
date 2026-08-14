@@ -11,21 +11,21 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.enchantment.Enchantments;
 
-public final class EndgameTestRecipe {
-    private EndgameTestRecipe() {
+public final class GodStickRecipe {
+    private GodStickRecipe() {
     }
 
     public static ItemStack createResult(HolderLookup.Provider registries) {
-        ItemStack stack = new ItemStack(dddsendgame.ENDGAME_TEST_STICK.get());
+        ItemStack stack = new ItemStack(dddsendgame.GOD_STICK.get());
         registries.lookupOrThrow(Registries.ENCHANTMENT)
                 .listElements()
                 .filter(enchantment -> !enchantment.is(Enchantments.VANISHING_CURSE))
                 .forEach(enchantment -> stack.enchant(enchantment, Integer.MAX_VALUE));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.translatable("item.dddsendgame.endgame_test_stick.lore").withStyle(ChatFormatting.DARK_PURPLE));
+        lore.add(Component.translatable("item.dddsendgame.god_stick.lore").withStyle(ChatFormatting.DARK_PURPLE));
         stack.set(DataComponents.LORE, new ItemLore(lore));
-        stack.set(DataComponents.ITEM_NAME, Component.translatable("item.dddsendgame.endgame_test_stick").withStyle(ChatFormatting.LIGHT_PURPLE));
+        stack.set(DataComponents.ITEM_NAME, Component.translatable("item.dddsendgame.god_stick").withStyle(ChatFormatting.LIGHT_PURPLE));
         return stack;
     }
 }

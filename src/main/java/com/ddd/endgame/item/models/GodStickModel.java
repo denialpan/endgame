@@ -5,12 +5,12 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.neoforged.neoforge.client.model.BakedModelWrapper;
 
-public class EndgameTestStickModel extends BakedModelWrapper<BakedModel> {
+public class GodStickModel extends BakedModelWrapper<BakedModel> {
     private static BakedModel originalModel;
 
-    public EndgameTestStickModel(BakedModel originalModel) {
+    public GodStickModel(BakedModel originalModel) {
         super(originalModel);
-        EndgameTestStickModel.originalModel = originalModel;
+        GodStickModel.originalModel = originalModel;
     }
 
     public static BakedModel originalModel() {

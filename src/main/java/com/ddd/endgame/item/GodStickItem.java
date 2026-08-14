@@ -1,6 +1,6 @@
 package com.ddd.endgame.item;
 
-import com.ddd.endgame.item.models.EndgameTestStickItemRenderer;
+import com.ddd.endgame.item.models.GodStickItemRenderer;
 import com.ddd.endgame.dddsendgame;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -25,16 +25,16 @@ import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class EndgameTestStickItem extends Item {
+public class GodStickItem extends Item {
     private static final String MODE_TAG = "EndgameStickMode";
 
-    public EndgameTestStickItem(Properties properties) {
+    public GodStickItem(Properties properties) {
         super(properties);
     }
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.dddsendgame.endgame_test_stick.mode", mode(stack).displayName()).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.dddsendgame.god_stick.mode", mode(stack).displayName()).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override
@@ -96,7 +96,7 @@ public class EndgameTestStickItem extends Item {
         consumer.accept(new IClientItemExtensions() {
             @Override
             public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                return EndgameTestStickItemRenderer.INSTANCE;
+                return GodStickItemRenderer.INSTANCE;
             }
         });
     }

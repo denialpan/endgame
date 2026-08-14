@@ -15,7 +15,7 @@ import com.ddd.endgame.compat.IrisCompat;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
 import com.ddd.endgame.item.models.*;
 import com.ddd.endgame.payload.BlockFabricatorSelectionPayload;
-import com.ddd.endgame.payload.EndgameTestStickModePayload;
+import com.ddd.endgame.payload.GodStickModePayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -180,7 +180,7 @@ public class dddsendgameClient {
                 || stack.is(dddsendgame.CHUNK_ANNIHILATOR.get())
                 || stack.is(dddsendgame.GALAXY_INGOT.get())
                 || stack.is(dddsendgame.GALAXY_BLOCK_ITEM.get())
-                || stack.is(dddsendgame.ENDGAME_TEST_STICK.get());
+                || stack.is(dddsendgame.GOD_STICK.get());
     }
 
     private static void onMouseScrolled(InputEvent.MouseScrollingEvent event) {
@@ -195,9 +195,9 @@ public class dddsendgameClient {
         }
 
         int direction = scroll > 0.0D ? 1 : -1;
-        if (minecraft.player.getMainHandItem().is(dddsendgame.ENDGAME_TEST_STICK.get())
-                || minecraft.player.getOffhandItem().is(dddsendgame.ENDGAME_TEST_STICK.get())) {
-            PacketDistributor.sendToServer(new EndgameTestStickModePayload(direction));
+        if (minecraft.player.getMainHandItem().is(dddsendgame.GOD_STICK.get())
+                || minecraft.player.getOffhandItem().is(dddsendgame.GOD_STICK.get())) {
+            PacketDistributor.sendToServer(new GodStickModePayload(direction));
             event.setCanceled(true);
             return;
         }
@@ -348,10 +348,10 @@ public class dddsendgameClient {
             event.getModels().put(chunkAnnihilatorLocation, new ChunkAnnihilatorModel(chunkAnnihilatorOriginal));
         }
 
-        ModelResourceLocation endgameTestStickLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "endgame_test_stick"));
+        ModelResourceLocation endgameTestStickLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "god_stick"));
         BakedModel endgameTestStickOriginal = event.getModels().get(endgameTestStickLocation);
-        if (endgameTestStickOriginal != null && !(endgameTestStickOriginal instanceof EndgameTestStickModel)) {
-            event.getModels().put(endgameTestStickLocation, new EndgameTestStickModel(endgameTestStickOriginal));
+        if (endgameTestStickOriginal != null && !(endgameTestStickOriginal instanceof GodStickModel)) {
+            event.getModels().put(endgameTestStickLocation, new GodStickModel(endgameTestStickOriginal));
         }
 
         ModelResourceLocation weatherLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "weather_cycler"));

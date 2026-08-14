@@ -217,7 +217,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
 
     private static void addRecipeOutputItem(Map<ResourceLocation, Item> recipeItems, ItemStack result) {
         if (result.isEmpty()
-                || result.is(dddsendgame.ENDGAME_TEST_STICK.get())
+                || result.is(dddsendgame.GOD_STICK.get())
                 || result.is(dddsendgame.GALAXY_COMPRESSOR_ITEM.get())) {
             return;
         }
