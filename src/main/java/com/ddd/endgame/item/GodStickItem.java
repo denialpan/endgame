@@ -53,17 +53,13 @@ public class GodStickItem extends Item {
             case WEATHER_CONTROLLER -> dddsendgame.WEATHER_CYCLER.get().use(level, player, usedHand);
             case MOB_ANNIHILATOR -> dddsendgame.ENTITY_PURGE_CORE.get().use(level, player, usedHand);
             case REALITY_SHIFTER -> dddsendgame.REALITY_RESTORER.get().use(level, player, usedHand);
-            case NOCLIP -> dddsendgame.SPECTATOR_PHASE_CORE.get().use(level, player, usedHand);
             case CHUNK_ANNIHILATOR -> dddsendgame.CHUNK_ANNIHILATOR.get().use(level, player, usedHand);
-            case BLOCK_FABRICATOR, DEBUG_STICK -> InteractionResultHolder.pass(stack);
+            case DEBUG_STICK -> InteractionResultHolder.pass(stack);
         };
     }
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
-        if (mode(context.getItemInHand()) == Mode.BLOCK_FABRICATOR) {
-            return dddsendgame.RANDOM_BLOCK_PLACER.get().useOn(context);
-        }
         if (mode(context.getItemInHand()) == Mode.DEBUG_STICK) {
             return Items.DEBUG_STICK.useOn(context);
         }
@@ -118,9 +114,7 @@ public class GodStickItem extends Item {
         DAY_CONTROLLER("item.dddsendgame.day_night_toggle"),
         WEATHER_CONTROLLER("item.dddsendgame.weather_cycler"),
         MOB_ANNIHILATOR("item.dddsendgame.entity_purge_core"),
-        BLOCK_FABRICATOR("item.dddsendgame.random_block_placer"),
         REALITY_SHIFTER("item.dddsendgame.reality_restorer"),
-        NOCLIP("item.dddsendgame.spectator_phase_core"),
         CHUNK_ANNIHILATOR("item.dddsendgame.chunk_annihilator"),
         DEBUG_STICK("item.minecraft.debug_stick");
 
