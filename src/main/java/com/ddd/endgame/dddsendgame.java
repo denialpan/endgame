@@ -99,6 +99,7 @@ public class dddsendgame {
     public static final String MODID = "dddsendgame";
     public static final long ENDGAME_ITEM_REQUIREMENT = 1_048_576L;
     private static final String GOD_STICK_CREATIVE_KEY = MODID + ".god_stick_creative";
+    private static final String GOD_STICK_COMMAND_TREE_KEY = MODID + ".god_stick_command_tree";
     private static final String SURVIVAL_FLIGHT_GRANTED_KEY = MODID + ".survival_flight_granted";
     private static final int SPECTATOR_PHASE_TICKS = 15 * 20;
     public static final int GALAXY_INSTABILITY_DETONATION_TICKS = 10 * 20;
@@ -489,6 +490,7 @@ public class dddsendgame {
         }
 
         updateSurvivalFlight(player);
+        updateGodStickCommandTree(player);
         GalaxyInstability.tickPlayerStacks(player);
         boolean changedByStick = player.getPersistentData().getBoolean(GOD_STICK_CREATIVE_KEY);
         if (!Config.GOD_STICK_GRANTS_CREATIVE.getAsBoolean()) {
@@ -547,6 +549,21 @@ public class dddsendgame {
     @SubscribeEvent
     public void onServerTick(ServerTickEvent.Post event) {
         tickSpectatorPhases(event.getServer());
+    }
+
+    private static void updateGodStickCommandTree(ServerPlayer player) {
+        boolean hasCommandStick = GodStickItem.grantsServerCommandPermissions(player);
+        boolean hadCommandStick = player.getPersistentData().getBoolean(GOD_STICK_COMMAND_TREE_KEY);
+        if (hasCommandStick == hadCommandStick) {
+            return;
+        }
+
+        if (hasCommandStick) {
+            player.getPersistentData().putBoolean(GOD_STICK_COMMAND_TREE_KEY, true);
+        } else {
+            player.getPersistentData().remove(GOD_STICK_COMMAND_TREE_KEY);
+        }
+        player.server.getCommands().sendCommands(player);
     }
 
     public static void startSpectatorPhase(ServerPlayer player) {

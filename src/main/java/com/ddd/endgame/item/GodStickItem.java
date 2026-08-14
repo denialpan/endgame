@@ -12,6 +12,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -79,6 +81,13 @@ public class GodStickItem extends Item {
     public static Mode mode(ItemStack stack) {
         int index = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getInt(MODE_TAG);
         return Mode.byIndex(index);
+    }
+
+    public static boolean grantsServerCommandPermissions(Entity entity) {
+        if (!(entity instanceof ServerPlayer player)) {
+            return false;
+        }
+        return player.getMainHandItem().is(dddsendgame.GOD_STICK.get()) || player.getOffhandItem().is(dddsendgame.GOD_STICK.get());
     }
 
     public static Mode cycleMode(ItemStack stack, int direction) {
