@@ -1,8 +1,8 @@
 package com.ddd.endgame.block;
 
 import com.ddd.endgame.Config;
-import com.ddd.endgame.galaxy.GalaxyControllerMenu;
-import com.ddd.endgame.galaxy.GalaxyControllerNetwork;
+import com.ddd.endgame.galaxy.GalaxyCompressorMenu;
+import com.ddd.endgame.galaxy.GalaxyCompressorNetwork;
 import com.ddd.endgame.EndgameRequirement;
 import com.ddd.endgame.dddsendgame;
 import java.lang.reflect.Field;
@@ -40,7 +40,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 
-public class GalaxyControllerBlockEntity extends BlockEntity implements Container, MenuProvider {
+public class GalaxyCompressorBlockEntity extends BlockEntity implements Container, MenuProvider {
     private static final int SLOT_INPUT = 0;
     private static final int SLOT_OUTPUT = 1;
     private final LinkedHashMap<ResourceLocation, Long> remaining = new LinkedHashMap<>();
@@ -51,8 +51,8 @@ public class GalaxyControllerBlockEntity extends BlockEntity implements Containe
     private boolean requirementsDirty = true;
     private int requirementsRevision;
 
-    public GalaxyControllerBlockEntity(BlockPos pos, BlockState blockState) {
-        super(dddsendgame.GALAXY_CONTROLLER_BLOCK_ENTITY.get(), pos, blockState);
+    public GalaxyCompressorBlockEntity(BlockPos pos, BlockState blockState) {
+        super(dddsendgame.GALAXY_COMPRESSOR_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     public List<EndgameRequirement> requirements() {
@@ -112,8 +112,8 @@ public class GalaxyControllerBlockEntity extends BlockEntity implements Containe
         return this.requirementsRevision;
     }
 
-    public GalaxyControllerNetwork.Status networkStatus() {
-        return this.level == null ? new GalaxyControllerNetwork.Status(this.worldPosition, 1, 0) : GalaxyControllerNetwork.fromController(this.level, this.worldPosition);
+    public GalaxyCompressorNetwork.Status networkStatus() {
+        return this.level == null ? new GalaxyCompressorNetwork.Status(this.worldPosition, 1, 0) : GalaxyCompressorNetwork.fromController(this.level, this.worldPosition);
     }
 
     public int connectedInputCount() {
@@ -186,7 +186,7 @@ public class GalaxyControllerBlockEntity extends BlockEntity implements Containe
         }
 
         if (changed) {
-            dddsendgame.LOGGER.info("Endgame controller at {} tracks {} recipe output items and {} fluids", this.worldPosition, this.remaining.size(), this.fluidRemaining.size());
+            dddsendgame.LOGGER.info("Endgame compressor at {} tracks {} recipe output items and {} fluids", this.worldPosition, this.remaining.size(), this.fluidRemaining.size());
             this.setChangedAndSync();
         }
     }
@@ -218,7 +218,7 @@ public class GalaxyControllerBlockEntity extends BlockEntity implements Containe
     private static void addRecipeOutputItem(Map<ResourceLocation, Item> recipeItems, ItemStack result) {
         if (result.isEmpty()
                 || result.is(dddsendgame.ENDGAME_TEST_STICK.get())
-                || result.is(dddsendgame.GALAXY_CONTROLLER_ITEM.get())) {
+                || result.is(dddsendgame.GALAXY_COMPRESSOR_ITEM.get())) {
             return;
         }
 
@@ -338,14 +338,14 @@ public class GalaxyControllerBlockEntity extends BlockEntity implements Containe
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("container.dddsendgame.galaxy_controller");
+        return Component.translatable("container.dddsendgame.galaxy_compressor");
     }
 
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
         this.initializeRequirementsFromRecipes();
-        return new GalaxyControllerMenu(containerId, playerInventory, this);
+        return new GalaxyCompressorMenu(containerId, playerInventory, this);
     }
 
     @Override
@@ -484,7 +484,7 @@ public class GalaxyControllerBlockEntity extends BlockEntity implements Containe
         @Override
         public ItemStack getStackInSlot(int slot) {
             validateSlot(slot);
-            if (slot == SLOT_OUTPUT && GalaxyControllerBlockEntity.this.level != null && GalaxyControllerBlockEntity.this.isComplete()) {
+            if (slot == SLOT_OUTPUT && GalaxyCompressorBlockEntity.this.level != null && GalaxyCompressorBlockEntity.this.isComplete()) {
                 return new ItemStack(dddsendgame.GALAXY_INGOT.get());
             }
             return ItemStack.EMPTY;
@@ -497,14 +497,14 @@ public class GalaxyControllerBlockEntity extends BlockEntity implements Containe
                 return stack;
             }
 
-            int accepted = GalaxyControllerBlockEntity.this.acceptedContributionCount(stack);
+            int accepted = GalaxyCompressorBlockEntity.this.acceptedContributionCount(stack);
             if (accepted <= 0) {
                 return stack;
             }
 
             if (!simulate) {
                 ItemStack consumed = stack.copyWithCount(accepted);
-                GalaxyControllerBlockEntity.this.acceptContribution(consumed);
+                GalaxyCompressorBlockEntity.this.acceptContribution(consumed);
             }
 
             return accepted >= stack.getCount() ? ItemStack.EMPTY : stack.copyWithCount(stack.getCount() - accepted);
@@ -517,13 +517,13 @@ public class GalaxyControllerBlockEntity extends BlockEntity implements Containe
                 return ItemStack.EMPTY;
             }
 
-            if (GalaxyControllerBlockEntity.this.level == null || !GalaxyControllerBlockEntity.this.isComplete()) {
+            if (GalaxyCompressorBlockEntity.this.level == null || !GalaxyCompressorBlockEntity.this.isComplete()) {
                 return ItemStack.EMPTY;
             }
 
             ItemStack result = new ItemStack(dddsendgame.GALAXY_INGOT.get());
             if (!simulate) {
-                GalaxyControllerBlockEntity.this.resetRequirements();
+                GalaxyCompressorBlockEntity.this.resetRequirements();
             }
             return result;
         }
@@ -537,7 +537,7 @@ public class GalaxyControllerBlockEntity extends BlockEntity implements Containe
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
             validateSlot(slot);
-            return slot == SLOT_INPUT && GalaxyControllerBlockEntity.this.acceptedContributionCount(stack) > 0;
+            return slot == SLOT_INPUT && GalaxyCompressorBlockEntity.this.acceptedContributionCount(stack) > 0;
         }
 
         private void validateSlot(int slot) {
@@ -568,12 +568,12 @@ public class GalaxyControllerBlockEntity extends BlockEntity implements Containe
         @Override
         public boolean isFluidValid(int tank, FluidStack stack) {
             validateTank(tank);
-            return GalaxyControllerBlockEntity.this.acceptFluidContribution(stack, FluidAction.SIMULATE) > 0;
+            return GalaxyCompressorBlockEntity.this.acceptFluidContribution(stack, FluidAction.SIMULATE) > 0;
         }
 
         @Override
         public int fill(FluidStack resource, FluidAction action) {
-            return GalaxyControllerBlockEntity.this.acceptFluidContribution(resource, action);
+            return GalaxyCompressorBlockEntity.this.acceptFluidContribution(resource, action);
         }
 
         @Override

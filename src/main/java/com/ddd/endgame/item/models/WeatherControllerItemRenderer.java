@@ -180,7 +180,7 @@ public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRender
                 collectBakedMaskQuads(quads, renderPass, image, random);
             }
         } catch (IOException | IllegalStateException exception) {
-            dddsendgame.LOGGER.warn("Unable to build weather controller stencil mask", exception);
+            dddsendgame.LOGGER.warn("Unable to build weather compressor stencil mask", exception);
         }
 
         cachedMaskQuads = List.copyOf(quads);

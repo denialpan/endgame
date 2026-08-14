@@ -76,7 +76,7 @@ public final class GalaxyFreezerPreviewRenderer {
         QUEUED_TARGETS.clear();
         PreviewTarget placementTarget = findPlacementTarget(minecraft, player);
         if (placementTarget != null && targets.isEmpty()) {
-            targets.put(placementTarget.controllerPos(), placementTarget);
+            targets.put(placementTarget.compressorPos(), placementTarget);
         }
 
         if (targets.isEmpty()) {
@@ -100,7 +100,7 @@ public final class GalaxyFreezerPreviewRenderer {
         poseStack.pushPose();
         poseStack.mulPose(event.getModelViewMatrix());
         for (PreviewTarget target : targets.values()) {
-            List<GalaxyFreezerMultiblock.PreviewBlock> previewBlocks = GalaxyFreezerMultiblock.previewBlocks(target.controllerPos(), target.facing());
+            List<GalaxyFreezerMultiblock.PreviewBlock> previewBlocks = GalaxyFreezerMultiblock.previewBlocks(target.compressorPos(), target.facing());
             for (GalaxyFreezerMultiblock.PreviewBlock previewBlock : previewBlocks) {
                 if (!isPreviewBlockInRange(player, previewBlock.pos())) {
                     continue;
@@ -155,7 +155,7 @@ public final class GalaxyFreezerPreviewRenderer {
     }
 
     private static boolean hasVisiblePreviewBlock(Level level, Player player, PreviewTarget target) {
-        return GalaxyFreezerMultiblock.previewBlocks(target.controllerPos(), target.facing()).stream()
+        return GalaxyFreezerMultiblock.previewBlocks(target.compressorPos(), target.facing()).stream()
                 .anyMatch(previewBlock -> isPreviewBlockInRange(player, previewBlock.pos()));
     }
 
@@ -163,7 +163,7 @@ public final class GalaxyFreezerPreviewRenderer {
         return player.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) <= DETECTION_RADIUS_BLOCKS_SQUARED;
     }
 
-    private record PreviewTarget(BlockPos controllerPos, Direction facing) {
+    private record PreviewTarget(BlockPos compressorPos, Direction facing) {
     }
 
     private record TranslucentPreviewBufferSource(MultiBufferSource delegate, float alpha) implements MultiBufferSource {

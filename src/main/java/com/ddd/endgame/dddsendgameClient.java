@@ -8,7 +8,7 @@ import com.ddd.endgame.galaxy.GalaxyFreezerScreen;
 
 import com.ddd.endgame.galaxy.GalaxyFreezerPreviewRenderer;
 
-import com.ddd.endgame.galaxy.GalaxyControllerScreen;
+import com.ddd.endgame.galaxy.GalaxyCompressorScreen;
 
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
 import com.ddd.endgame.compat.IrisCompat;
@@ -262,7 +262,7 @@ public class dddsendgameClient {
     }
 
     private static boolean isEndgameSkyboxBlock(BlockState state) {
-        return state.is(dddsendgame.GALAXY_CONTROLLER_BLOCK.get())
+        return state.is(dddsendgame.GALAXY_COMPRESSOR_BLOCK.get())
                 || state.is(dddsendgame.GALAXY_CONNECTOR_BLOCK.get())
                 || state.is(dddsendgame.GALAXY_OBSIDIAN_BLOCK.get())
                 || state.is(dddsendgame.GALAXY_GLASS_BLOCK.get())
@@ -273,13 +273,13 @@ public class dddsendgameClient {
 
     @SubscribeEvent
     static void registerScreens(RegisterMenuScreensEvent event) {
-        event.register(dddsendgame.GALAXY_CONTROLLER_MENU.get(), GalaxyControllerScreen::new);
+        event.register(dddsendgame.GALAXY_COMPRESSOR_MENU.get(), GalaxyCompressorScreen::new);
         event.register(dddsendgame.GALAXY_FREEZER_MENU.get(), GalaxyFreezerScreen::new);
     }
 
     @SubscribeEvent
     static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(dddsendgame.GALAXY_CONTROLLER_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(dddsendgame.GALAXY_COMPRESSOR_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
         event.registerBlockEntityRenderer(dddsendgame.GALAXY_CONNECTOR_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
         event.registerBlockEntityRenderer(dddsendgame.GALAXY_DECORATIVE_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
         event.registerBlockEntityRenderer(dddsendgame.GALAXY_FREEZER_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);

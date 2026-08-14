@@ -21,11 +21,11 @@ public class Config {
     }
 
     public static final ModConfigSpec.LongValue ITEM_REQUIREMENT = BUILDER
-            .comment("How many of each required item stack must be inserted into the endgame controller.")
+            .comment("How many of each required item stack must be inserted into the endgame compressor.")
             .defineInRange("itemRequirement", 1_048_576L, 1L, Long.MAX_VALUE);
 
     public static final ModConfigSpec.LongValue FLUID_REQUIREMENT_MB = BUILDER
-            .comment("How many millibuckets of each required fluid must be inserted into the endgame controller.")
+            .comment("How many millibuckets of each required fluid must be inserted into the endgame compressor.")
             .defineInRange("fluidRequirementMb", 1_048_576L, 1L, Long.MAX_VALUE);
 
     public static final ModConfigSpec.BooleanValue DEBUG_STONE_ONLY = BUILDER
@@ -45,15 +45,15 @@ public class Config {
             .define("entityPurgeKillsPlayers", false);
 
     public static final ModConfigSpec.DoubleValue PITCH_ROTATION_SPEED = CLIENT_BUILDER
-            .comment("Client-side visual pitch speed for the endgame controller inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
+            .comment("Client-side visual pitch speed for the endgame compressor inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
             .defineInRange("skyboxPitchRotationSpeedDegreesPerSecond", 0.1D, -360.0D, 360.0D);
 
     public static final ModConfigSpec.DoubleValue YAW_ROTATION_SPEED = CLIENT_BUILDER
-            .comment("Client-side visual yaw speed for the endgame controller inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
+            .comment("Client-side visual yaw speed for the endgame compressor inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
             .defineInRange("skyboxYawRotationSpeedDegreesPerSecond", 0.1D, -360.0D, 360.0D);
 
     public static final ModConfigSpec.DoubleValue ROLL_ROTATION_SPEED = CLIENT_BUILDER
-            .comment("Client-side visual roll speed for the endgame controller inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
+            .comment("Client-side visual roll speed for the endgame compressor inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
             .defineInRange("skyboxRollRotationSpeedDegreesPerSecond", 0.1D, -360.0D, 360.0D);
 
     public static final ModConfigSpec.DoubleValue RENDER_DISTANCE = CLIENT_BUILDER

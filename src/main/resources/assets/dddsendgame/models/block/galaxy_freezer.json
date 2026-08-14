@@ -6,7 +6,7 @@
     "north": "dddsendgame:block/galaxy_plated",
     "south": "dddsendgame:block/galaxy_plated",
     "east": "dddsendgame:block/galaxy_plated",
-    "west": "dddsendgame:block/galaxy_controller_front",
+    "west": "dddsendgame:block/galaxy_compressor_front",
     "up": "dddsendgame:block/galaxy_plated",
     "down": "dddsendgame:block/galaxy_plated"
   }

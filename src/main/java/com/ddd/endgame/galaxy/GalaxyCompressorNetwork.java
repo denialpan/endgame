@@ -1,7 +1,7 @@
 package com.ddd.endgame.galaxy;
 
 import com.ddd.endgame.block.GalaxyConnectorBlockEntity;
-import com.ddd.endgame.block.GalaxyControllerBlockEntity;
+import com.ddd.endgame.block.GalaxyCompressorBlockEntity;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Queue;
@@ -12,38 +12,38 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-public final class GalaxyControllerNetwork {
-    private GalaxyControllerNetwork() {
+public final class GalaxyCompressorNetwork {
+    private GalaxyCompressorNetwork() {
     }
 
-    public static Status fromController(Level level, BlockPos controllerPos) {
-        Set<BlockPos> controllers = new HashSet<>();
+    public static Status fromController(Level level, BlockPos compressorPos) {
+        Set<BlockPos> compressors = new HashSet<>();
         Set<BlockPos> inputs = new HashSet<>();
         Queue<BlockPos> queue = new ArrayDeque<>();
-        controllers.add(controllerPos);
-        addAdjacentInputs(level, controllerPos, inputs, queue);
-        scan(level, inputs, queue, controllers);
-        return new Status(controllers.size() == 1 ? controllers.iterator().next() : null, controllers.size(), inputs.size());
+        compressors.add(compressorPos);
+        addAdjacentInputs(level, compressorPos, inputs, queue);
+        scan(level, inputs, queue, compressors);
+        return new Status(compressors.size() == 1 ? compressors.iterator().next() : null, compressors.size(), inputs.size());
     }
 
     public static Status fromInput(Level level, BlockPos inputPos) {
-        Set<BlockPos> controllers = new HashSet<>();
+        Set<BlockPos> compressors = new HashSet<>();
         Set<BlockPos> inputs = new HashSet<>();
         Queue<BlockPos> queue = new ArrayDeque<>();
         inputs.add(inputPos);
         queue.add(inputPos);
-        scan(level, inputs, queue, controllers);
-        return new Status(controllers.size() == 1 ? controllers.iterator().next() : null, controllers.size(), inputs.size());
+        scan(level, inputs, queue, compressors);
+        return new Status(compressors.size() == 1 ? compressors.iterator().next() : null, compressors.size(), inputs.size());
     }
 
-    private static void scan(Level level, Set<BlockPos> inputs, Queue<BlockPos> queue, Set<BlockPos> controllers) {
+    private static void scan(Level level, Set<BlockPos> inputs, Queue<BlockPos> queue, Set<BlockPos> compressors) {
         while (!queue.isEmpty()) {
             BlockPos current = queue.remove();
             for (Direction direction : Direction.values()) {
                 BlockPos adjacentPos = current.relative(direction);
                 BlockEntity adjacent = level.getBlockEntity(adjacentPos);
-                if (adjacent instanceof GalaxyControllerBlockEntity) {
-                    controllers.add(adjacentPos);
+                if (adjacent instanceof GalaxyCompressorBlockEntity) {
+                    compressors.add(adjacentPos);
                 } else if (adjacent instanceof GalaxyConnectorBlockEntity && inputs.add(adjacentPos)) {
                     queue.add(adjacentPos);
                 }
@@ -60,18 +60,18 @@ public final class GalaxyControllerNetwork {
         }
     }
 
-    public record Status(@Nullable BlockPos controllerPos, int controllerCount, int inputCount) {
+    public record Status(@Nullable BlockPos compressorPos, int compressorCount, int inputCount) {
         public boolean hasMultipleControllers() {
-            return this.controllerCount > 1;
+            return this.compressorCount > 1;
         }
 
         @Nullable
-        public GalaxyControllerBlockEntity singleController(Level level) {
-            if (this.controllerPos == null) {
+        public GalaxyCompressorBlockEntity singleController(Level level) {
+            if (this.compressorPos == null) {
                 return null;
             }
 
-            return level.getBlockEntity(this.controllerPos) instanceof GalaxyControllerBlockEntity controller ? controller : null;
+            return level.getBlockEntity(this.compressorPos) instanceof GalaxyCompressorBlockEntity compressor ? compressor : null;
         }
     }
 }

@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "dddsendgame:galaxy_controller",
+    "dddsendgame:galaxy_compressor",
     "dddsendgame:galaxy_connector",
     "dddsendgame:galaxy_obsidian",
     "dddsendgame:galaxy_glass",

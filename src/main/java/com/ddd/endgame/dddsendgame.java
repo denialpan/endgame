@@ -4,12 +4,12 @@ import com.ddd.endgame.galaxy.GalaxyInstability;
 
 import com.ddd.endgame.galaxy.GalaxyFreezerMenu;
 
-import com.ddd.endgame.galaxy.GalaxyControllerMenu;
+import com.ddd.endgame.galaxy.GalaxyCompressorMenu;
 
 import com.ddd.endgame.block.GalaxyConnectorBlock;
 import com.ddd.endgame.block.GalaxyConnectorBlockEntity;
-import com.ddd.endgame.block.GalaxyControllerBlock;
-import com.ddd.endgame.block.GalaxyControllerBlockEntity;
+import com.ddd.endgame.block.GalaxyCompressorBlock;
+import com.ddd.endgame.block.GalaxyCompressorBlockEntity;
 import com.ddd.endgame.block.DescribedEndgameSkyboxBlockItem;
 import com.ddd.endgame.block.GalaxyDecorativeBlock;
 import com.ddd.endgame.block.GalaxyDecorativeBlockEntity;
@@ -153,14 +153,14 @@ public class dddsendgame {
             "chunk_annihilator",
             () -> new ChunkAnnihilatorItem(new Item.Properties().stacksTo(1))
     );
-    public static final DeferredBlock<GalaxyControllerBlock> GALAXY_CONTROLLER_BLOCK = BLOCKS.registerBlock(
-            "galaxy_controller",
-            GalaxyControllerBlock::new,
+    public static final DeferredBlock<GalaxyCompressorBlock> GALAXY_COMPRESSOR_BLOCK = BLOCKS.registerBlock(
+            "galaxy_compressor",
+            GalaxyCompressorBlock::new,
             BlockBehaviour.Properties.ofFullCopy(Blocks.OBSIDIAN)
     );
-    public static final DeferredItem<BlockItem> GALAXY_CONTROLLER_ITEM = ITEMS.register(
-            "galaxy_controller",
-            () -> new DescribedEndgameSkyboxBlockItem(GALAXY_CONTROLLER_BLOCK.get(), new Item.Properties(), "block.dddsendgame.galaxy_controller.tooltip")
+    public static final DeferredItem<BlockItem> GALAXY_COMPRESSOR_ITEM = ITEMS.register(
+            "galaxy_compressor",
+            () -> new DescribedEndgameSkyboxBlockItem(GALAXY_COMPRESSOR_BLOCK.get(), new Item.Properties(), "block.dddsendgame.galaxy_compressor.tooltip")
     );
     public static final DeferredBlock<GalaxyConnectorBlock> GALAXY_CONNECTOR_BLOCK = BLOCKS.registerBlock(
             "galaxy_connector",
@@ -253,8 +253,8 @@ public class dddsendgame {
     public static final DeferredBlock<TransparentBlock> COMPRESSED_GLASS_9_BLOCK = registerCompressedGlassBlock("compressed_glass_9", 5.4F);
     public static final DeferredItem<BlockItem> COMPRESSED_GLASS_9_ITEM = registerBlockItem("compressed_glass_9", COMPRESSED_GLASS_9_BLOCK);
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GalaxyControllerBlockEntity>> GALAXY_CONTROLLER_BLOCK_ENTITY =
-            BLOCK_ENTITY_TYPES.register("galaxy_controller", () -> BlockEntityType.Builder.of(GalaxyControllerBlockEntity::new, GALAXY_CONTROLLER_BLOCK.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GalaxyCompressorBlockEntity>> GALAXY_COMPRESSOR_BLOCK_ENTITY =
+            BLOCK_ENTITY_TYPES.register("galaxy_compressor", () -> BlockEntityType.Builder.of(GalaxyCompressorBlockEntity::new, GALAXY_COMPRESSOR_BLOCK.get()).build(null));
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GalaxyConnectorBlockEntity>> GALAXY_CONNECTOR_BLOCK_ENTITY =
             BLOCK_ENTITY_TYPES.register("galaxy_connector", () -> BlockEntityType.Builder.of(GalaxyConnectorBlockEntity::new, GALAXY_CONNECTOR_BLOCK.get()).build(null));
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GalaxyDecorativeBlockEntity>> GALAXY_DECORATIVE_BLOCK_ENTITY =
@@ -268,17 +268,17 @@ public class dddsendgame {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GalaxyFreezerBlockEntity>> GALAXY_FREEZER_BLOCK_ENTITY =
             BLOCK_ENTITY_TYPES.register("galaxy_freezer", () -> BlockEntityType.Builder.of(GalaxyFreezerBlockEntity::new, GALAXY_FREEZER_BLOCK.get()).build(null));
 
-    public static final DeferredHolder<MenuType<?>, MenuType<GalaxyControllerMenu>> GALAXY_CONTROLLER_MENU =
-            MENU_TYPES.register("galaxy_controller", () -> IMenuTypeExtension.create(GalaxyControllerMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<GalaxyCompressorMenu>> GALAXY_COMPRESSOR_MENU =
+            MENU_TYPES.register("galaxy_compressor", () -> IMenuTypeExtension.create(GalaxyCompressorMenu::new));
     public static final DeferredHolder<MenuType<?>, MenuType<GalaxyFreezerMenu>> GALAXY_FREEZER_MENU =
             MENU_TYPES.register("galaxy_freezer", () -> IMenuTypeExtension.create(GalaxyFreezerMenu::new));
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> ENDGAME_TAB = CREATIVE_MODE_TABS.register("endgame_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.dddsendgame"))
             .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> GALAXY_CONTROLLER_ITEM.get().getDefaultInstance())
+            .icon(() -> GALAXY_COMPRESSOR_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
-                output.accept(GALAXY_CONTROLLER_ITEM.get());
+                output.accept(GALAXY_COMPRESSOR_ITEM.get());
                 output.accept(GALAXY_CONNECTOR_ITEM.get());
                 output.accept(GALAXY_OBSIDIAN_BLOCK_ITEM.get());
                 output.accept(GALAXY_GLASS_ITEM.get());
@@ -337,12 +337,12 @@ public class dddsendgame {
         registerBlockFabricatorAutomationCapabilities(event);
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
-                GALAXY_CONTROLLER_BLOCK_ENTITY.get(),
+                GALAXY_COMPRESSOR_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.itemHandler()
         );
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
-                GALAXY_CONTROLLER_BLOCK_ENTITY.get(),
+                GALAXY_COMPRESSOR_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.fluidHandler()
         );
         event.registerBlockEntity(
@@ -433,7 +433,7 @@ public class dddsendgame {
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-            event.accept(GALAXY_CONTROLLER_ITEM);
+            event.accept(GALAXY_COMPRESSOR_ITEM);
             event.accept(GALAXY_CONNECTOR_ITEM);
             event.accept(GALAXY_OBSIDIAN_BLOCK_ITEM);
             event.accept(GALAXY_GLASS_ITEM);

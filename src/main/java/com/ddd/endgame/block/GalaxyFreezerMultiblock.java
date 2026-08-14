@@ -36,12 +36,12 @@ public final class GalaxyFreezerMultiblock {
     private GalaxyFreezerMultiblock() {
     }
 
-    public static boolean matches(Level level, BlockPos controllerPos, Direction controllerFacing) {
+    public static boolean matches(Level level, BlockPos compressorPos, Direction compressorFacing) {
         if (level == null) {
             return false;
         }
 
-        for (PreviewBlock previewBlock : previewBlocks(controllerPos, controllerFacing)) {
+        for (PreviewBlock previewBlock : previewBlocks(compressorPos, compressorFacing)) {
             if (!previewBlock.matches(level.getBlockState(previewBlock.pos()))) {
                 return false;
             }
@@ -49,27 +49,27 @@ public final class GalaxyFreezerMultiblock {
         return true;
     }
 
-    public static List<PreviewBlock> previewBlocks(BlockPos controllerPos, Direction controllerFacing) {
-        RotationSteps rotation = RotationSteps.from(SCHEMATIC_FACING, controllerFacing);
+    public static List<PreviewBlock> previewBlocks(BlockPos compressorPos, Direction compressorFacing) {
+        RotationSteps rotation = RotationSteps.from(SCHEMATIC_FACING, compressorFacing);
         List<PreviewBlock> blocks = new ArrayList<>(REQUIREMENTS.size());
         for (Requirement requirement : REQUIREMENTS) {
-            BlockPos targetPos = controllerPos.offset(rotation.rotateX(requirement.x(), requirement.z()), requirement.y(), rotation.rotateZ(requirement.x(), requirement.z()));
+            BlockPos targetPos = compressorPos.offset(rotation.rotateX(requirement.x(), requirement.z()), requirement.y(), rotation.rotateZ(requirement.x(), requirement.z()));
             blocks.add(new PreviewBlock(targetPos, requirement.block().defaultBlockState(), requirement.predicate()));
         }
         return blocks;
     }
 
-    public static BlockPos inputConnectorPos(BlockPos controllerPos, Direction controllerFacing) {
-        RotationSteps rotation = RotationSteps.from(SCHEMATIC_FACING, controllerFacing);
-        return controllerPos.offset(
+    public static BlockPos inputConnectorPos(BlockPos compressorPos, Direction compressorFacing) {
+        RotationSteps rotation = RotationSteps.from(SCHEMATIC_FACING, compressorFacing);
+        return compressorPos.offset(
                 rotation.rotateX(INPUT_CONNECTOR_X, INPUT_CONNECTOR_Z),
                 INPUT_CONNECTOR_Y,
                 rotation.rotateZ(INPUT_CONNECTOR_X, INPUT_CONNECTOR_Z)
         );
     }
 
-    public static BlockPos controllerPosForInputConnector(BlockPos connectorPos, Direction controllerFacing) {
-        RotationSteps rotation = RotationSteps.from(SCHEMATIC_FACING, controllerFacing);
+    public static BlockPos compressorPosForInputConnector(BlockPos connectorPos, Direction compressorFacing) {
+        RotationSteps rotation = RotationSteps.from(SCHEMATIC_FACING, compressorFacing);
         return connectorPos.offset(
                 -rotation.rotateX(INPUT_CONNECTOR_X, INPUT_CONNECTOR_Z),
                 -INPUT_CONNECTOR_Y,

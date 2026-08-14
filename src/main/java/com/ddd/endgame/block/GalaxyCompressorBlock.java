@@ -19,10 +19,10 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class GalaxyControllerBlock extends HorizontalFacingEntityBlock {
-    public static final MapCodec<GalaxyControllerBlock> CODEC = simpleCodec(GalaxyControllerBlock::new);
+public class GalaxyCompressorBlock extends HorizontalFacingEntityBlock {
+    public static final MapCodec<GalaxyCompressorBlock> CODEC = simpleCodec(GalaxyCompressorBlock::new);
 
-    public GalaxyControllerBlock(BlockBehaviour.Properties properties) {
+    public GalaxyCompressorBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 
@@ -39,12 +39,12 @@ public class GalaxyControllerBlock extends HorizontalFacingEntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new GalaxyControllerBlockEntity(pos, state);
+        return new GalaxyCompressorBlockEntity(pos, state);
     }
 
     @Override
     public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!level.isClientSide && !player.isCreative() && level.getBlockEntity(pos) instanceof GalaxyControllerBlockEntity blockEntity) {
+        if (!level.isClientSide && !player.isCreative() && level.getBlockEntity(pos) instanceof GalaxyCompressorBlockEntity blockEntity) {
             popResource(level, pos, savedControllerStack(blockEntity, (ServerLevel)level));
         }
 
@@ -70,14 +70,14 @@ public class GalaxyControllerBlock extends HorizontalFacingEntityBlock {
     }
 
     private static void open(Level level, BlockPos pos, Player player) {
-        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof GalaxyControllerBlockEntity blockEntity) {
+        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof GalaxyCompressorBlockEntity blockEntity) {
             blockEntity.initializeRequirementsFromRecipes();
             serverPlayer.openMenu(blockEntity, buffer -> buffer.writeBlockPos(pos));
         }
     }
 
-    private static ItemStack savedControllerStack(GalaxyControllerBlockEntity blockEntity, ServerLevel level) {
-        ItemStack stack = new ItemStack(dddsendgame.GALAXY_CONTROLLER_ITEM.get());
+    private static ItemStack savedControllerStack(GalaxyCompressorBlockEntity blockEntity, ServerLevel level) {
+        ItemStack stack = new ItemStack(dddsendgame.GALAXY_COMPRESSOR_ITEM.get());
         blockEntity.saveToItem(stack, level.registryAccess());
         return stack;
     }

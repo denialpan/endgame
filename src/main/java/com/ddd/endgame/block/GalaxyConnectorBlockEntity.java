@@ -1,6 +1,6 @@
 package com.ddd.endgame.block;
 
-import com.ddd.endgame.galaxy.GalaxyControllerNetwork;
+import com.ddd.endgame.galaxy.GalaxyCompressorNetwork;
 import com.ddd.endgame.dddsendgame;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -31,12 +31,12 @@ public class GalaxyConnectorBlockEntity extends BlockEntity {
     }
 
     @Nullable
-    private GalaxyControllerBlockEntity connectedController() {
+    private GalaxyCompressorBlockEntity connectedController() {
         if (this.level == null) {
             return null;
         }
 
-        GalaxyControllerNetwork.Status status = GalaxyControllerNetwork.fromInput(this.level, this.worldPosition);
+        GalaxyCompressorNetwork.Status status = GalaxyCompressorNetwork.fromInput(this.level, this.worldPosition);
         return status.hasMultipleControllers() ? null : status.singleController(this.level);
     }
 
@@ -47,15 +47,15 @@ public class GalaxyConnectorBlockEntity extends BlockEntity {
         }
 
         for (Direction facing : Direction.Plane.HORIZONTAL) {
-            BlockPos controllerPos = GalaxyFreezerMultiblock.controllerPosForInputConnector(this.worldPosition, facing);
-            if (!(this.level.getBlockEntity(controllerPos) instanceof GalaxyFreezerBlockEntity freezer)) {
+            BlockPos compressorPos = GalaxyFreezerMultiblock.compressorPosForInputConnector(this.worldPosition, facing);
+            if (!(this.level.getBlockEntity(compressorPos) instanceof GalaxyFreezerBlockEntity freezer)) {
                 continue;
             }
             if (!freezer.getBlockState().is(dddsendgame.GALAXY_FREEZER_BLOCK.get())
                     || freezer.getBlockState().getValue(HorizontalFacingEntityBlock.FACING) != facing) {
                 continue;
             }
-            if (GalaxyFreezerMultiblock.inputConnectorPos(controllerPos, facing).equals(this.worldPosition)
+            if (GalaxyFreezerMultiblock.inputConnectorPos(compressorPos, facing).equals(this.worldPosition)
                     && freezer.isMultiblockValid()) {
                 return freezer;
             }
@@ -72,9 +72,9 @@ public class GalaxyConnectorBlockEntity extends BlockEntity {
         @Override
         public ItemStack getStackInSlot(int slot) {
             validateSlot(slot);
-            GalaxyControllerBlockEntity controller = GalaxyConnectorBlockEntity.this.connectedController();
-            if (controller != null && slot == SLOT_OUTPUT) {
-                return controller.itemHandler().getStackInSlot(SLOT_OUTPUT);
+            GalaxyCompressorBlockEntity compressor = GalaxyConnectorBlockEntity.this.connectedController();
+            if (compressor != null && slot == SLOT_OUTPUT) {
+                return compressor.itemHandler().getStackInSlot(SLOT_OUTPUT);
             }
             return ItemStack.EMPTY;
         }
@@ -99,12 +99,12 @@ public class GalaxyConnectorBlockEntity extends BlockEntity {
                 return remainder;
             }
 
-            GalaxyControllerBlockEntity controller = GalaxyConnectorBlockEntity.this.connectedController();
-            if (controller == null) {
+            GalaxyCompressorBlockEntity compressor = GalaxyConnectorBlockEntity.this.connectedController();
+            if (compressor == null) {
                 return stack;
             }
 
-            return controller.itemHandler().insertItem(SLOT_INPUT, stack, simulate);
+            return compressor.itemHandler().insertItem(SLOT_INPUT, stack, simulate);
         }
 
         @Override
@@ -114,8 +114,8 @@ public class GalaxyConnectorBlockEntity extends BlockEntity {
                 return ItemStack.EMPTY;
             }
 
-            GalaxyControllerBlockEntity controller = GalaxyConnectorBlockEntity.this.connectedController();
-            return controller == null ? ItemStack.EMPTY : controller.itemHandler().extractItem(SLOT_OUTPUT, amount, simulate);
+            GalaxyCompressorBlockEntity compressor = GalaxyConnectorBlockEntity.this.connectedController();
+            return compressor == null ? ItemStack.EMPTY : compressor.itemHandler().extractItem(SLOT_OUTPUT, amount, simulate);
         }
 
         @Override
@@ -132,8 +132,8 @@ public class GalaxyConnectorBlockEntity extends BlockEntity {
                 return slot == SLOT_INPUT && freezer.connectorInputHandler().isItemValid(0, stack);
             }
 
-            GalaxyControllerBlockEntity controller = GalaxyConnectorBlockEntity.this.connectedController();
-            return slot == SLOT_INPUT && controller != null && controller.itemHandler().isItemValid(SLOT_INPUT, stack);
+            GalaxyCompressorBlockEntity compressor = GalaxyConnectorBlockEntity.this.connectedController();
+            return slot == SLOT_INPUT && compressor != null && compressor.itemHandler().isItemValid(SLOT_INPUT, stack);
         }
 
         private void validateSlot(int slot) {
@@ -164,14 +164,14 @@ public class GalaxyConnectorBlockEntity extends BlockEntity {
         @Override
         public boolean isFluidValid(int tank, FluidStack stack) {
             validateTank(tank);
-            GalaxyControllerBlockEntity controller = GalaxyConnectorBlockEntity.this.connectedController();
-            return controller != null && controller.fluidHandler().isFluidValid(0, stack);
+            GalaxyCompressorBlockEntity compressor = GalaxyConnectorBlockEntity.this.connectedController();
+            return compressor != null && compressor.fluidHandler().isFluidValid(0, stack);
         }
 
         @Override
         public int fill(FluidStack resource, FluidAction action) {
-            GalaxyControllerBlockEntity controller = GalaxyConnectorBlockEntity.this.connectedController();
-            return controller == null ? 0 : controller.fluidHandler().fill(resource, action);
+            GalaxyCompressorBlockEntity compressor = GalaxyConnectorBlockEntity.this.connectedController();
+            return compressor == null ? 0 : compressor.fluidHandler().fill(resource, action);
         }
 
         @Override

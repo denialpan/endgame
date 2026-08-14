@@ -4,7 +4,7 @@ import com.ddd.endgame.dddsendgame;
 
 import com.ddd.endgame.EndgameRequirement;
 
-import com.ddd.endgame.block.GalaxyControllerBlockEntity;
+import com.ddd.endgame.block.GalaxyCompressorBlockEntity;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 
-public class GalaxyControllerScreen extends AbstractContainerScreen<GalaxyControllerMenu> {
+public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompressorMenu> {
     private static final ResourceLocation ATLAS = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/gui/atlas.png");
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getIntegerInstance(Locale.US);
     private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.0000000");
@@ -87,7 +87,7 @@ public class GalaxyControllerScreen extends AbstractContainerScreen<GalaxyContro
     private int cachedCompletedStacks;
     private int cachedTotalStacks;
 
-    public GalaxyControllerScreen(GalaxyControllerMenu menu, Inventory playerInventory, Component title) {
+    public GalaxyCompressorScreen(GalaxyCompressorMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = TEMPLATE_WIDTH;
         this.imageHeight = TEMPLATE_HEIGHT;
@@ -104,7 +104,7 @@ public class GalaxyControllerScreen extends AbstractContainerScreen<GalaxyContro
                 this.topPos + SEARCH_Y,
                 SEARCH_WIDTH,
                 SEARCH_HEIGHT,
-                Component.translatable("container.dddsendgame.galaxy_controller.search")
+                Component.translatable("container.dddsendgame.galaxy_compressor.search")
         );
         this.searchBox.setMaxLength(64);
         this.searchBox.setBordered(false);
@@ -129,7 +129,7 @@ public class GalaxyControllerScreen extends AbstractContainerScreen<GalaxyContro
         int y = this.topPos;
         guiGraphics.blit(ATLAS, x, y, 0, 0, TEMPLATE_WIDTH, TEMPLATE_HEIGHT);
         if (this.searchBox != null && this.searchBox.getValue().isEmpty() && !this.searchBox.isFocused()) {
-            guiGraphics.drawString(this.font, Component.translatable("container.dddsendgame.galaxy_controller.search.short"), x + SEARCH_X + 2, y + SEARCH_Y + 1, 0xFFB0B0B0, false);
+            guiGraphics.drawString(this.font, Component.translatable("container.dddsendgame.galaxy_compressor.search.short"), x + SEARCH_X + 2, y + SEARCH_Y + 1, 0xFFB0B0B0, false);
         }
 
         if (this.hasNetworkConflict()) {
@@ -229,12 +229,12 @@ public class GalaxyControllerScreen extends AbstractContainerScreen<GalaxyContro
         return super.mouseReleased(mouseX, mouseY, button);
     }
 
-    private GalaxyControllerBlockEntity currentController() {
+    private GalaxyCompressorBlockEntity currentController() {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level != null) {
             BlockEntity blockEntity = minecraft.level.getBlockEntity(this.menu.pos());
-            if (blockEntity instanceof GalaxyControllerBlockEntity controller) {
-                return controller;
+            if (blockEntity instanceof GalaxyCompressorBlockEntity compressor) {
+                return compressor;
             }
         }
 
@@ -242,18 +242,18 @@ public class GalaxyControllerScreen extends AbstractContainerScreen<GalaxyContro
     }
 
     private boolean hasNetworkConflict() {
-        GalaxyControllerBlockEntity controller = this.currentController();
-        return controller != null && controller.hasMultipleConnectedControllers();
+        GalaxyCompressorBlockEntity compressor = this.currentController();
+        return compressor != null && compressor.hasMultipleConnectedControllers();
     }
 
     private int connectedInputCount() {
-        GalaxyControllerBlockEntity controller = this.currentController();
-        return controller == null ? 0 : controller.connectedInputCount();
+        GalaxyCompressorBlockEntity compressor = this.currentController();
+        return compressor == null ? 0 : compressor.connectedInputCount();
     }
 
     private List<RowData> sortedRows() {
-        GalaxyControllerBlockEntity controller = this.currentController();
-        int revision = controller == null ? -1 : controller.requirementsRevision();
+        GalaxyCompressorBlockEntity compressor = this.currentController();
+        int revision = compressor == null ? -1 : compressor.requirementsRevision();
         String searchText = normalizedSearchText();
         if (revision == this.cachedRequirementsRevision
                 && this.sortMode == this.cachedSortMode
@@ -262,7 +262,7 @@ public class GalaxyControllerScreen extends AbstractContainerScreen<GalaxyContro
             return this.cachedRows;
         }
 
-        List<EndgameRequirement> requirements = controller == null ? List.of() : controller.requirements();
+        List<EndgameRequirement> requirements = compressor == null ? List.of() : compressor.requirements();
         List<RowData> rows = new ArrayList<>(requirements.size());
         long totalRequired = 0L;
         long totalRemaining = 0L;
@@ -353,7 +353,7 @@ public class GalaxyControllerScreen extends AbstractContainerScreen<GalaxyContro
     }
 
     private void drawNetworkConflict(GuiGraphics guiGraphics, int x, int y) {
-        Component message = Component.literal("multiple controllers detected");
+        Component message = Component.literal("multiple compressors detected");
         guiGraphics.drawString(this.font, message, x + TEMPLATE_WIDTH / 2 - this.font.width(message) / 2, y + TEMPLATE_HEIGHT / 2 - this.font.lineHeight / 2, 0xFFFF3333, false);
     }
 
