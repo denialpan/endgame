@@ -157,7 +157,7 @@ public class dddsendgame {
     public static final DeferredBlock<GalaxyCompressorBlock> GALAXY_COMPRESSOR_BLOCK = BLOCKS.registerBlock(
             "galaxy_compressor",
             GalaxyCompressorBlock::new,
-            BlockBehaviour.Properties.ofFullCopy(Blocks.OBSIDIAN)
+            galaxyBlockProperties(Blocks.OBSIDIAN)
     );
     public static final DeferredItem<BlockItem> GALAXY_COMPRESSOR_ITEM = ITEMS.register(
             "galaxy_compressor",
@@ -166,7 +166,7 @@ public class dddsendgame {
     public static final DeferredBlock<GalaxyConnectorBlock> GALAXY_CONNECTOR_BLOCK = BLOCKS.registerBlock(
             "galaxy_connector",
             GalaxyConnectorBlock::new,
-            BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
+            galaxyBlockProperties(Blocks.DEEPSLATE)
     );
     public static final DeferredItem<BlockItem> GALAXY_CONNECTOR_ITEM = ITEMS.register(
             "galaxy_connector",
@@ -175,7 +175,7 @@ public class dddsendgame {
     public static final DeferredBlock<GalaxyDecorativeBlock> GALAXY_OBSIDIAN_BLOCK = BLOCKS.registerBlock(
             "galaxy_obsidian",
             GalaxyDecorativeBlock::new,
-            BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
+            galaxyBlockProperties(Blocks.DEEPSLATE)
     );
     public static final DeferredItem<BlockItem> GALAXY_OBSIDIAN_BLOCK_ITEM = ITEMS.register(
             "galaxy_obsidian",
@@ -184,7 +184,7 @@ public class dddsendgame {
     public static final DeferredBlock<GalaxyDecorativeBlock> GALAXY_GLASS_BLOCK = BLOCKS.registerBlock(
             "galaxy_glass",
             GalaxyDecorativeBlock::new,
-            BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
+            galaxyBlockProperties(Blocks.DEEPSLATE)
     );
     public static final DeferredItem<BlockItem> GALAXY_GLASS_ITEM = ITEMS.register(
             "galaxy_glass",
@@ -195,7 +195,7 @@ public class dddsendgame {
     public static final DeferredBlock<GalaxyDecorativeBlock> GALAXY_FULL_GLASS_BLOCK = BLOCKS.registerBlock(
             "galaxy_full_glass",
             GalaxyDecorativeBlock::new,
-            BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
+            galaxyBlockProperties(Blocks.DEEPSLATE)
     );
     public static final DeferredItem<BlockItem> GALAXY_FULL_GLASS_ITEM = ITEMS.register(
             "galaxy_full_glass",
@@ -204,7 +204,7 @@ public class dddsendgame {
     public static final DeferredBlock<GalaxyDecorativeBlock> GALAXY_BLOCK = BLOCKS.registerBlock(
             "galaxy_block",
             GalaxyDecorativeBlock::new,
-            BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
+            galaxyBlockProperties(Blocks.DEEPSLATE)
     );
     public static final DeferredItem<BlockItem> GALAXY_BLOCK_ITEM = ITEMS.register(
             "galaxy_block",
@@ -213,7 +213,7 @@ public class dddsendgame {
     public static final DeferredBlock<GalaxyFreezerBlock> GALAXY_FREEZER_BLOCK = BLOCKS.registerBlock(
             "galaxy_freezer",
             GalaxyFreezerBlock::new,
-            BlockBehaviour.Properties.ofFullCopy(Blocks.OBSIDIAN)
+            galaxyBlockProperties(Blocks.OBSIDIAN)
     );
     public static final DeferredItem<BlockItem> GALAXY_FREEZER_ITEM = ITEMS.register(
             "galaxy_freezer",
@@ -471,7 +471,11 @@ public class dddsendgame {
     }
 
     private static DeferredBlock<TransparentBlock> registerTransparentGlassBlock(String name, float destroyTime) {
-        return BLOCKS.registerBlock(name, TransparentBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS).strength(destroyTime, 6.0F));
+        return BLOCKS.registerBlock(name, TransparentBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS).strength(destroyTime, 1200.0F));
+    }
+
+    private static BlockBehaviour.Properties galaxyBlockProperties(Block block) {
+        return BlockBehaviour.Properties.ofFullCopy(block).sound(SoundType.STONE).explosionResistance(1200.0F);
     }
 
     private static DeferredItem<BlockItem> registerBlockItem(String name, DeferredBlock<? extends Block> block) {

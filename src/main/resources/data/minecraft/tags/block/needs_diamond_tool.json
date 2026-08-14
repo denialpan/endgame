@@ -1,8 +1,6 @@
 {
   "replace": false,
   "values": [
-    "dddsendgame:galaxy_compressor",
-    "dddsendgame:galaxy_freezer",
     "dddsendgame:compressed_obsidian_1",
     "dddsendgame:compressed_obsidian_2",
     "dddsendgame:compressed_obsidian_3",
