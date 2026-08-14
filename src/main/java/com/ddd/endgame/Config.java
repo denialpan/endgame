@@ -36,6 +36,10 @@ public class Config {
             .comment("Whether holding the god stick in inventory sets the player to Creative mode.")
             .define("godStickGrantsCreative", true);
 
+    public static final ModConfigSpec.BooleanValue GOD_STICK_GRANTS_SERVER_COMMANDS = BUILDER
+            .comment("Whether holding the god stick in main hand or offhand grants server command permissions.")
+            .define("godStickGrantsServerCommands", false);
+
     public static final ModConfigSpec.IntValue ENTITY_PURGE_RADIUS = BUILDER
             .comment("Radius in blocks used by the entity purge item.")
             .defineInRange("entityPurgeRadius", 32, 1, 1024);

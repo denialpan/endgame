@@ -1,5 +1,6 @@
 package com.ddd.endgame.item;
 
+import com.ddd.endgame.Config;
 import com.ddd.endgame.item.models.GodStickItemRenderer;
 import com.ddd.endgame.dddsendgame;
 import net.minecraft.ChatFormatting;
@@ -84,6 +85,9 @@ public class GodStickItem extends Item {
     }
 
     public static boolean grantsServerCommandPermissions(Entity entity) {
+        if (!Config.GOD_STICK_GRANTS_SERVER_COMMANDS.getAsBoolean()) {
+            return false;
+        }
         if (!(entity instanceof ServerPlayer player)) {
             return false;
         }

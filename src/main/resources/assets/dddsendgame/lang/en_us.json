@@ -90,6 +90,7 @@
   "dddsendgame.configuration.fluidRequirementMb": "Fluid Requirement (mB)",
   "dddsendgame.configuration.debugStoneOnly": "Debug Stone Only",
   "dddsendgame.configuration.godStickGrantsCreative": "God Stick Grants Creative",
+  "dddsendgame.configuration.godStickGrantsServerCommands": "God Stick Grants Server Commands",
   "dddsendgame.configuration.entityPurgeRadius": "Entity Purge Radius",
   "dddsendgame.configuration.entityPurgeKillsPlayers": "Entity Purge Kills Players",
   "dddsendgame.configuration.skyboxPitchRotationSpeedDegreesPerSecond": "Pitch Rotation Speed",
