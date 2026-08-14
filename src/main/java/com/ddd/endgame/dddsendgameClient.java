@@ -36,7 +36,7 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
-import com.ddd.endgame.block.EndgameDecorativeBlockEntity;
+import com.ddd.endgame.block.GalaxyDecorativeBlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
@@ -249,26 +249,26 @@ public class dddsendgameClient {
     }
 
     private static boolean isEndgameSkyboxBlock(BlockState state) {
-        return state.is(dddsendgame.ENDGAME_CONTROLLER_BLOCK.get())
-                || state.is(dddsendgame.ENDGAME_CONNECTOR_BLOCK.get())
-                || state.is(dddsendgame.ENDGAME_SOLID_BLOCK.get())
-                || state.is(dddsendgame.ENDGAME_GLASS_BLOCK.get())
-                || state.is(dddsendgame.ENDGAME_FULL_GLASS_BLOCK.get())
+        return state.is(dddsendgame.GALAXY_CONTROLLER_BLOCK.get())
+                || state.is(dddsendgame.GALAXY_CONNECTOR_BLOCK.get())
+                || state.is(dddsendgame.GALAXY_OBSIDIAN_BLOCK.get())
+                || state.is(dddsendgame.GALAXY_GLASS_BLOCK.get())
+                || state.is(dddsendgame.GALAXY_FULL_GLASS_BLOCK.get())
                 || state.is(dddsendgame.GALAXY_BLOCK.get())
                 || state.is(dddsendgame.GALAXY_FREEZER_BLOCK.get());
     }
 
     @SubscribeEvent
     static void registerScreens(RegisterMenuScreensEvent event) {
-        event.register(dddsendgame.ENDGAME_CONTROLLER_MENU.get(), EndgameControllerScreen::new);
+        event.register(dddsendgame.GALAXY_CONTROLLER_MENU.get(), GalaxyControllerScreen::new);
         event.register(dddsendgame.GALAXY_FREEZER_MENU.get(), GalaxyFreezerScreen::new);
     }
 
     @SubscribeEvent
     static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(dddsendgame.ENDGAME_CONTROLLER_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
-        event.registerBlockEntityRenderer(dddsendgame.ENDGAME_CONNECTOR_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
-        event.registerBlockEntityRenderer(dddsendgame.ENDGAME_DECORATIVE_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(dddsendgame.GALAXY_CONTROLLER_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(dddsendgame.GALAXY_CONNECTOR_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(dddsendgame.GALAXY_DECORATIVE_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
         event.registerBlockEntityRenderer(dddsendgame.GALAXY_FREEZER_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
     }
 
@@ -278,7 +278,7 @@ public class dddsendgameClient {
             if (level == null || pos == null || tintIndex != 0) {
                 return 0xFFFFFF;
             }
-            if (level.getBlockEntity(pos) instanceof EndgameDecorativeBlockEntity blockEntity) {
+            if (level.getBlockEntity(pos) instanceof GalaxyDecorativeBlockEntity blockEntity) {
                 int greenBlue = Math.round(blockEntity.galaxyTintGreenBlue() * 255.0F);
                 return 0xFF0000 | greenBlue << 8 | greenBlue;
             }

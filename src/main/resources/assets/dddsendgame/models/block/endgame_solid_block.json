@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "render_type": "minecraft:translucent",
-  "textures": {
-    "particle": "dddsendgame:block/endgame_plated",
-    "all": "dddsendgame:block/endgame_plated"
-  }
-}

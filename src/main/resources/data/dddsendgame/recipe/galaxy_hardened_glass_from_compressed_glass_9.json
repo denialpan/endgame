@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PPP",
+    "PGP",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "item": "dddsendgame:galaxy_obsidian"
+    },
+    "G": {
+      "item": "dddsendgame:compressed_glass_9"
+    }
+  },
+  "result": {
+    "id": "dddsendgame:galaxy_hardened_glass",
+    "count": 1
+  }
+}

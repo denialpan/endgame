@@ -78,16 +78,16 @@ public final class GalaxyFreezerMultiblock {
     }
 
     private static Requirement solid(int x, int y, int z) {
-        return new Requirement(x, y, z, dddsendgame.ENDGAME_SOLID_BLOCK.get(), state -> state.is(dddsendgame.ENDGAME_SOLID_BLOCK.get()));
+        return new Requirement(x, y, z, dddsendgame.GALAXY_OBSIDIAN_BLOCK.get(), state -> state.is(dddsendgame.GALAXY_OBSIDIAN_BLOCK.get()));
     }
 
     private static Requirement glass(int x, int y, int z) {
-        return new Requirement(x, y, z, dddsendgame.ENDGAME_GLASS_BLOCK.get(), state -> state.is(dddsendgame.ENDGAME_GLASS_BLOCK.get()));
+        return new Requirement(x, y, z, dddsendgame.GALAXY_GLASS_BLOCK.get(), state -> state.is(dddsendgame.GALAXY_GLASS_BLOCK.get()));
     }
 
     private static Requirement connector(int x, int y, int z) {
-        return new Requirement(x, y, z, dddsendgame.ENDGAME_CONNECTOR_BLOCK.get(), state ->
-                state.is(dddsendgame.ENDGAME_CONNECTOR_BLOCK.get())
+        return new Requirement(x, y, z, dddsendgame.GALAXY_CONNECTOR_BLOCK.get(), state ->
+                state.is(dddsendgame.GALAXY_CONNECTOR_BLOCK.get())
                         && state.getValue(OrientableEntityBlock.AXIS) == Direction.Axis.Y
         );
     }

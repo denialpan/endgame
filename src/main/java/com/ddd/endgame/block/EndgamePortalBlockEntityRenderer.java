@@ -336,7 +336,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     private static float blockEntityTintGreenBlue(BlockEntity blockEntity) {
-        if (blockEntity instanceof EndgameDecorativeBlockEntity decorativeBlockEntity
+        if (blockEntity instanceof GalaxyDecorativeBlockEntity decorativeBlockEntity
                 && decorativeBlockEntity.getBlockState().is(dddsendgame.GALAXY_BLOCK.get())) {
             return decorativeBlockEntity.galaxyTintGreenBlue();
         }

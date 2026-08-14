@@ -1,12 +1,12 @@
 package com.ddd.endgame;
 
-import com.ddd.endgame.block.EndgameConnectorBlock;
-import com.ddd.endgame.block.EndgameConnectorBlockEntity;
-import com.ddd.endgame.block.EndgameControllerBlock;
-import com.ddd.endgame.block.EndgameControllerBlockEntity;
+import com.ddd.endgame.block.GalaxyConnectorBlock;
+import com.ddd.endgame.block.GalaxyConnectorBlockEntity;
+import com.ddd.endgame.block.GalaxyControllerBlock;
+import com.ddd.endgame.block.GalaxyControllerBlockEntity;
 import com.ddd.endgame.block.DescribedEndgameSkyboxBlockItem;
-import com.ddd.endgame.block.EndgameDecorativeBlock;
-import com.ddd.endgame.block.EndgameDecorativeBlockEntity;
+import com.ddd.endgame.block.GalaxyDecorativeBlock;
+import com.ddd.endgame.block.GalaxyDecorativeBlockEntity;
 import com.ddd.endgame.block.EndgameSkyboxBlockItem;
 import com.ddd.endgame.block.GalaxyBlockItem;
 import com.ddd.endgame.block.GalaxyFreezerBlock;
@@ -145,56 +145,56 @@ public class dddsendgame {
             "chunk_annihilator",
             () -> new ChunkAnnihilatorItem(new Item.Properties().stacksTo(1))
     );
-    public static final DeferredBlock<EndgameControllerBlock> ENDGAME_CONTROLLER_BLOCK = BLOCKS.registerBlock(
-            "endgame_controller",
-            EndgameControllerBlock::new,
+    public static final DeferredBlock<GalaxyControllerBlock> GALAXY_CONTROLLER_BLOCK = BLOCKS.registerBlock(
+            "galaxy_controller",
+            GalaxyControllerBlock::new,
             BlockBehaviour.Properties.ofFullCopy(Blocks.OBSIDIAN)
     );
-    public static final DeferredItem<BlockItem> ENDGAME_CONTROLLER_ITEM = ITEMS.register(
-            "endgame_controller",
-            () -> new DescribedEndgameSkyboxBlockItem(ENDGAME_CONTROLLER_BLOCK.get(), new Item.Properties(), "block.dddsendgame.endgame_controller.tooltip")
+    public static final DeferredItem<BlockItem> GALAXY_CONTROLLER_ITEM = ITEMS.register(
+            "galaxy_controller",
+            () -> new DescribedEndgameSkyboxBlockItem(GALAXY_CONTROLLER_BLOCK.get(), new Item.Properties(), "block.dddsendgame.galaxy_controller.tooltip")
     );
-    public static final DeferredBlock<EndgameConnectorBlock> ENDGAME_CONNECTOR_BLOCK = BLOCKS.registerBlock(
-            "endgame_connector",
-            EndgameConnectorBlock::new,
+    public static final DeferredBlock<GalaxyConnectorBlock> GALAXY_CONNECTOR_BLOCK = BLOCKS.registerBlock(
+            "galaxy_connector",
+            GalaxyConnectorBlock::new,
             BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
     );
-    public static final DeferredItem<BlockItem> ENDGAME_CONNECTOR_ITEM = ITEMS.register(
-            "endgame_connector",
-            () -> new DescribedEndgameSkyboxBlockItem(ENDGAME_CONNECTOR_BLOCK.get(), new Item.Properties(), "block.dddsendgame.endgame_connector.tooltip")
+    public static final DeferredItem<BlockItem> GALAXY_CONNECTOR_ITEM = ITEMS.register(
+            "galaxy_connector",
+            () -> new DescribedEndgameSkyboxBlockItem(GALAXY_CONNECTOR_BLOCK.get(), new Item.Properties(), "block.dddsendgame.galaxy_connector.tooltip")
     );
-    public static final DeferredBlock<EndgameDecorativeBlock> ENDGAME_SOLID_BLOCK = BLOCKS.registerBlock(
-            "endgame_solid_block",
-            EndgameDecorativeBlock::new,
+    public static final DeferredBlock<GalaxyDecorativeBlock> GALAXY_OBSIDIAN_BLOCK = BLOCKS.registerBlock(
+            "galaxy_obsidian",
+            GalaxyDecorativeBlock::new,
             BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
     );
-    public static final DeferredItem<BlockItem> ENDGAME_SOLID_BLOCK_ITEM = ITEMS.register(
-            "endgame_solid_block",
-            () -> new EndgameSkyboxBlockItem(ENDGAME_SOLID_BLOCK.get(), new Item.Properties())
+    public static final DeferredItem<BlockItem> GALAXY_OBSIDIAN_BLOCK_ITEM = ITEMS.register(
+            "galaxy_obsidian",
+            () -> new EndgameSkyboxBlockItem(GALAXY_OBSIDIAN_BLOCK.get(), new Item.Properties())
     );
-    public static final DeferredBlock<EndgameDecorativeBlock> ENDGAME_GLASS_BLOCK = BLOCKS.registerBlock(
-            "endgame_glass",
-            EndgameDecorativeBlock::new,
+    public static final DeferredBlock<GalaxyDecorativeBlock> GALAXY_GLASS_BLOCK = BLOCKS.registerBlock(
+            "galaxy_glass",
+            GalaxyDecorativeBlock::new,
             BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
     );
-    public static final DeferredItem<BlockItem> ENDGAME_GLASS_ITEM = ITEMS.register(
-            "endgame_glass",
-            () -> new EndgameSkyboxBlockItem(ENDGAME_GLASS_BLOCK.get(), new Item.Properties())
+    public static final DeferredItem<BlockItem> GALAXY_GLASS_ITEM = ITEMS.register(
+            "galaxy_glass",
+            () -> new EndgameSkyboxBlockItem(GALAXY_GLASS_BLOCK.get(), new Item.Properties())
     );
-    public static final DeferredBlock<TransparentBlock> ENDGAME_EMPTY_GLASS_BLOCK = registerTransparentGlassBlock("endgame_empty_glass", 5.4F);
-    public static final DeferredItem<BlockItem> ENDGAME_EMPTY_GLASS_ITEM = registerBlockItem("endgame_empty_glass", ENDGAME_EMPTY_GLASS_BLOCK);
-    public static final DeferredBlock<EndgameDecorativeBlock> ENDGAME_FULL_GLASS_BLOCK = BLOCKS.registerBlock(
-            "endgame_full_glass",
-            EndgameDecorativeBlock::new,
+    public static final DeferredBlock<TransparentBlock> GALAXY_HARDENED_GLASS_BLOCK = registerTransparentGlassBlock("galaxy_hardened_glass", 5.4F);
+    public static final DeferredItem<BlockItem> GALAXY_HARDENED_GLASS_ITEM = registerBlockItem("galaxy_hardened_glass", GALAXY_HARDENED_GLASS_BLOCK);
+    public static final DeferredBlock<GalaxyDecorativeBlock> GALAXY_FULL_GLASS_BLOCK = BLOCKS.registerBlock(
+            "galaxy_full_glass",
+            GalaxyDecorativeBlock::new,
             BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
     );
-    public static final DeferredItem<BlockItem> ENDGAME_FULL_GLASS_ITEM = ITEMS.register(
-            "endgame_full_glass",
-            () -> new EndgameSkyboxBlockItem(ENDGAME_FULL_GLASS_BLOCK.get(), new Item.Properties())
+    public static final DeferredItem<BlockItem> GALAXY_FULL_GLASS_ITEM = ITEMS.register(
+            "galaxy_full_glass",
+            () -> new EndgameSkyboxBlockItem(GALAXY_FULL_GLASS_BLOCK.get(), new Item.Properties())
     );
-    public static final DeferredBlock<EndgameDecorativeBlock> GALAXY_BLOCK = BLOCKS.registerBlock(
+    public static final DeferredBlock<GalaxyDecorativeBlock> GALAXY_BLOCK = BLOCKS.registerBlock(
             "galaxy_block",
-            EndgameDecorativeBlock::new,
+            GalaxyDecorativeBlock::new,
             BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).sound(SoundType.STONE)
     );
     public static final DeferredItem<BlockItem> GALAXY_BLOCK_ITEM = ITEMS.register(
@@ -245,37 +245,37 @@ public class dddsendgame {
     public static final DeferredBlock<TransparentBlock> COMPRESSED_GLASS_9_BLOCK = registerCompressedGlassBlock("compressed_glass_9", 5.4F);
     public static final DeferredItem<BlockItem> COMPRESSED_GLASS_9_ITEM = registerBlockItem("compressed_glass_9", COMPRESSED_GLASS_9_BLOCK);
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameControllerBlockEntity>> ENDGAME_CONTROLLER_BLOCK_ENTITY =
-            BLOCK_ENTITY_TYPES.register("endgame_controller", () -> BlockEntityType.Builder.of(EndgameControllerBlockEntity::new, ENDGAME_CONTROLLER_BLOCK.get()).build(null));
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameConnectorBlockEntity>> ENDGAME_CONNECTOR_BLOCK_ENTITY =
-            BLOCK_ENTITY_TYPES.register("endgame_connector", () -> BlockEntityType.Builder.of(EndgameConnectorBlockEntity::new, ENDGAME_CONNECTOR_BLOCK.get()).build(null));
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EndgameDecorativeBlockEntity>> ENDGAME_DECORATIVE_BLOCK_ENTITY =
-            BLOCK_ENTITY_TYPES.register("endgame_decorative", () -> BlockEntityType.Builder.of(
-                    EndgameDecorativeBlockEntity::new,
-                    ENDGAME_SOLID_BLOCK.get(),
-                    ENDGAME_GLASS_BLOCK.get(),
-                    ENDGAME_FULL_GLASS_BLOCK.get(),
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GalaxyControllerBlockEntity>> GALAXY_CONTROLLER_BLOCK_ENTITY =
+            BLOCK_ENTITY_TYPES.register("galaxy_controller", () -> BlockEntityType.Builder.of(GalaxyControllerBlockEntity::new, GALAXY_CONTROLLER_BLOCK.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GalaxyConnectorBlockEntity>> GALAXY_CONNECTOR_BLOCK_ENTITY =
+            BLOCK_ENTITY_TYPES.register("galaxy_connector", () -> BlockEntityType.Builder.of(GalaxyConnectorBlockEntity::new, GALAXY_CONNECTOR_BLOCK.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GalaxyDecorativeBlockEntity>> GALAXY_DECORATIVE_BLOCK_ENTITY =
+            BLOCK_ENTITY_TYPES.register("galaxy_decorative", () -> BlockEntityType.Builder.of(
+                    GalaxyDecorativeBlockEntity::new,
+                    GALAXY_OBSIDIAN_BLOCK.get(),
+                    GALAXY_GLASS_BLOCK.get(),
+                    GALAXY_FULL_GLASS_BLOCK.get(),
                     GALAXY_BLOCK.get()
             ).build(null));
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GalaxyFreezerBlockEntity>> GALAXY_FREEZER_BLOCK_ENTITY =
             BLOCK_ENTITY_TYPES.register("galaxy_freezer", () -> BlockEntityType.Builder.of(GalaxyFreezerBlockEntity::new, GALAXY_FREEZER_BLOCK.get()).build(null));
 
-    public static final DeferredHolder<MenuType<?>, MenuType<EndgameControllerMenu>> ENDGAME_CONTROLLER_MENU =
-            MENU_TYPES.register("endgame_controller", () -> IMenuTypeExtension.create(EndgameControllerMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<GalaxyControllerMenu>> GALAXY_CONTROLLER_MENU =
+            MENU_TYPES.register("galaxy_controller", () -> IMenuTypeExtension.create(GalaxyControllerMenu::new));
     public static final DeferredHolder<MenuType<?>, MenuType<GalaxyFreezerMenu>> GALAXY_FREEZER_MENU =
             MENU_TYPES.register("galaxy_freezer", () -> IMenuTypeExtension.create(GalaxyFreezerMenu::new));
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> ENDGAME_TAB = CREATIVE_MODE_TABS.register("endgame_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.dddsendgame"))
             .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> ENDGAME_CONTROLLER_ITEM.get().getDefaultInstance())
+            .icon(() -> GALAXY_CONTROLLER_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
-                output.accept(ENDGAME_CONTROLLER_ITEM.get());
-                output.accept(ENDGAME_CONNECTOR_ITEM.get());
-                output.accept(ENDGAME_SOLID_BLOCK_ITEM.get());
-                output.accept(ENDGAME_GLASS_ITEM.get());
-                output.accept(ENDGAME_EMPTY_GLASS_ITEM.get());
-                output.accept(ENDGAME_FULL_GLASS_ITEM.get());
+                output.accept(GALAXY_CONTROLLER_ITEM.get());
+                output.accept(GALAXY_CONNECTOR_ITEM.get());
+                output.accept(GALAXY_OBSIDIAN_BLOCK_ITEM.get());
+                output.accept(GALAXY_GLASS_ITEM.get());
+                output.accept(GALAXY_HARDENED_GLASS_ITEM.get());
+                output.accept(GALAXY_FULL_GLASS_ITEM.get());
                 output.accept(GALAXY_BLOCK_ITEM.get());
                 output.accept(GALAXY_FREEZER_ITEM.get());
                 output.accept(COMPRESSED_OBSIDIAN_1_ITEM.get());
@@ -329,22 +329,22 @@ public class dddsendgame {
         registerBlockFabricatorAutomationCapabilities(event);
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
-                ENDGAME_CONTROLLER_BLOCK_ENTITY.get(),
+                GALAXY_CONTROLLER_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.itemHandler()
         );
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
-                ENDGAME_CONTROLLER_BLOCK_ENTITY.get(),
+                GALAXY_CONTROLLER_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.fluidHandler()
         );
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
-                ENDGAME_CONNECTOR_BLOCK_ENTITY.get(),
+                GALAXY_CONNECTOR_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.itemHandler()
         );
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
-                ENDGAME_CONNECTOR_BLOCK_ENTITY.get(),
+                GALAXY_CONNECTOR_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.fluidHandler()
         );
         event.registerBlockEntity(
@@ -425,12 +425,12 @@ public class dddsendgame {
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-            event.accept(ENDGAME_CONTROLLER_ITEM);
-            event.accept(ENDGAME_CONNECTOR_ITEM);
-            event.accept(ENDGAME_SOLID_BLOCK_ITEM);
-            event.accept(ENDGAME_GLASS_ITEM);
-            event.accept(ENDGAME_EMPTY_GLASS_ITEM);
-            event.accept(ENDGAME_FULL_GLASS_ITEM);
+            event.accept(GALAXY_CONTROLLER_ITEM);
+            event.accept(GALAXY_CONNECTOR_ITEM);
+            event.accept(GALAXY_OBSIDIAN_BLOCK_ITEM);
+            event.accept(GALAXY_GLASS_ITEM);
+            event.accept(GALAXY_HARDENED_GLASS_ITEM);
+            event.accept(GALAXY_FULL_GLASS_ITEM);
             event.accept(GALAXY_BLOCK_ITEM);
             event.accept(GALAXY_FREEZER_ITEM);
             event.accept(COMPRESSED_OBSIDIAN_1_ITEM);

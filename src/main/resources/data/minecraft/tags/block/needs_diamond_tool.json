@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "dddsendgame:endgame_controller",
+    "dddsendgame:galaxy_controller",
     "dddsendgame:galaxy_freezer",
     "dddsendgame:compressed_obsidian_1",
     "dddsendgame:compressed_obsidian_2",

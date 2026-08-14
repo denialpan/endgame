@@ -47,7 +47,7 @@ public class GalaxyIngotJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        registration.addRecipeCatalyst(dddsendgame.ENDGAME_CONTROLLER_ITEM.get(), GALAXY_INGOT_RECIPE_TYPE);
+        registration.addRecipeCatalyst(dddsendgame.GALAXY_CONTROLLER_ITEM.get(), GALAXY_INGOT_RECIPE_TYPE);
     }
 
     public static final class GalaxyIngotRecipe {
@@ -60,7 +60,7 @@ public class GalaxyIngotJeiPlugin implements IModPlugin {
 
         private GalaxyIngotRecipeCategory(IGuiHelper guiHelper) {
             this.background = guiHelper.createBlankDrawable(126, 54);
-            this.icon = guiHelper.createDrawableItemStack(new ItemStack(dddsendgame.ENDGAME_CONTROLLER_ITEM.get()));
+            this.icon = guiHelper.createDrawableItemStack(new ItemStack(dddsendgame.GALAXY_CONTROLLER_ITEM.get()));
             this.arrow = guiHelper.createAnimatedRecipeArrow(200);
         }
 
@@ -88,7 +88,7 @@ public class GalaxyIngotJeiPlugin implements IModPlugin {
         public void setRecipe(IRecipeLayoutBuilder builder, GalaxyIngotRecipe recipe, IFocusGroup focuses) {
             builder.addInputSlot(20, 17)
                     .setStandardSlotBackground()
-                    .addItemStack(new ItemStack(dddsendgame.ENDGAME_CONTROLLER_ITEM.get()));
+                    .addItemStack(new ItemStack(dddsendgame.GALAXY_CONTROLLER_ITEM.get()));
             builder.addOutputSlot(88, 17)
                     .setOutputSlotBackground()
                     .addItemStack(new ItemStack(dddsendgame.GALAXY_INGOT.get()));
