@@ -9,6 +9,7 @@
     "description": {
       "translate": "advancements.dddsendgame.slightly_compressed_obsidian.description"
     },
+    "background": "minecraft:textures/block/obsidian.png",
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,
