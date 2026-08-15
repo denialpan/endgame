@@ -1,0 +1,35 @@
+{
+  "parent": "dddsendgame:galaxy_ingot",
+  "display": {
+    "icon": {
+      "id": "dddsendgame:random_block_placer"
+    },
+    "title": {
+      "translate": "advancements.dddsendgame.item_fabricator.title"
+    },
+    "description": {
+      "translate": "advancements.dddsendgame.item_fabricator.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_item_fabricator": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "dddsendgame:random_block_placer"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_item_fabricator"
+    ]
+  ]
+}

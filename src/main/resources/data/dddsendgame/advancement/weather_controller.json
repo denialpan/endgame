@@ -1,0 +1,35 @@
+{
+  "parent": "dddsendgame:galaxy_ingot",
+  "display": {
+    "icon": {
+      "id": "dddsendgame:weather_cycler"
+    },
+    "title": {
+      "translate": "advancements.dddsendgame.weather_controller.title"
+    },
+    "description": {
+      "translate": "advancements.dddsendgame.weather_controller.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_weather_controller": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "dddsendgame:weather_cycler"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_weather_controller"
+    ]
+  ]
+}

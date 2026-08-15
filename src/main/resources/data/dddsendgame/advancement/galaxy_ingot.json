@@ -1,0 +1,35 @@
+{
+  "parent": "dddsendgame:galaxy_compressor",
+  "display": {
+    "icon": {
+      "id": "dddsendgame:galaxy_ingot"
+    },
+    "title": {
+      "translate": "advancements.dddsendgame.galaxy_ingot.title"
+    },
+    "description": {
+      "translate": "advancements.dddsendgame.galaxy_ingot.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_galaxy_ingot": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "dddsendgame:galaxy_ingot"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_galaxy_ingot"
+    ]
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "parent": "dddsendgame:galaxy_glass",
+  "display": {
+    "icon": {
+      "id": "dddsendgame:galaxy_compressor"
+    },
+    "title": {
+      "translate": "advancements.dddsendgame.galaxy_compressor.title"
+    },
+    "description": {
+      "translate": "advancements.dddsendgame.galaxy_compressor.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_galaxy_compressor": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "dddsendgame:galaxy_compressor"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_galaxy_compressor"
+    ]
+  ]
+}

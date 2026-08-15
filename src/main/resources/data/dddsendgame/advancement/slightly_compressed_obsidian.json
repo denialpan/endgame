@@ -1,0 +1,34 @@
+{
+  "display": {
+    "icon": {
+      "id": "dddsendgame:compressed_obsidian_1"
+    },
+    "title": {
+      "translate": "advancements.dddsendgame.slightly_compressed_obsidian.title"
+    },
+    "description": {
+      "translate": "advancements.dddsendgame.slightly_compressed_obsidian.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_slightly_compressed_obsidian": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "dddsendgame:compressed_obsidian_1"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_slightly_compressed_obsidian"
+    ]
+  ]
+}
