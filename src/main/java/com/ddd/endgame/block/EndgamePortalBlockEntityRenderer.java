@@ -713,7 +713,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         private final ResourceLocation texture;
 
         CubemapFace(String textureName) {
-            this.texture = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/" + textureName + ".png");
+            this.texture = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/main/" + textureName + ".png");
         }
     }
 

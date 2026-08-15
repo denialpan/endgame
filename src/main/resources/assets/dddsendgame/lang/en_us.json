@@ -23,6 +23,7 @@
   "item.dddsendgame.spectator_phase_core.tooltip": "Sponsored by Valve.",
   "item.dddsendgame.chunk_annihilator": "Chunk Annihilator",
   "item.dddsendgame.chunk_annihilator.tooltip": "Bedrock is included. Not recommended to use if you can't fly.",
+
   "block.dddsendgame.galaxy_compressor": "Galaxy Compressor",
   "block.dddsendgame.galaxy_compressor.tooltip": "This is the true endgame decider.",
   "block.dddsendgame.galaxy_connector": "Galaxy Connector",
@@ -98,6 +99,7 @@
   "container.dddsendgame.galaxy_compressor.sort.desc": "Desc",
   "container.dddsendgame.galaxy_freezer": "Galaxy Freezer",
   "container.dddsendgame.galaxy_freezer.invalid": "Incomplete multiblock",
+
   "message.dddsendgame.weather.clear": "Weather set to clear",
   "message.dddsendgame.weather.rain": "Weather set to rain",
   "message.dddsendgame.weather.thunder": "Weather set to thunder",
@@ -114,6 +116,7 @@
   "message.dddsendgame.chunk_annihilator.warning": "Endgame blocks detected in this chunk, are you sure you want to do this? Sneak + right-click to confirm",
   "message.dddsendgame.chunk_annihilator.destroyed": "Destroyed chunk %s, %s (%s blocks removed)",
   "message.dddsendgame.god_stick.mode": "Mode: %s",
+
   "jei.dddsendgame.galaxy_compressor": "Galaxy Compressor Processing",
   "jei.dddsendgame.galaxy_compressor.process": "Processed in compressor",
   "jei.dddsendgame.galaxy_compressor.requirements": "Automate the world!",
