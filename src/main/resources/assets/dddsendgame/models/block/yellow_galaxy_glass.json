@@ -3,6 +3,6 @@
   "render_type": "minecraft:translucent",
   "textures": {
     "particle": "dddsendgame:block/galaxy_plated",
-    "all": "dddsendgame:block/galaxy_glass"
+    "all": "dddsendgame:block/yellow_galaxy_glass"
   }
 }
