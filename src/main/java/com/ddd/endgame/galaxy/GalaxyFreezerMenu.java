@@ -12,6 +12,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.items.SlotItemHandler;
@@ -20,6 +21,8 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
     private static final int SLOT_COUNT = GalaxyFreezerBlockEntity.SLOT_COUNT;
     private static final int SLOT_START_X = 62;
     private static final int SLOT_START_Y = 27;
+    private static final int ICE_SLOT_X = 125;
+    private static final int ICE_SLOT_Y = SLOT_START_Y;
     private static final int SLOT_SPACING = 18;
     private static final int PLAYER_INVENTORY_X = 8;
     private static final int PLAYER_INVENTORY_Y = 84;
@@ -55,9 +58,6 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
 
     @Override
     public void clicked(int slotId, int button, ClickType clickType, Player player) {
-        if (slotId >= 0 && slotId < SLOT_COUNT) {
-            GalaxyInstability.resetTicks(this.getCarried());
-        }
         super.clicked(slotId, button, clickType, player);
     }
 
@@ -67,6 +67,10 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
                 int slot = row * 3 + col;
                 this.addSlot(new FreezerSlot(itemHandler, slot, SLOT_START_X + col * SLOT_SPACING, SLOT_START_Y + row * SLOT_SPACING));
             }
+        }
+        for (int slot = GalaxyFreezerBlockEntity.ICE_SLOT_START; slot < SLOT_COUNT; slot++) {
+            int row = slot - GalaxyFreezerBlockEntity.ICE_SLOT_START;
+            this.addSlot(new FreezerSlot(itemHandler, slot, ICE_SLOT_X, ICE_SLOT_Y + row * SLOT_SPACING));
         }
     }
 
@@ -107,7 +111,11 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
                 return ItemStack.EMPTY;
             }
         } else if (stack.is(dddsendgame.GALAXY_INGOT.get())) {
-            if (!this.moveItemStackTo(stack, 0, SLOT_COUNT, false)) {
+            if (!this.moveItemStackTo(stack, 0, GalaxyFreezerBlockEntity.INGOT_SLOT_COUNT, false)) {
+                return ItemStack.EMPTY;
+            }
+        } else if (stack.is(Items.BLUE_ICE)) {
+            if (!this.moveItemStackTo(stack, GalaxyFreezerBlockEntity.ICE_SLOT_START, SLOT_COUNT, false)) {
                 return ItemStack.EMPTY;
             }
         } else {
@@ -137,7 +145,10 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
         return new ClientTarget(pos, null, new ItemStackHandler(SLOT_COUNT) {
             @Override
             public boolean isItemValid(int slot, ItemStack stack) {
-                return stack.is(dddsendgame.GALAXY_INGOT.get());
+                if (slot < GalaxyFreezerBlockEntity.INGOT_SLOT_COUNT) {
+                    return stack.is(dddsendgame.GALAXY_INGOT.get());
+                }
+                return stack.is(Items.BLUE_ICE);
             }
         });
     }
@@ -157,9 +168,8 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
             }
 
             int insertCount = Math.min(increment, stack.getCount());
-            ItemStack stabilizedStack = stack.copyWithCount(insertCount);
-            GalaxyInstability.resetTicks(stabilizedStack);
-            ItemStack remainder = this.getItemHandler().insertItem(this.index, stabilizedStack, false);
+            ItemStack insertStack = stack.copyWithCount(insertCount);
+            ItemStack remainder = this.getItemHandler().insertItem(this.index, insertStack, false);
             int inserted = insertCount - remainder.getCount();
             if (inserted > 0) {
                 stack.shrink(inserted);

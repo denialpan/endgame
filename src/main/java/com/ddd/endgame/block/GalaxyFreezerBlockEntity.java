@@ -18,6 +18,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -25,28 +26,31 @@ import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvider {
-    public static final int SLOT_COUNT = 6;
+    public static final int INGOT_SLOT_COUNT = 6;
+    public static final int ICE_SLOT_COUNT = 2;
+    public static final int ICE_SLOT_START = INGOT_SLOT_COUNT;
+    public static final int SLOT_COUNT = INGOT_SLOT_COUNT + ICE_SLOT_COUNT;
     private static final long MULTIBLOCK_CHECK_INTERVAL_TICKS = 20L;
+    private static final int BLUE_ICE_CONSUME_TICKS = 48_000;
     private static final String ITEMS_TAG = "Items";
+    private static final String COOLANT_TICKS_TAG = "CoolantTicks";
     private boolean multiblockValid;
     private long lastMultiblockCheck = Long.MIN_VALUE;
+    private int coolantTicks;
     private final IItemHandler directAutomationHandler = new DirectAutomationItemHandler();
     private final IItemHandler connectorInputHandler = new ConnectorInputItemHandler();
     private final ItemStackHandler itemHandler = new ItemStackHandler(SLOT_COUNT) {
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
-            return stack.is(dddsendgame.GALAXY_INGOT.get()) && GalaxyFreezerBlockEntity.this.isMultiblockValid();
+            if (slot < INGOT_SLOT_COUNT) {
+                return stack.is(dddsendgame.GALAXY_INGOT.get()) && GalaxyFreezerBlockEntity.this.isMultiblockValid();
+            }
+            return isIceSlot(slot) && stack.is(Items.BLUE_ICE);
         }
 
         @Override
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            if (stack.isEmpty()) {
-                return ItemStack.EMPTY;
-            }
-
-            ItemStack stabilizedStack = stack.copy();
-            GalaxyInstability.resetTicks(stabilizedStack);
-            return super.insertItem(slot, stabilizedStack, simulate);
+            return super.insertItem(slot, stack, simulate);
         }
 
         @Override
@@ -77,14 +81,18 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         }
 
         boolean valid = blockEntity.isMultiblockValid();
+        boolean hasCoolant = blockEntity.hasBlueIce();
+        boolean coolingActive = valid && hasCoolant;
+        boolean hasGalaxyMaterial = false;
         boolean changed = false;
-        for (int slot = 0; slot < blockEntity.itemHandler.getSlots(); slot++) {
+        for (int slot = 0; slot < INGOT_SLOT_COUNT; slot++) {
             ItemStack stack = blockEntity.itemHandler.getStackInSlot(slot);
             if (!GalaxyInstability.isGalaxyMaterial(stack)) {
                 continue;
             }
 
-            if (valid) {
+            hasGalaxyMaterial = true;
+            if (coolingActive) {
                 if (GalaxyInstability.ticks(stack) > 0) {
                     GalaxyInstability.resetTicks(stack);
                     changed = true;
@@ -99,6 +107,18 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
                 detonate(level, pos, blockEntity);
                 return;
             }
+        }
+
+        if (coolingActive && hasGalaxyMaterial) {
+            blockEntity.coolantTicks++;
+            if (blockEntity.coolantTicks >= BLUE_ICE_CONSUME_TICKS) {
+                blockEntity.coolantTicks = 0;
+                blockEntity.consumeBlueIce();
+            }
+            changed = true;
+        } else if (blockEntity.coolantTicks != 0) {
+            blockEntity.coolantTicks = 0;
+            changed = true;
         }
 
         if (changed) {
@@ -152,12 +172,14 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         this.itemHandler.deserializeNBT(registries, tag.getCompound(ITEMS_TAG));
+        this.coolantTicks = tag.getInt(COOLANT_TICKS_TAG);
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.put(ITEMS_TAG, this.itemHandler.serializeNBT(registries));
+        tag.putInt(COOLANT_TICKS_TAG, this.coolantTicks);
     }
 
     @Nullable
@@ -178,7 +200,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         double y = pos.getY() + 0.5D;
         double z = pos.getZ() + 0.5D;
         ItemEntity explosionSource = new ItemEntity(level, x, y, z, new ItemStack(dddsendgame.GALAXY_INGOT.get()));
-        for (int slot = 0; slot < blockEntity.itemHandler.getSlots(); slot++) {
+        for (int slot = 0; slot < INGOT_SLOT_COUNT; slot++) {
             ItemStack stack = blockEntity.itemHandler.getStackInSlot(slot);
             if (GalaxyInstability.isGalaxyMaterial(stack)) {
                 stack.setCount(0);
@@ -259,6 +281,29 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
             return GalaxyFreezerBlockEntity.this.itemHandler.isItemValid(slot, stack);
+        }
+    }
+
+    private static boolean isIceSlot(int slot) {
+        return slot >= ICE_SLOT_START && slot < SLOT_COUNT;
+    }
+
+    private boolean hasBlueIce() {
+        for (int slot = ICE_SLOT_START; slot < SLOT_COUNT; slot++) {
+            if (this.itemHandler.getStackInSlot(slot).is(Items.BLUE_ICE)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void consumeBlueIce() {
+        for (int slot = ICE_SLOT_START; slot < SLOT_COUNT; slot++) {
+            ItemStack stack = this.itemHandler.getStackInSlot(slot);
+            if (stack.is(Items.BLUE_ICE)) {
+                stack.shrink(1);
+                return;
+            }
         }
     }
 }
