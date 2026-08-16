@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "dddsendgame:galaxy_full_glass"
+  },
+  "result": {
+    "id": "dddsendgame:red_skybox_block",
+    "count": 1
+  }
+}

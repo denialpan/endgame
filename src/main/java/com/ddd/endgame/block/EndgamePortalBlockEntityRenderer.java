@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -158,17 +159,17 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             return;
         }
 
-        if (visibleMasks.stream().anyMatch(mask -> mask.tintGreenBlue() < 0.999F)) {
-            renderTintedSkyboxLayer(event, visibleMasks, stencilRef, maskMin, maskMax);
+        if (visibleMasks.stream().anyMatch(mask -> mask.tintGreenBlue() < 0.999F || mask.cubemap() != Cubemap.MAIN)) {
+            renderGroupedSkyboxLayer(event, visibleMasks, stencilRef, maskMin, maskMax);
             return;
         }
 
         prepareStencilForFrame(event);
-        renderSkyboxMaskPass(event, visibleMasks, stencilRef, maskMin, maskMax, 1.0F);
+        renderSkyboxMaskPass(event, visibleMasks, stencilRef, maskMin, maskMax, 1.0F, Cubemap.MAIN);
         restoreAfterSkyboxLayer();
     }
 
-    private static void renderTintedSkyboxLayer(
+    private static void renderGroupedSkyboxLayer(
             RenderLevelStageEvent event,
             List<? extends WindowMask> visibleMasks,
             int stencilRef,
@@ -176,17 +177,17 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             float maskMax
     ) {
         int groupRef = stencilRef;
-        Map<Integer, List<WindowMask>> groupedMasks = new HashMap<>();
+        Map<SkyboxGroup, List<WindowMask>> groupedMasks = new HashMap<>();
         for (WindowMask mask : visibleMasks) {
-            int tintKey = Math.round(mask.tintGreenBlue() * 255.0F);
-            groupedMasks.computeIfAbsent(tintKey, ignored -> new ArrayList<>()).add(mask);
+            SkyboxGroup group = new SkyboxGroup(mask.cubemap(), Math.round(mask.tintGreenBlue() * 255.0F));
+            groupedMasks.computeIfAbsent(group, ignored -> new ArrayList<>()).add(mask);
         }
 
         GL11.glEnable(GL11.GL_STENCIL_TEST);
-        for (Map.Entry<Integer, List<WindowMask>> entry : groupedMasks.entrySet()) {
+        for (Map.Entry<SkyboxGroup, List<WindowMask>> entry : groupedMasks.entrySet()) {
             RenderSystem.stencilMask(0xFF);
             RenderSystem.clear(GL11.GL_STENCIL_BUFFER_BIT, Minecraft.ON_OSX);
-            renderSkyboxMaskPass(event, entry.getValue(), groupRef, maskMin, maskMax, entry.getKey() / 255.0F);
+            renderSkyboxMaskPass(event, entry.getValue(), groupRef, maskMin, maskMax, entry.getKey().tintGreenBlue() / 255.0F, entry.getKey().cubemap());
         }
 
         restoreAfterSkyboxLayer();
@@ -198,7 +199,8 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             int stencilRef,
             float maskMin,
             float maskMax,
-            float greenBlue
+            float greenBlue,
+            Cubemap cubemap
     ) {
         RenderSystem.enableDepthTest();
         RenderSystem.disableCull();
@@ -225,7 +227,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
 
         poseStack.pushPose();
         applyConfiguredSkyboxRotation(poseStack, skyboxAnimationSeconds(event, visibleMasks));
-        withFixedSkyboxProjection(() -> renderSkyboxCube(poseStack.last().pose(), SKYBOX_SIZE, greenBlue));
+        withFixedSkyboxProjection(() -> renderSkyboxCube(poseStack.last().pose(), SKYBOX_SIZE, greenBlue, cubemap));
         poseStack.popPose();
     }
 
@@ -234,6 +236,10 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static void registerWindowMask(Matrix4f pose, float greenBlue) {
+        registerWindowMask(pose, greenBlue, Cubemap.MAIN);
+    }
+
+    public static void registerWindowMask(Matrix4f pose, float greenBlue, Cubemap cubemap) {
         if (!Config.DROPPED_ITEM_WINDOWS.getAsBoolean() || IrisCompat.isRenderingShadowPass()) {
             return;
         }
@@ -248,7 +254,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         if (!ITEM_WINDOW_MASK_KEYS.add(MatrixKey.from(itemPose))) {
             return;
         }
-        ITEM_WINDOW_MASKS.add(new DynamicWindowMask(itemPose, transformedUnitCubeBounds(itemPose), greenBlue));
+        ITEM_WINDOW_MASKS.add(new DynamicWindowMask(itemPose, transformedUnitCubeBounds(itemPose), greenBlue, cubemap));
     }
 
     public static void registerPixelWindowMask(Matrix4f pose, boolean[][] pixels, int pixelCount, float frontZ, float backZ) {
@@ -267,7 +273,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         if (!ITEM_WINDOW_MASK_KEYS.add(MatrixKey.from(itemPose))) {
             return;
         }
-        ITEM_WINDOW_MASKS.add(new PixelWindowMask(itemPose, transformedUnitCubeBounds(itemPose), pixels, pixelCount, frontZ, backZ, greenBlue));
+        ITEM_WINDOW_MASKS.add(new PixelWindowMask(itemPose, transformedUnitCubeBounds(itemPose), pixels, pixelCount, frontZ, backZ, greenBlue, Cubemap.MAIN));
     }
 
     public static void registerMeshWindowMask(Matrix4f pose, List<MaskQuad> quads, float greenBlue) {
@@ -282,7 +288,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         if (!ITEM_WINDOW_MASK_KEYS.add(MatrixKey.from(itemPose))) {
             return;
         }
-        ITEM_WINDOW_MASKS.add(new MeshWindowMask(itemPose, transformedUnitCubeBounds(itemPose), quads, greenBlue));
+        ITEM_WINDOW_MASKS.add(new MeshWindowMask(itemPose, transformedUnitCubeBounds(itemPose), quads, greenBlue, Cubemap.MAIN));
     }
 
     public static int lastBlockEntityWindowsQueued() {
@@ -317,22 +323,39 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         float greenBlue = blockEntityTintGreenBlue(blockEntity);
         if (blockEntity.getLevel() != minecraft.level || minecraft.level == null) {
             Matrix4f pose = new Matrix4f(fallbackPose);
-            return new DynamicWindowMask(pose, transformedUnitCubeBounds(pose), greenBlue);
+            return new DynamicWindowMask(pose, transformedUnitCubeBounds(pose), greenBlue, blockEntityCubemap(blockEntity));
         }
 
         Vec3 cameraPosition = minecraft.gameRenderer.getMainCamera().getPosition();
         BlockPos blockPos = blockEntity.getBlockPos();
         if (!isStaticWorldPose(fallbackPose, blockPos, cameraPosition)) {
             Matrix4f pose = new Matrix4f(fallbackPose);
-            return new DynamicWindowMask(pose, transformedUnitCubeBounds(pose), greenBlue);
+            return new DynamicWindowMask(pose, transformedUnitCubeBounds(pose), greenBlue, blockEntityCubemap(blockEntity));
         }
 
         ensureStaticCacheLevel(minecraft.level);
         long key = blockPos.asLong();
         StaticWorldWindowMask mask = STATIC_WORLD_WINDOW_MASKS.computeIfAbsent(key, ignored -> new StaticWorldWindowMask(blockPos));
-        mask.prepare(cameraPosition, minecraft.level.getGameTime(), greenBlue);
+        mask.prepare(cameraPosition, minecraft.level.getGameTime(), greenBlue, blockEntityCubemap(blockEntity));
         pruneStaticWorldWindowMasks(minecraft.level.getGameTime());
         return mask;
+    }
+
+    private static Cubemap blockEntityCubemap(BlockEntity blockEntity) {
+        return cubemapForBlock(blockEntity.getBlockState().getBlock());
+    }
+
+    public static Cubemap cubemapForBlock(Block block) {
+        if (block == dddsendgame.BLUE_SKYBOX_BLOCK.get()) {
+            return Cubemap.BLUE;
+        }
+        if (block == dddsendgame.GREEN_SKYBOX_BLOCK.get()) {
+            return Cubemap.GREEN;
+        }
+        if (block == dddsendgame.RED_SKYBOX_BLOCK.get()) {
+            return Cubemap.RED;
+        }
+        return Cubemap.MAIN;
     }
 
     private static float blockEntityTintGreenBlue(BlockEntity blockEntity) {
@@ -446,9 +469,13 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static void renderGlobalSkybox(float greenBlue) {
+        renderGlobalSkybox(greenBlue, Cubemap.MAIN);
+    }
+
+    public static void renderGlobalSkybox(float greenBlue, Cubemap cubemap) {
         PoseStack skyboxPose = new PoseStack();
         applyConfiguredSkyboxRotation(skyboxPose);
-        withFixedSkyboxProjection(() -> renderSkyboxCube(skyboxPose.last().pose(), SKYBOX_SIZE, greenBlue));
+        withFixedSkyboxProjection(() -> renderSkyboxCube(skyboxPose.last().pose(), SKYBOX_SIZE, greenBlue, cubemap));
     }
 
     private static void applyConfiguredSkyboxRotation(PoseStack poseStack, double seconds) {
@@ -666,19 +693,23 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static void renderSkyboxCube(Matrix4f pose, float size, float greenBlue) {
+        renderSkyboxCube(pose, size, greenBlue, Cubemap.MAIN);
+    }
+
+    public static void renderSkyboxCube(Matrix4f pose, float size, float greenBlue, Cubemap cubemap) {
         RenderSystem.setShaderColor(1.0F, greenBlue, greenBlue, 1.0F);
         float s = size;
-        renderSkyboxFace(CubemapFace.FRONT, pose, -s, -s, s, s, -s, s, s, s, s, -s, s, s);
-        renderSkyboxFace(CubemapFace.BACK, pose, s, -s, -s, -s, -s, -s, -s, s, -s, s, s, -s);
-        renderSkyboxFace(CubemapFace.LEFT, pose, -s, -s, -s, -s, -s, s, -s, s, s, -s, s, -s);
-        renderSkyboxFace(CubemapFace.RIGHT, pose, s, -s, s, s, -s, -s, s, s, -s, s, s, s);
-        renderSkyboxFace(CubemapFace.TOP, pose, -s, s, s, s, s, s, s, s, -s, -s, s, -s);
-        renderSkyboxFace(CubemapFace.BOTTOM, pose, -s, -s, -s, s, -s, -s, s, -s, s, -s, -s, s);
+        renderSkyboxFace(cubemap.face(CubemapFace.FRONT), pose, -s, -s, s, s, -s, s, s, s, s, -s, s, s);
+        renderSkyboxFace(cubemap.face(CubemapFace.BACK), pose, s, -s, -s, -s, -s, -s, -s, s, -s, s, s, -s);
+        renderSkyboxFace(cubemap.face(CubemapFace.LEFT), pose, -s, -s, -s, -s, -s, s, -s, s, s, -s, s, -s);
+        renderSkyboxFace(cubemap.face(CubemapFace.RIGHT), pose, s, -s, s, s, -s, -s, s, s, -s, s, s, s);
+        renderSkyboxFace(cubemap.face(CubemapFace.TOP), pose, -s, s, s, s, s, s, s, s, -s, -s, s, -s);
+        renderSkyboxFace(cubemap.face(CubemapFace.BOTTOM), pose, -s, -s, -s, s, -s, -s, s, -s, s, -s, -s, s);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     private static void renderSkyboxFace(
-            CubemapFace face,
+            ResourceLocation texture,
             Matrix4f pose,
             float x0,
             float y0,
@@ -693,7 +724,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             float y3,
             float z3
     ) {
-        RenderSystem.setShaderTexture(0, face.texture);
+        RenderSystem.setShaderTexture(0, texture);
         BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         builder.addVertex(pose, x0, y0, z0).setUv(0.0F, 1.0F);
         builder.addVertex(pose, x1, y1, z1).setUv(1.0F, 1.0F);
@@ -710,11 +741,31 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         TOP("top"),
         BOTTOM("bottom");
 
-        private final ResourceLocation texture;
+        private final String textureName;
 
         CubemapFace(String textureName) {
-            this.texture = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/main/" + textureName + ".png");
+            this.textureName = textureName;
         }
+    }
+
+    public enum Cubemap {
+        MAIN("main"),
+        BLUE("blue"),
+        GREEN("green"),
+        RED("red");
+
+        private final String folder;
+
+        Cubemap(String folder) {
+            this.folder = folder;
+        }
+
+        private ResourceLocation face(CubemapFace face) {
+            return ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/" + this.folder + "/" + face.textureName + ".png");
+        }
+    }
+
+    private record SkyboxGroup(Cubemap cubemap, int tintGreenBlue) {
     }
 
     private interface WindowMask {
@@ -727,9 +778,11 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         void append(BufferBuilder builder, float min, float max);
 
         float tintGreenBlue();
+
+        Cubemap cubemap();
     }
 
-    private record DynamicWindowMask(Matrix4f pose, AABB cameraRelativeBounds, float tintGreenBlue) implements WindowMask {
+    private record DynamicWindowMask(Matrix4f pose, AABB cameraRelativeBounds, float tintGreenBlue, Cubemap cubemap) implements WindowMask {
         @Override
         public AABB worldBounds(Vec3 cameraPosition) {
             return new AABB(
@@ -751,9 +804,14 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         public float tintGreenBlue() {
             return this.tintGreenBlue;
         }
+
+        @Override
+        public Cubemap cubemap() {
+            return this.cubemap;
+        }
     }
 
-    private record PixelWindowMask(Matrix4f pose, AABB cameraRelativeBounds, boolean[][] pixels, int pixelCount, float frontZ, float backZ, float tintGreenBlue) implements WindowMask {
+    private record PixelWindowMask(Matrix4f pose, AABB cameraRelativeBounds, boolean[][] pixels, int pixelCount, float frontZ, float backZ, float tintGreenBlue, Cubemap cubemap) implements WindowMask {
         @Override
         public AABB worldBounds(Vec3 cameraPosition) {
             return new AABB(
@@ -783,9 +841,14 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
                 }
             }
         }
+
+        @Override
+        public Cubemap cubemap() {
+            return this.cubemap;
+        }
     }
 
-    private record MeshWindowMask(Matrix4f pose, AABB cameraRelativeBounds, List<MaskQuad> quads, float tintGreenBlue) implements WindowMask {
+    private record MeshWindowMask(Matrix4f pose, AABB cameraRelativeBounds, List<MaskQuad> quads, float tintGreenBlue, Cubemap cubemap) implements WindowMask {
         @Override
         public AABB worldBounds(Vec3 cameraPosition) {
             return new AABB(
@@ -804,6 +867,11 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
                 appendMaskQuad(builder, this.pose, quad);
             }
         }
+
+        @Override
+        public Cubemap cubemap() {
+            return this.cubemap;
+        }
     }
 
     public record MaskQuad(
@@ -820,12 +888,13 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         private AABB cameraRelativeBounds;
         private long lastSeenGameTime;
         private float tintGreenBlue = 1.0F;
+        private Cubemap cubemap = Cubemap.MAIN;
 
         private StaticWorldWindowMask(BlockPos pos) {
             this.worldBounds = new AABB(pos);
         }
 
-        private void prepare(Vec3 cameraPosition, long gameTime, float tintGreenBlue) {
+        private void prepare(Vec3 cameraPosition, long gameTime, float tintGreenBlue, Cubemap cubemap) {
             double x = this.worldBounds.minX - cameraPosition.x;
             double y = this.worldBounds.minY - cameraPosition.y;
             double z = this.worldBounds.minZ - cameraPosition.z;
@@ -840,6 +909,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
             );
             this.lastSeenGameTime = gameTime;
             this.tintGreenBlue = tintGreenBlue;
+            this.cubemap = cubemap;
         }
 
         @Override
@@ -865,6 +935,11 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         @Override
         public float tintGreenBlue() {
             return this.tintGreenBlue;
+        }
+
+        @Override
+        public Cubemap cubemap() {
+            return this.cubemap;
         }
     }
 

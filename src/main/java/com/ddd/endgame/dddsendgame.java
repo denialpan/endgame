@@ -210,6 +210,33 @@ public class dddsendgame {
             "galaxy_block",
             () -> new GalaxyBlockItem(GALAXY_BLOCK.get(), new Item.Properties())
     );
+    public static final DeferredBlock<GalaxyDecorativeBlock> BLUE_SKYBOX_BLOCK = BLOCKS.registerBlock(
+            "blue_skybox_block",
+            GalaxyDecorativeBlock::new,
+            galaxyBlockProperties(Blocks.DEEPSLATE)
+    );
+    public static final DeferredItem<BlockItem> BLUE_SKYBOX_BLOCK_ITEM = ITEMS.register(
+            "blue_skybox_block",
+            () -> new EndgameSkyboxBlockItem(BLUE_SKYBOX_BLOCK.get(), new Item.Properties())
+    );
+    public static final DeferredBlock<GalaxyDecorativeBlock> GREEN_SKYBOX_BLOCK = BLOCKS.registerBlock(
+            "green_skybox_block",
+            GalaxyDecorativeBlock::new,
+            galaxyBlockProperties(Blocks.DEEPSLATE)
+    );
+    public static final DeferredItem<BlockItem> GREEN_SKYBOX_BLOCK_ITEM = ITEMS.register(
+            "green_skybox_block",
+            () -> new EndgameSkyboxBlockItem(GREEN_SKYBOX_BLOCK.get(), new Item.Properties())
+    );
+    public static final DeferredBlock<GalaxyDecorativeBlock> RED_SKYBOX_BLOCK = BLOCKS.registerBlock(
+            "red_skybox_block",
+            GalaxyDecorativeBlock::new,
+            galaxyBlockProperties(Blocks.DEEPSLATE)
+    );
+    public static final DeferredItem<BlockItem> RED_SKYBOX_BLOCK_ITEM = ITEMS.register(
+            "red_skybox_block",
+            () -> new EndgameSkyboxBlockItem(RED_SKYBOX_BLOCK.get(), new Item.Properties())
+    );
     public static final DeferredBlock<GalaxyFreezerBlock> GALAXY_FREEZER_BLOCK = BLOCKS.registerBlock(
             "galaxy_freezer",
             GalaxyFreezerBlock::new,
@@ -264,7 +291,10 @@ public class dddsendgame {
                     GALAXY_OBSIDIAN_BLOCK.get(),
                     GALAXY_GLASS_BLOCK.get(),
                     GALAXY_FULL_GLASS_BLOCK.get(),
-                    GALAXY_BLOCK.get()
+                    GALAXY_BLOCK.get(),
+                    BLUE_SKYBOX_BLOCK.get(),
+                    GREEN_SKYBOX_BLOCK.get(),
+                    RED_SKYBOX_BLOCK.get()
             ).build(null));
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GalaxyFreezerBlockEntity>> GALAXY_FREEZER_BLOCK_ENTITY =
             BLOCK_ENTITY_TYPES.register("galaxy_freezer", () -> BlockEntityType.Builder.of(GalaxyFreezerBlockEntity::new, GALAXY_FREEZER_BLOCK.get()).build(null));
@@ -286,6 +316,9 @@ public class dddsendgame {
                 output.accept(GALAXY_HARDENED_GLASS_ITEM.get());
                 output.accept(GALAXY_FULL_GLASS_ITEM.get());
                 output.accept(GALAXY_BLOCK_ITEM.get());
+                output.accept(BLUE_SKYBOX_BLOCK_ITEM.get());
+                output.accept(GREEN_SKYBOX_BLOCK_ITEM.get());
+                output.accept(RED_SKYBOX_BLOCK_ITEM.get());
                 output.accept(GALAXY_FREEZER_ITEM.get());
                 output.accept(COMPRESSED_OBSIDIAN_1_ITEM.get());
                 output.accept(COMPRESSED_OBSIDIAN_2_ITEM.get());
@@ -441,6 +474,9 @@ public class dddsendgame {
             event.accept(GALAXY_HARDENED_GLASS_ITEM);
             event.accept(GALAXY_FULL_GLASS_ITEM);
             event.accept(GALAXY_BLOCK_ITEM);
+            event.accept(BLUE_SKYBOX_BLOCK_ITEM);
+            event.accept(GREEN_SKYBOX_BLOCK_ITEM);
+            event.accept(RED_SKYBOX_BLOCK_ITEM);
             event.accept(GALAXY_FREEZER_ITEM);
             event.accept(COMPRESSED_OBSIDIAN_1_ITEM);
             event.accept(COMPRESSED_OBSIDIAN_2_ITEM);

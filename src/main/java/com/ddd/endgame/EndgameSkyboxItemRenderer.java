@@ -43,7 +43,8 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
 
         RenderOptimizationCompat.beforeSkyboxItemRender(displayContext);
         float greenBlue = GalaxyInstabilityVisuals.tintGreenBlue(stack);
-        renderStencilWindow(displayContext, poseStack, greenBlue);
+        EndgamePortalBlockEntityRenderer.Cubemap cubemap = EndgamePortalBlockEntityRenderer.cubemapForBlock(blockItem.getBlock());
+        renderStencilWindow(displayContext, poseStack, greenBlue, cubemap);
         renderBlockModel(blockItem.getBlock(), stack, poseStack, buffer, packedLight, packedOverlay);
         flushItemBuffers(buffer);
         RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
@@ -65,9 +66,9 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         }
     }
 
-    private static void renderStencilWindow(ItemDisplayContext displayContext, PoseStack poseStack, float greenBlue) {
+    private static void renderStencilWindow(ItemDisplayContext displayContext, PoseStack poseStack, float greenBlue, EndgamePortalBlockEntityRenderer.Cubemap cubemap) {
         if (displayContext == ItemDisplayContext.GROUND) {
-            EndgamePortalBlockEntityRenderer.registerWindowMask(poseStack.last().pose(), greenBlue);
+            EndgamePortalBlockEntityRenderer.registerWindowMask(poseStack.last().pose(), greenBlue, cubemap);
             return;
         }
 
@@ -98,10 +99,10 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
             poseStack.pushPose();
             poseStack.translate(0.5F, 0.5F, 0.5F);
             EndgamePortalBlockEntityRenderer.applyConfiguredSkyboxRotation(poseStack);
-            EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), GUI_SKYBOX_SIZE, greenBlue);
+            EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), GUI_SKYBOX_SIZE, greenBlue, cubemap);
             poseStack.popPose();
         } else {
-            EndgamePortalBlockEntityRenderer.renderGlobalSkybox(greenBlue);
+            EndgamePortalBlockEntityRenderer.renderGlobalSkybox(greenBlue, cubemap);
         }
 
         RenderSystem.depthMask(true);
