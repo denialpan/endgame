@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "dddsendgame:red_skybox_block"
+          "name": "dddsendgame:green_galaxy_full_glass"
         }
       ],
       "conditions": [

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "dddsendgame:yellow_galaxy_glass"
+  },
+  "result": {
+    "id": "dddsendgame:galaxy_glass",
+    "count": 1
+  }
+}

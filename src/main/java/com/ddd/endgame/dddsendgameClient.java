@@ -266,11 +266,18 @@ public class dddsendgameClient {
                 || state.is(dddsendgame.GALAXY_CONNECTOR_BLOCK.get())
                 || state.is(dddsendgame.GALAXY_OBSIDIAN_BLOCK.get())
                 || state.is(dddsendgame.GALAXY_GLASS_BLOCK.get())
+                || state.is(dddsendgame.BLUE_GALAXY_GLASS_BLOCK.get())
+                || state.is(dddsendgame.GREEN_GALAXY_GLASS_BLOCK.get())
+                || state.is(dddsendgame.RED_GALAXY_GLASS_BLOCK.get())
+                || state.is(dddsendgame.RAINBOW_GALAXY_GLASS_BLOCK.get())
+                || state.is(dddsendgame.YELLOW_GALAXY_GLASS_BLOCK.get())
                 || state.is(dddsendgame.GALAXY_FULL_GLASS_BLOCK.get())
                 || state.is(dddsendgame.GALAXY_BLOCK.get())
-                || state.is(dddsendgame.BLUE_SKYBOX_BLOCK.get())
-                || state.is(dddsendgame.GREEN_SKYBOX_BLOCK.get())
-                || state.is(dddsendgame.RED_SKYBOX_BLOCK.get())
+                || state.is(dddsendgame.BLUE_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(dddsendgame.GREEN_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(dddsendgame.RED_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(dddsendgame.RAINBOW_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(dddsendgame.YELLOW_GALAXY_FULL_GLASS_BLOCK.get())
                 || state.is(dddsendgame.GALAXY_FREEZER_BLOCK.get());
     }
 

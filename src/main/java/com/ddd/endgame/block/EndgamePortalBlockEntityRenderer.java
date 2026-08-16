@@ -346,14 +346,25 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static Cubemap cubemapForBlock(Block block) {
-        if (block == dddsendgame.BLUE_SKYBOX_BLOCK.get()) {
+        if (block == dddsendgame.BLUE_GALAXY_FULL_GLASS_BLOCK.get()
+                || block == dddsendgame.BLUE_GALAXY_GLASS_BLOCK.get()) {
             return Cubemap.BLUE;
         }
-        if (block == dddsendgame.GREEN_SKYBOX_BLOCK.get()) {
+        if (block == dddsendgame.GREEN_GALAXY_FULL_GLASS_BLOCK.get()
+                || block == dddsendgame.GREEN_GALAXY_GLASS_BLOCK.get()) {
             return Cubemap.GREEN;
         }
-        if (block == dddsendgame.RED_SKYBOX_BLOCK.get()) {
+        if (block == dddsendgame.RED_GALAXY_FULL_GLASS_BLOCK.get()
+                || block == dddsendgame.RED_GALAXY_GLASS_BLOCK.get()) {
             return Cubemap.RED;
+        }
+        if (block == dddsendgame.RAINBOW_GALAXY_FULL_GLASS_BLOCK.get()
+                || block == dddsendgame.RAINBOW_GALAXY_GLASS_BLOCK.get()) {
+            return Cubemap.RAINBOW;
+        }
+        if (block == dddsendgame.YELLOW_GALAXY_FULL_GLASS_BLOCK.get()
+                || block == dddsendgame.YELLOW_GALAXY_GLASS_BLOCK.get()) {
+            return Cubemap.YELLOW;
         }
         return Cubemap.MAIN;
     }
@@ -752,7 +763,9 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         MAIN("main"),
         BLUE("blue"),
         GREEN("green"),
-        RED("red");
+        RED("red"),
+        RAINBOW("rainbow"),
+        YELLOW("yellow");
 
         private final String folder;
 
