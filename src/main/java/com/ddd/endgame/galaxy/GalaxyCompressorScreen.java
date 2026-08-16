@@ -9,8 +9,10 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -28,6 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.fml.ModList;
 
 public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompressorMenu> {
     private static final ResourceLocation ATLAS = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/gui/atlas.png");
@@ -86,6 +89,7 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
     private long cachedTotalRemaining;
     private int cachedCompletedStacks;
     private int cachedTotalStacks;
+    private final Map<String, String> modDisplayNameCache = new HashMap<>();
 
     public GalaxyCompressorScreen(GalaxyCompressorMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -271,6 +275,8 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
             ItemStack stack = requirement.displayStack();
             FluidStack fluidStack = requirement.displayFluid();
             String name = requirement.displayName().getString();
+            String namespace = requirement.id().getNamespace();
+            String modName = modDisplayName(namespace);
             long remaining = requirement.remaining();
             long required = requirement.required();
             totalRequired += required;
@@ -278,7 +284,7 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
             if (requirement.complete()) {
                 completedStacks++;
             }
-            if (!searchText.isEmpty() && !name.toLowerCase(Locale.ROOT).contains(searchText)) {
+            if (!matchesSearch(searchText, name, namespace, modName)) {
                 continue;
             }
             rows.add(new RowData(stack, fluidStack, name, requirement.id().toString(), requirement.fluid(), remaining, required));
@@ -309,6 +315,28 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
 
     private String normalizedSearchText() {
         return this.searchBox == null ? "" : this.searchBox.getValue().trim().toLowerCase(Locale.ROOT);
+    }
+
+    private boolean matchesSearch(String searchText, String name, String namespace, String modName) {
+        if (searchText.isEmpty()) {
+            return true;
+        }
+
+        String query = searchText.startsWith("@") ? searchText.substring(1) : searchText;
+        if (query.isEmpty()) {
+            return true;
+        }
+
+        return name.toLowerCase(Locale.ROOT).contains(query)
+                || namespace.toLowerCase(Locale.ROOT).contains(query)
+                || modName.toLowerCase(Locale.ROOT).contains(query);
+    }
+
+    private String modDisplayName(String namespace) {
+        return this.modDisplayNameCache.computeIfAbsent(namespace, modId -> ModList.get()
+                .getModContainerById(modId)
+                .map(container -> container.getModInfo().getDisplayName())
+                .orElse(modId));
     }
 
     private void selectSortMode(SortMode mode) {
