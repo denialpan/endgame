@@ -82,7 +82,21 @@ public final class GalaxyFreezerMultiblock {
     }
 
     private static Requirement glass(int x, int y, int z) {
-        return new Requirement(x, y, z, dddsendgame.GALAXY_GLASS_BLOCK.get(), state -> state.is(dddsendgame.GALAXY_GLASS_BLOCK.get()));
+        return new Requirement(x, y, z, dddsendgame.GALAXY_GLASS_BLOCK.get(), GalaxyFreezerMultiblock::isAcceptedGlass);
+    }
+
+    private static boolean isAcceptedGlass(BlockState state) {
+        return state.is(dddsendgame.GALAXY_GLASS_BLOCK.get())
+                || state.is(dddsendgame.BLUE_GALAXY_GLASS_BLOCK.get())
+                || state.is(dddsendgame.GREEN_GALAXY_GLASS_BLOCK.get())
+                || state.is(dddsendgame.RED_GALAXY_GLASS_BLOCK.get())
+                || state.is(dddsendgame.RAINBOW_GALAXY_GLASS_BLOCK.get())
+                || state.is(dddsendgame.YELLOW_GALAXY_GLASS_BLOCK.get())
+                || state.is(dddsendgame.BLUE_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(dddsendgame.GREEN_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(dddsendgame.RED_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(dddsendgame.RAINBOW_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(dddsendgame.YELLOW_GALAXY_FULL_GLASS_BLOCK.get());
     }
 
     private static Requirement connector(int x, int y, int z) {
