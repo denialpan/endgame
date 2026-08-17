@@ -369,10 +369,14 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
 
     private void drawTotalProgress(GuiGraphics guiGraphics, int x, int y) {
         long totalContributed = Math.max(0L, this.cachedTotalRequired - this.cachedTotalRemaining);
-        int filled = (int)Math.round(TOTAL_BAR_WIDTH * progress(totalContributed, this.cachedTotalRequired));
-        if (filled > 0) {
-            guiGraphics.blit(ATLAS, x + TOTAL_BAR_X, y + TOTAL_BAR_Y, GRADIENT_U, GRADIENT_V, filled, TOTAL_BAR_HEIGHT);
+        if (this.cachedTotalRequired <= 0L || totalContributed <= 0L) {
+            return;
         }
+
+        int filled = totalContributed >= this.cachedTotalRequired
+                ? TOTAL_BAR_WIDTH
+                : Math.min(TOTAL_BAR_WIDTH - 1, Math.max(1, (int)Math.floor(TOTAL_BAR_WIDTH * progress(totalContributed, this.cachedTotalRequired))));
+        guiGraphics.blit(ATLAS, x + TOTAL_BAR_X, y + TOTAL_BAR_Y, GRADIENT_U, GRADIENT_V, filled, TOTAL_BAR_HEIGHT);
     }
 
     private void drawSortButtons(GuiGraphics guiGraphics, int x, int y) {
