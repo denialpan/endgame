@@ -19,6 +19,7 @@ import net.minecraft.world.level.Level;
 
 public final class GalaxyInstability {
     private static final String TICKS_TAG = "GalaxyInstabilityTicks";
+    private static final String FROZEN_STABLE_TAG = "GalaxyInstabilityFrozenStable";
     private static final String PLAYER_TICKS_TAG = "GalaxyInstabilityPlayerTicks";
     private static final String DROPPED_TICKS_TAG = "GalaxyInstabilityDroppedTicks";
     private static final String DROPPED_INITIALIZED_TAG = "GalaxyInstabilityDroppedInitialized";
@@ -118,6 +119,15 @@ public final class GalaxyInstability {
         return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getInt(TICKS_TAG);
     }
 
+    public static int remainingSeconds(ItemStack stack) {
+        int remainingTicks = Math.max(0, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS - ticks(stack));
+        return (remainingTicks + 19) / 20;
+    }
+
+    public static boolean isFrozenStable(ItemStack stack) {
+        return isGalaxyMaterial(stack) && stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getBoolean(FROZEN_STABLE_TAG);
+    }
+
     public static int carriedTicks(ItemStack stack, @Nullable Entity holder) {
         int ticks = ticks(stack);
         if (holder instanceof Player player) {
@@ -130,7 +140,20 @@ public final class GalaxyInstability {
         if (stack.isEmpty() || !isGalaxyMaterial(stack)) {
             return;
         }
-        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.remove(TICKS_TAG));
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
+            tag.remove(TICKS_TAG);
+            tag.remove(FROZEN_STABLE_TAG);
+        });
+    }
+
+    public static void freezeTicks(ItemStack stack) {
+        if (stack.isEmpty() || !isGalaxyMaterial(stack)) {
+            return;
+        }
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
+            tag.remove(TICKS_TAG);
+            tag.putBoolean(FROZEN_STABLE_TAG, true);
+        });
     }
 
     public static float tintProgress(ItemStack stack) {
@@ -162,6 +185,7 @@ public final class GalaxyInstability {
 
     private static void updateTicks(CompoundTag tag, int ticks) {
         tag.putInt(TICKS_TAG, ticks);
+        tag.remove(FROZEN_STABLE_TAG);
     }
 
     private static int playerTicks(Player player) {

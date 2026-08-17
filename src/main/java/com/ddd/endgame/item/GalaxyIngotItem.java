@@ -40,7 +40,11 @@ public class GalaxyIngotItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.dddsendgame.galaxy_ingot.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        if (GalaxyInstability.isFrozenStable(stack)) {
+            tooltipComponents.add(Component.translatable("item.dddsendgame.galaxy_ingot.tooltip.frozen").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+            return;
+        }
+        tooltipComponents.add(Component.translatable("item.dddsendgame.galaxy_ingot.tooltip", GalaxyInstability.remainingSeconds(stack)).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override

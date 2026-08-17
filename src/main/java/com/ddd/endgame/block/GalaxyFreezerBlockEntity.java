@@ -136,8 +136,8 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
 
             hasGalaxyMaterial = true;
             if (coolingActive) {
-                if (GalaxyInstability.ticks(stack) > 0) {
-                    GalaxyInstability.resetTicks(stack);
+                if (GalaxyInstability.ticks(stack) > 0 || !GalaxyInstability.isFrozenStable(stack)) {
+                    GalaxyInstability.freezeTicks(stack);
                     changed = true;
                 }
                 continue;

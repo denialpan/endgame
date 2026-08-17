@@ -1,7 +1,8 @@
 {
   "itemGroup.dddsendgame": "ddd's Endgame",
   "item.dddsendgame.galaxy_ingot": "Galaxy Ingot",
-  "item.dddsendgame.galaxy_ingot.tooltip": "This ingot has % seconds of stability! Craft quick or put it in freezer!",
+  "item.dddsendgame.galaxy_ingot.tooltip": "This ingot has %s seconds of stability! Craft quick or put it in a freezer!",
+  "item.dddsendgame.galaxy_ingot.tooltip.frozen": "Currently frozen and stable",
   "item.dddsendgame.god_stick": "God Stick",
   "item.dddsendgame.god_stick.lore": "Thank you for playing!",
   "item.dddsendgame.god_stick.tooltip": "Gives literal Creative Mode (default true) and elevated server commands (default false)! You may also cycle through all other item modes.",
@@ -38,7 +39,7 @@
   "block.dddsendgame.galaxy_hardened_glass": "Galaxy Hardened Glass",
   "block.dddsendgame.galaxy_full_glass": "Galaxy Full Glass",
   "block.dddsendgame.galaxy_block": "Block of Galaxy Ingots",
-  "block.dddsendgame.galaxy_block.tooltip": "This block is even more unstable! Do not hold this for more than 5 seconds.",
+  "block.dddsendgame.galaxy_block.tooltip": "This block is even more unstable! It will explode in %s seconds!",
   "block.dddsendgame.blue_galaxy_full_glass": "Blue Galaxy Full Glass",
   "block.dddsendgame.green_galaxy_full_glass": "Green Galaxy Full Glass",
   "block.dddsendgame.red_galaxy_full_glass": "Red Galaxy Full Glass",
