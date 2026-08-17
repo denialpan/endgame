@@ -14,7 +14,7 @@
   "item.xevitia.entity_purge_core": "Mob Annihilation Core",
   "item.xevitia.entity_purge_core.tooltip": "Make sure no mobs look at you funny.",
   "item.xevitia.random_block_placer": "Item Fabricator",
-  "item.xevitia.random_block_placer.tooltip": "One step away from Creative mode, just a bit of work to get what you want though. This can also serve as an infinite stacked item.",
+  "item.xevitia.random_block_placer.tooltip": "One step away from Creative mode, just a bit of work to get what you want though. This can also serve as an infinite stacked item. Sneak + scroll to change item.",
   "item.xevitia.random_block_placer.selected": "Selected: %s",
   "item.xevitia.reality_restorer": "Reality Shifter",
   "item.xevitia.reality_restorer.tooltip": "Suddenly there are no regrets on scarring the world surface.",
