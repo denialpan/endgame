@@ -44,7 +44,10 @@ public class GalaxyIngotItem extends Item {
             tooltipComponents.add(Component.translatable("item.dddsendgame.galaxy_ingot.tooltip.frozen").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
             return;
         }
-        tooltipComponents.add(Component.translatable("item.dddsendgame.galaxy_ingot.tooltip", GalaxyInstability.remainingSeconds(stack)).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable(
+                "item.dddsendgame.galaxy_ingot.tooltip",
+                Component.literal(String.valueOf(GalaxyInstability.remainingSeconds(stack))).withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
+        ).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override

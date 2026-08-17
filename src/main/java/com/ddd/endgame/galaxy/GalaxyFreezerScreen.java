@@ -82,7 +82,9 @@ public class GalaxyFreezerScreen extends AbstractContainerScreen<GalaxyFreezerMe
         if (remainingSeconds <= 0) {
             return Component.literal("Requires cooling").withStyle(ChatFormatting.AQUA);
         }
-        return Component.literal("Total remaining cooling: " + remainingSeconds + " seconds").withStyle(ChatFormatting.AQUA);
+        return Component.literal("Total remaining cooling: ").withStyle(ChatFormatting.AQUA)
+                .append(Component.literal(String.valueOf(remainingSeconds)).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD))
+                .append(Component.literal(" seconds").withStyle(ChatFormatting.AQUA));
     }
 
     private boolean isHoveringCoolantSlot(Slot slot) {
