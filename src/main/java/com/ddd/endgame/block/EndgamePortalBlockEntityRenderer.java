@@ -3,7 +3,7 @@ package com.ddd.endgame.block;
 import com.ddd.endgame.Config;
 import com.ddd.endgame.galaxy.GalaxyFreezerPreviewRenderer;
 import com.ddd.endgame.compat.IrisCompat;
-import com.ddd.endgame.dddsendgame;
+import com.ddd.endgame.Xevitia;
 import com.mojang.math.Axis;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -346,24 +346,24 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static Cubemap cubemapForBlock(Block block) {
-        if (block == dddsendgame.BLUE_GALAXY_FULL_GLASS_BLOCK.get()
-                || block == dddsendgame.BLUE_GALAXY_GLASS_BLOCK.get()) {
+        if (block == Xevitia.BLUE_GALAXY_FULL_GLASS_BLOCK.get()
+                || block == Xevitia.BLUE_GALAXY_GLASS_BLOCK.get()) {
             return Cubemap.BLUE;
         }
-        if (block == dddsendgame.GREEN_GALAXY_FULL_GLASS_BLOCK.get()
-                || block == dddsendgame.GREEN_GALAXY_GLASS_BLOCK.get()) {
+        if (block == Xevitia.GREEN_GALAXY_FULL_GLASS_BLOCK.get()
+                || block == Xevitia.GREEN_GALAXY_GLASS_BLOCK.get()) {
             return Cubemap.GREEN;
         }
-        if (block == dddsendgame.RED_GALAXY_FULL_GLASS_BLOCK.get()
-                || block == dddsendgame.RED_GALAXY_GLASS_BLOCK.get()) {
+        if (block == Xevitia.RED_GALAXY_FULL_GLASS_BLOCK.get()
+                || block == Xevitia.RED_GALAXY_GLASS_BLOCK.get()) {
             return Cubemap.RED;
         }
-        if (block == dddsendgame.RAINBOW_GALAXY_FULL_GLASS_BLOCK.get()
-                || block == dddsendgame.RAINBOW_GALAXY_GLASS_BLOCK.get()) {
+        if (block == Xevitia.RAINBOW_GALAXY_FULL_GLASS_BLOCK.get()
+                || block == Xevitia.RAINBOW_GALAXY_GLASS_BLOCK.get()) {
             return Cubemap.RAINBOW;
         }
-        if (block == dddsendgame.YELLOW_GALAXY_FULL_GLASS_BLOCK.get()
-                || block == dddsendgame.YELLOW_GALAXY_GLASS_BLOCK.get()) {
+        if (block == Xevitia.YELLOW_GALAXY_FULL_GLASS_BLOCK.get()
+                || block == Xevitia.YELLOW_GALAXY_GLASS_BLOCK.get()) {
             return Cubemap.YELLOW;
         }
         return Cubemap.MAIN;
@@ -371,7 +371,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
 
     private static float blockEntityTintGreenBlue(BlockEntity blockEntity) {
         if (blockEntity instanceof GalaxyDecorativeBlockEntity decorativeBlockEntity
-                && decorativeBlockEntity.getBlockState().is(dddsendgame.GALAXY_BLOCK.get())) {
+                && decorativeBlockEntity.getBlockState().is(Xevitia.GALAXY_BLOCK.get())) {
             return decorativeBlockEntity.galaxyTintGreenBlue();
         }
         return 1.0F;
@@ -774,7 +774,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         }
 
         private ResourceLocation face(CubemapFace face) {
-            return ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/inner_skybox/" + this.folder + "/" + face.textureName + ".png");
+            return ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "textures/inner_skybox/" + this.folder + "/" + face.textureName + ".png");
         }
     }
 

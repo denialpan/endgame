@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GGG",
+    "SSS",
+    "GGG"
+  ],
+  "key": {
+    "G": {
+      "item": "xevitia:compressed_glass_5"
+    },
+    "S": {
+      "item": "minecraft:slime_ball"
+    }
+  },
+  "result": {
+    "id": "xevitia:compressed_glass_6",
+    "count": 1
+  }
+}

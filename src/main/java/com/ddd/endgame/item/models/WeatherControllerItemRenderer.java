@@ -3,7 +3,7 @@ package com.ddd.endgame.item.models;
 import com.ddd.endgame.EndgameSkyboxItemRenderer;
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
 import com.ddd.endgame.compat.RenderOptimizationCompat;
-import com.ddd.endgame.dddsendgame;
+import com.ddd.endgame.Xevitia;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -40,7 +40,7 @@ import java.util.Optional;
 
 public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRenderer {
     public static final WeatherControllerItemRenderer INSTANCE = new WeatherControllerItemRenderer();
-    private static final ResourceLocation MASK_TEXTURE = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/item/galaxy_weather_controller.png");
+    private static final ResourceLocation MASK_TEXTURE = ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "textures/item/galaxy_weather_controller.png");
     private static final float MASK_DEPTH_OFFSET = 0.0005F;
     private static final float MASK_EDGE_OVERLAP = 0.0015F;
     private static List<EndgamePortalBlockEntityRenderer.MaskQuad> cachedMaskQuads;
@@ -180,7 +180,7 @@ public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRender
                 collectBakedMaskQuads(quads, renderPass, image, random);
             }
         } catch (IOException | IllegalStateException exception) {
-            dddsendgame.LOGGER.warn("Unable to build weather compressor stencil mask", exception);
+            Xevitia.LOGGER.warn("Unable to build weather compressor stencil mask", exception);
         }
 
         cachedMaskQuads = List.copyOf(quads);

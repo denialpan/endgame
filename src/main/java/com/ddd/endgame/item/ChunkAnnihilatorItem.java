@@ -1,7 +1,7 @@
 package com.ddd.endgame.item;
 
 import com.ddd.endgame.item.models.ChunkAnnihilatorItemRenderer;
-import com.ddd.endgame.dddsendgame;
+import com.ddd.endgame.Xevitia;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
@@ -39,7 +39,7 @@ public class ChunkAnnihilatorItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.dddsendgame.chunk_annihilator.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.xevitia.chunk_annihilator.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override
@@ -57,13 +57,13 @@ public class ChunkAnnihilatorItem extends Item {
         ChunkPos chunkPos = new ChunkPos(player.blockPosition());
         boolean containsEndgameBlocks = containsEndgameBlocks(serverLevel, chunkPos);
         if (containsEndgameBlocks && !player.isShiftKeyDown()) {
-            player.displayClientMessage(Component.translatable("message.dddsendgame.chunk_annihilator.warning").withStyle(ChatFormatting.RED), true);
+            player.displayClientMessage(Component.translatable("message.xevitia.chunk_annihilator.warning").withStyle(ChatFormatting.RED), true);
             player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
             return InteractionResultHolder.consume(stack);
         }
 
         int changedBlocks = annihilateChunk(serverLevel, chunkPos);
-        player.displayClientMessage(Component.translatable("message.dddsendgame.chunk_annihilator.destroyed", chunkPos.x, chunkPos.z, changedBlocks), true);
+        player.displayClientMessage(Component.translatable("message.xevitia.chunk_annihilator.destroyed", chunkPos.x, chunkPos.z, changedBlocks), true);
         player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
         return InteractionResultHolder.consume(stack);
     }
@@ -80,7 +80,7 @@ public class ChunkAnnihilatorItem extends Item {
                 for (int y = minY; y < maxY; y++) {
                     mutablePos.set(minX + x, y, minZ + z);
                     ResourceLocation key = BuiltInRegistries.BLOCK.getKey(level.getBlockState(mutablePos).getBlock());
-                    if (dddsendgame.MODID.equals(key.getNamespace())) {
+                    if (Xevitia.MODID.equals(key.getNamespace())) {
                         return true;
                     }
                 }

@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "WDM",
+    "RGF",
+    "NCA"
+  ],
+  "key": {
+    "W": {
+      "item": "xevitia:weather_cycler"
+    },
+    "D": {
+      "item": "xevitia:day_night_toggle"
+    },
+    "M": {
+      "item": "xevitia:entity_purge_core"
+    },
+    "R": {
+      "item": "xevitia:random_block_placer"
+    },
+    "G": {
+      "item": "xevitia:galaxy_block"
+    },
+    "F": {
+      "item": "xevitia:reality_restorer"
+    },
+    "N": {
+      "item": "xevitia:survival_flight_core"
+    },
+    "C": {
+      "item": "xevitia:spectator_phase_core"
+    },
+    "A": {
+      "item": "xevitia:chunk_annihilator"
+    }
+  },
+  "result": {
+    "id": "xevitia:the_stick",
+    "count": 1
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "xevitia:block/galaxy_freezer",
+      "y": 90
+    },
+    "facing=east": {
+      "model": "xevitia:block/galaxy_freezer",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "xevitia:block/galaxy_freezer",
+      "y": 270
+    },
+    "facing=west": {
+      "model": "xevitia:block/galaxy_freezer"
+    }
+  }
+}

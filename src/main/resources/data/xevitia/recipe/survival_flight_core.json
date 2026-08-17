@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    "FGF",
+    "   "
+  ],
+  "key": {
+    "F": {
+      "item": "minecraft:feather"
+    },
+    "G": {
+      "item": "xevitia:galaxy_ingot"
+    }
+  },
+  "result": {
+    "id": "xevitia:survival_flight_core",
+    "count": 1
+  }
+}

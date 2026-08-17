@@ -17,7 +17,7 @@ public final class TheStickRecipe {
     }
 
     public static ItemStack createResult(HolderLookup.Provider registries) {
-        ItemStack stack = new ItemStack(dddsendgame.THE_STICK.get());
+        ItemStack stack = new ItemStack(Xevitia.THE_STICK.get());
         registries.lookupOrThrow(Registries.ENCHANTMENT)
                 .listElements()
                 .filter(enchantment -> !enchantment.is(Enchantments.VANISHING_CURSE))
@@ -28,9 +28,9 @@ public final class TheStickRecipe {
         }
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.translatable("item.dddsendgame.the_stick.lore").withStyle(ChatFormatting.DARK_PURPLE));
+        lore.add(Component.translatable("item.xevitia.the_stick.lore").withStyle(ChatFormatting.DARK_PURPLE));
         stack.set(DataComponents.LORE, new ItemLore(lore));
-        stack.set(DataComponents.ITEM_NAME, Component.translatable("item.dddsendgame.the_stick").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD));
+        stack.set(DataComponents.ITEM_NAME, Component.translatable("item.xevitia.the_stick").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD));
         return stack;
     }
 }

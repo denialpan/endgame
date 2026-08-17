@@ -1,6 +1,6 @@
 package com.ddd.endgame.item.models;
 
-import com.ddd.endgame.dddsendgame;
+import com.ddd.endgame.Xevitia;
 import net.minecraft.resources.ResourceLocation;
 
 public class NoclipItemRenderer extends GeneratedStencilItemRenderer {
@@ -8,7 +8,7 @@ public class NoclipItemRenderer extends GeneratedStencilItemRenderer {
 
     private NoclipItemRenderer() {
         super(
-                ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/item/galaxy_noclip.png"),
+                ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "textures/item/galaxy_noclip.png"),
                 NoclipModel::originalModel,
                 "Unable to load noclip texture masks"
         );

@@ -1,7 +1,7 @@
 package com.ddd.endgame.item;
 
 import com.ddd.endgame.item.models.RandomBlockPlacerItemRenderer;
-import com.ddd.endgame.dddsendgame;
+import com.ddd.endgame.Xevitia;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -59,8 +59,8 @@ public class RandomBlockPlacerItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.dddsendgame.random_block_placer.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-        tooltipComponents.add(Component.translatable("item.dddsendgame.random_block_placer.selected", selectedItem(stack).getDescription()));
+        tooltipComponents.add(Component.translatable("item.xevitia.random_block_placer.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.xevitia.random_block_placer.selected", selectedItem(stack).getDescription()));
     }
 
     @Override
@@ -254,7 +254,7 @@ public class RandomBlockPlacerItem extends Item {
             if (item == net.minecraft.world.item.Items.AIR) {
                 continue;
             }
-            if (BuiltInRegistries.ITEM.getKey(item).getNamespace().equals(dddsendgame.MODID)) {
+            if (BuiltInRegistries.ITEM.getKey(item).getNamespace().equals(Xevitia.MODID)) {
                 continue;
             }
             items.add(item);

@@ -1,6 +1,6 @@
 package com.ddd.endgame.galaxy;
 
-import com.ddd.endgame.dddsendgame;
+import com.ddd.endgame.Xevitia;
 import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GalaxyFreezerScreen extends AbstractContainerScreen<GalaxyFreezerMenu> {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/gui/galaxy_freezer.png");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "textures/gui/galaxy_freezer.png");
     private static final int WIDTH = 176;
     private static final int HEIGHT = 166;
     private static final int INVALID_MULTIBLOCK_TEXT_Y = 64;
@@ -46,7 +46,7 @@ public class GalaxyFreezerScreen extends AbstractContainerScreen<GalaxyFreezerMe
         if (this.menu.blockEntity() != null && !this.menu.blockEntity().isMultiblockValid()) {
             guiGraphics.drawCenteredString(
                     this.font,
-                    Component.translatable("container.dddsendgame.galaxy_freezer.invalid"),
+                    Component.translatable("container.xevitia.galaxy_freezer.invalid"),
                     this.imageWidth / 2,
                     INVALID_MULTIBLOCK_TEXT_Y,
                     0xFF4040

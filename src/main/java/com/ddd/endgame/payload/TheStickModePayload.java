@@ -1,6 +1,6 @@
 package com.ddd.endgame.payload;
 
-import com.ddd.endgame.dddsendgame;
+import com.ddd.endgame.Xevitia;
 import com.ddd.endgame.item.TheStickItem;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -13,7 +13,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record TheStickModePayload(int direction) implements CustomPacketPayload {
     public static final Type<TheStickModePayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "the_stick_mode")
+            ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "the_stick_mode")
     );
     public static final StreamCodec<RegistryFriendlyByteBuf, TheStickModePayload> STREAM_CODEC = StreamCodec.of(
             (buffer, payload) -> buffer.writeVarInt(payload.direction()),
@@ -36,16 +36,16 @@ public record TheStickModePayload(int direction) implements CustomPacketPayload 
         }
 
         TheStickItem.Mode mode = TheStickItem.cycleMode(stack, payload.direction());
-        player.displayClientMessage(Component.translatable("message.dddsendgame.the_stick.mode", mode.displayName()), true);
+        player.displayClientMessage(Component.translatable("message.xevitia.the_stick.mode", mode.displayName()), true);
     }
 
     private static ItemStack selectedStick(ServerPlayer player) {
         ItemStack mainHand = player.getMainHandItem();
-        if (mainHand.is(dddsendgame.THE_STICK.get())) {
+        if (mainHand.is(Xevitia.THE_STICK.get())) {
             return mainHand;
         }
 
         ItemStack offHand = player.getOffhandItem();
-        return offHand.is(dddsendgame.THE_STICK.get()) ? offHand : ItemStack.EMPTY;
+        return offHand.is(Xevitia.THE_STICK.get()) ? offHand : ItemStack.EMPTY;
     }
 }

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GHG",
+    "GHG",
+    "GHG"
+  ],
+  "key": {
+    "G": {
+      "item": "xevitia:galaxy_glass"
+    },
+    "H": {
+      "item": "minecraft:hopper"
+    }
+  },
+  "result": {
+    "id": "xevitia:galaxy_connector",
+    "count": 1
+  }
+}

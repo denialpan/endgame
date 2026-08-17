@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(DropperBlock.class)
 public class DropperBlockMixin {
     @Inject(method = "dispenseFrom", at = @At("HEAD"), cancellable = true)
-    private void dddsendgame$dispenseFabricatorOutput(ServerLevel level, BlockState state, BlockPos pos, CallbackInfo callbackInfo) {
+    private void xevitia$dispenseFabricatorOutput(ServerLevel level, BlockState state, BlockPos pos, CallbackInfo callbackInfo) {
         if (BlockFabricatorVanillaAutomation.dispenseFromDropper(level, state, pos)) {
             callbackInfo.cancel();
         }

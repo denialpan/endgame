@@ -1,0 +1,35 @@
+{
+  "parent": "xevitia:galaxy_glass",
+  "display": {
+    "icon": {
+      "id": "xevitia:galaxy_compressor"
+    },
+    "title": {
+      "translate": "advancements.xevitia.galaxy_compressor.title"
+    },
+    "description": {
+      "translate": "advancements.xevitia.galaxy_compressor.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_galaxy_compressor": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xevitia:galaxy_compressor"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_galaxy_compressor"
+    ]
+  ]
+}

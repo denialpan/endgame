@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "xevitia:compressed_obsidian_2"
+    }
+  },
+  "result": {
+    "id": "xevitia:compressed_obsidian_3",
+    "count": 1
+  }
+}

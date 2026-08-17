@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "xevitia:item/galaxy_free_flight"
+  }
+}

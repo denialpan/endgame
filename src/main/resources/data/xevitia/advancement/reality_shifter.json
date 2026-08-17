@@ -1,0 +1,35 @@
+{
+  "parent": "xevitia:galaxy_ingot",
+  "display": {
+    "icon": {
+      "id": "xevitia:reality_restorer"
+    },
+    "title": {
+      "translate": "advancements.xevitia.reality_shifter.title"
+    },
+    "description": {
+      "translate": "advancements.xevitia.reality_shifter.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_reality_shifter": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xevitia:reality_restorer"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_reality_shifter"
+    ]
+  ]
+}

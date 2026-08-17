@@ -23,12 +23,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 )
 public class CreateItemHandlerMixin {
     @Inject(method = "getStackInSlot", at = @At("RETURN"), cancellable = true, require = 0, remap = false)
-    private void dddsendgame$getFabricatorOutputStack(int slot, CallbackInfoReturnable<ItemStack> callbackInfo) {
+    private void xevitia$getFabricatorOutputStack(int slot, CallbackInfoReturnable<ItemStack> callbackInfo) {
         callbackInfo.setReturnValue(CreateFabricatorInventoryCompat.visibleStack(callbackInfo.getReturnValue()));
     }
 
     @Inject(method = "extractItem", at = @At("HEAD"), cancellable = true, require = 0, remap = false)
-    private void dddsendgame$extractFabricatorOutput(int slot, int amount, boolean simulate, CallbackInfoReturnable<ItemStack> callbackInfo) {
+    private void xevitia$extractFabricatorOutput(int slot, int amount, boolean simulate, CallbackInfoReturnable<ItemStack> callbackInfo) {
         ItemStack extracted = CreateFabricatorInventoryCompat.extractFromFabricator(this, slot, amount);
         if (!extracted.isEmpty()) {
             callbackInfo.setReturnValue(extracted);

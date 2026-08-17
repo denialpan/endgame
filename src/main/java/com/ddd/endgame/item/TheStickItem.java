@@ -2,7 +2,7 @@ package com.ddd.endgame.item;
 
 import com.ddd.endgame.Config;
 import com.ddd.endgame.item.models.TheStickItemRenderer;
-import com.ddd.endgame.dddsendgame;
+import com.ddd.endgame.Xevitia;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
@@ -37,8 +37,8 @@ public class TheStickItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.dddsendgame.the_stick.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-        tooltipComponents.add(Component.translatable("item.dddsendgame.the_stick.mode", mode(stack).displayName()).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.xevitia.the_stick.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.xevitia.the_stick.mode", mode(stack).displayName()).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override
@@ -50,11 +50,11 @@ public class TheStickItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         ItemStack stack = player.getItemInHand(usedHand);
         return switch (mode(stack)) {
-            case DAY_CONTROLLER -> dddsendgame.DAY_NIGHT_TOGGLE.get().use(level, player, usedHand);
-            case WEATHER_CONTROLLER -> dddsendgame.WEATHER_CYCLER.get().use(level, player, usedHand);
-            case MOB_ANNIHILATOR -> dddsendgame.ENTITY_PURGE_CORE.get().use(level, player, usedHand);
-            case REALITY_SHIFTER -> dddsendgame.REALITY_RESTORER.get().use(level, player, usedHand);
-            case CHUNK_ANNIHILATOR -> dddsendgame.CHUNK_ANNIHILATOR.get().use(level, player, usedHand);
+            case DAY_CONTROLLER -> Xevitia.DAY_NIGHT_TOGGLE.get().use(level, player, usedHand);
+            case WEATHER_CONTROLLER -> Xevitia.WEATHER_CYCLER.get().use(level, player, usedHand);
+            case MOB_ANNIHILATOR -> Xevitia.ENTITY_PURGE_CORE.get().use(level, player, usedHand);
+            case REALITY_SHIFTER -> Xevitia.REALITY_RESTORER.get().use(level, player, usedHand);
+            case CHUNK_ANNIHILATOR -> Xevitia.CHUNK_ANNIHILATOR.get().use(level, player, usedHand);
             case DEBUG_STICK -> InteractionResultHolder.pass(stack);
         };
     }
@@ -88,7 +88,7 @@ public class TheStickItem extends Item {
         if (!(entity instanceof ServerPlayer player)) {
             return false;
         }
-        return player.getMainHandItem().is(dddsendgame.THE_STICK.get()) || player.getOffhandItem().is(dddsendgame.THE_STICK.get());
+        return player.getMainHandItem().is(Xevitia.THE_STICK.get()) || player.getOffhandItem().is(Xevitia.THE_STICK.get());
     }
 
     public static Mode cycleMode(ItemStack stack, int direction) {
@@ -112,11 +112,11 @@ public class TheStickItem extends Item {
     }
 
     public enum Mode {
-        DAY_CONTROLLER("item.dddsendgame.day_night_toggle"),
-        WEATHER_CONTROLLER("item.dddsendgame.weather_cycler"),
-        MOB_ANNIHILATOR("item.dddsendgame.entity_purge_core"),
-        REALITY_SHIFTER("item.dddsendgame.reality_restorer"),
-        CHUNK_ANNIHILATOR("item.dddsendgame.chunk_annihilator"),
+        DAY_CONTROLLER("item.xevitia.day_night_toggle"),
+        WEATHER_CONTROLLER("item.xevitia.weather_cycler"),
+        MOB_ANNIHILATOR("item.xevitia.entity_purge_core"),
+        REALITY_SHIFTER("item.xevitia.reality_restorer"),
+        CHUNK_ANNIHILATOR("item.xevitia.chunk_annihilator"),
         DEBUG_STICK("item.minecraft.debug_stick");
 
         private static final Mode[] VALUES = values();

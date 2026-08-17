@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "xevitia:block/galaxy_connector"
+    },
+    "axis=z": {
+      "model": "xevitia:block/galaxy_connector",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "xevitia:block/galaxy_connector",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SGR",
+    "CGD",
+    "EGT"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:stone"
+    },
+    "G": {
+      "item": "xevitia:galaxy_ingot"
+    },
+    "R": {
+      "item": "minecraft:grass_block"
+    },
+    "C": {
+      "item": "minecraft:cobblestone"
+    },
+    "D": {
+      "item": "minecraft:dirt"
+    },
+    "E": {
+      "item": "minecraft:deepslate"
+    },
+    "T": {
+      "item": "minecraft:dirt"
+    }
+  },
+  "result": {
+    "id": "xevitia:reality_restorer",
+    "count": 1
+  }
+}

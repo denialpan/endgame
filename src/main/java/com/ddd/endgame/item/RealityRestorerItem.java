@@ -1,7 +1,7 @@
 package com.ddd.endgame.item;
 
 import com.ddd.endgame.item.models.RealityShifterItemRenderer;
-import com.ddd.endgame.dddsendgame;
+import com.ddd.endgame.Xevitia;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
@@ -65,7 +65,7 @@ public class RealityRestorerItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.dddsendgame.reality_restorer.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.xevitia.reality_restorer.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override
@@ -83,7 +83,7 @@ public class RealityRestorerItem extends Item {
         ChunkPos chunkPos = new ChunkPos(player.blockPosition());
         boolean containsEndgameBlocks = containsEndgameBlocks(serverLevel, chunkPos);
         if (containsEndgameBlocks && !player.isShiftKeyDown()) {
-            player.displayClientMessage(Component.translatable("message.dddsendgame.reality_restorer.warning").withStyle(ChatFormatting.RED), true);
+            player.displayClientMessage(Component.translatable("message.xevitia.reality_restorer.warning").withStyle(ChatFormatting.RED), true);
             player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
             return InteractionResultHolder.consume(stack);
         }
@@ -93,10 +93,10 @@ public class RealityRestorerItem extends Item {
             if (player instanceof ServerPlayer serverPlayer) {
                 queueSurfaceTeleport(serverLevel, serverPlayer, result.surfaceY());
             }
-            player.displayClientMessage(Component.translatable("message.dddsendgame.reality_restorer.restored", chunkPos.x, chunkPos.z, result.changedBlocks()), true);
+            player.displayClientMessage(Component.translatable("message.xevitia.reality_restorer.restored", chunkPos.x, chunkPos.z, result.changedBlocks()), true);
         } catch (RuntimeException exception) {
-            dddsendgame.LOGGER.warn("Failed to restore chunk {} with Reality Restorer", chunkPos, exception);
-            player.displayClientMessage(Component.translatable("message.dddsendgame.reality_restorer.failed").withStyle(ChatFormatting.RED), true);
+            Xevitia.LOGGER.warn("Failed to restore chunk {} with Reality Restorer", chunkPos, exception);
+            player.displayClientMessage(Component.translatable("message.xevitia.reality_restorer.failed").withStyle(ChatFormatting.RED), true);
         }
 
         player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
@@ -115,7 +115,7 @@ public class RealityRestorerItem extends Item {
                 for (int y = minY; y < maxY; y++) {
                     mutablePos.set(minX + x, y, minZ + z);
                     ResourceLocation key = BuiltInRegistries.BLOCK.getKey(level.getBlockState(mutablePos).getBlock());
-                    if (dddsendgame.MODID.equals(key.getNamespace())) {
+                    if (Xevitia.MODID.equals(key.getNamespace())) {
                         return true;
                     }
                 }

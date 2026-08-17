@@ -58,7 +58,7 @@ public final class RenderOptimizationCompat {
         }
 
         try {
-            gnetumDisableCachingForCurrentElementMethod.invoke(null, "dddsendgame skybox item uses stencil state");
+            gnetumDisableCachingForCurrentElementMethod.invoke(null, "xevitia skybox item uses stencil state");
         } catch (ReflectiveOperationException | RuntimeException ignored) {
         }
     }

@@ -4,7 +4,7 @@ import com.ddd.endgame.EndgameSkyboxItemRenderer;
 import com.ddd.endgame.galaxy.GalaxyInstabilityTint;
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
 import com.ddd.endgame.compat.RenderOptimizationCompat;
-import com.ddd.endgame.dddsendgame;
+import com.ddd.endgame.Xevitia;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -218,7 +218,7 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
                     }
                 }
             } catch (IOException exception) {
-                dddsendgame.LOGGER.warn(warningMessage, exception);
+                Xevitia.LOGGER.warn(warningMessage, exception);
             }
         }
 

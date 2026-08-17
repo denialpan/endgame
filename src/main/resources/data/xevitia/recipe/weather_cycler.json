@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " CL",
+    " GC",
+    "C  "
+  ],
+  "key": {
+    "C": {
+      "item": "minecraft:copper_ingot"
+    },
+    "L": {
+      "item": "minecraft:lightning_rod"
+    },
+    "G": {
+      "item": "xevitia:galaxy_ingot"
+    }
+  },
+  "result": {
+    "id": "xevitia:weather_cycler",
+    "count": 1
+  }
+}

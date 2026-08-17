@@ -1,0 +1,139 @@
+{
+  "parent": "xevitia:noclip",
+  "display": {
+    "icon": {
+      "id": "xevitia:the_stick"
+    },
+    "title": {
+      "translate": "advancements.xevitia.the_stick.title"
+    },
+    "description": {
+      "translate": "advancements.xevitia.the_stick.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_weather_controller": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xevitia:weather_cycler"
+          }
+        ]
+      }
+    },
+    "has_day_controller": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xevitia:day_night_toggle"
+          }
+        ]
+      }
+    },
+    "has_mob_annihilator": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xevitia:entity_purge_core"
+          }
+        ]
+      }
+    },
+    "has_item_fabricator": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xevitia:random_block_placer"
+          }
+        ]
+      }
+    },
+    "has_reality_shifter": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xevitia:reality_restorer"
+          }
+        ]
+      }
+    },
+    "has_free_flight": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xevitia:survival_flight_core"
+          }
+        ]
+      }
+    },
+    "has_noclip": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xevitia:spectator_phase_core"
+          }
+        ]
+      }
+    },
+    "has_chunk_annihilator": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xevitia:chunk_annihilator"
+          }
+        ]
+      }
+    },
+    "has_the_stick": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xevitia:the_stick"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_weather_controller"
+    ],
+    [
+      "has_day_controller"
+    ],
+    [
+      "has_mob_annihilator"
+    ],
+    [
+      "has_item_fabricator"
+    ],
+    [
+      "has_reality_shifter"
+    ],
+    [
+      "has_free_flight"
+    ],
+    [
+      "has_noclip"
+    ],
+    [
+      "has_chunk_annihilator"
+    ],
+    [
+      "has_the_stick"
+    ]
+  ]
+}

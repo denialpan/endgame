@@ -2,7 +2,7 @@ package com.ddd.endgame.block;
 
 import com.ddd.endgame.galaxy.GalaxyFreezerMenu;
 import com.ddd.endgame.galaxy.GalaxyInstability;
-import com.ddd.endgame.dddsendgame;
+import com.ddd.endgame.Xevitia;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -50,7 +50,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
             if (slot < INGOT_SLOT_COUNT) {
-                return stack.is(dddsendgame.GALAXY_INGOT.get()) && GalaxyFreezerBlockEntity.this.isMultiblockValid();
+                return stack.is(Xevitia.GALAXY_INGOT.get()) && GalaxyFreezerBlockEntity.this.isMultiblockValid();
             }
             return isIceSlot(slot) && isCoolant(stack);
         }
@@ -67,7 +67,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
     };
 
     public GalaxyFreezerBlockEntity(BlockPos pos, BlockState blockState) {
-        super(dddsendgame.GALAXY_FREEZER_BLOCK_ENTITY.get(), pos, blockState);
+        super(Xevitia.GALAXY_FREEZER_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     public ItemStackHandler itemHandler() {
@@ -143,10 +143,10 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
                 continue;
             }
 
-            int ticks = Math.min(GalaxyInstability.ticks(stack) + 1, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS);
+            int ticks = Math.min(GalaxyInstability.ticks(stack) + 1, Xevitia.GALAXY_INSTABILITY_DETONATION_TICKS);
             GalaxyInstability.setTicks(stack, ticks);
             changed = true;
-            if (ticks >= dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS) {
+            if (ticks >= Xevitia.GALAXY_INSTABILITY_DETONATION_TICKS) {
                 detonate(level, pos, blockEntity);
                 return;
             }
@@ -198,11 +198,11 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         return stack.is(Items.ICE)
                 || stack.is(Items.PACKED_ICE)
                 || stack.is(Items.BLUE_ICE)
-                || stack.is(dddsendgame.COMPRESSED_ICE_1_ITEM.get())
-                || stack.is(dddsendgame.COMPRESSED_ICE_2_ITEM.get())
-                || stack.is(dddsendgame.COMPRESSED_ICE_3_ITEM.get())
-                || stack.is(dddsendgame.COMPRESSED_ICE_4_ITEM.get())
-                || stack.is(dddsendgame.COMPRESSED_ICE_5_ITEM.get());
+                || stack.is(Xevitia.COMPRESSED_ICE_1_ITEM.get())
+                || stack.is(Xevitia.COMPRESSED_ICE_2_ITEM.get())
+                || stack.is(Xevitia.COMPRESSED_ICE_3_ITEM.get())
+                || stack.is(Xevitia.COMPRESSED_ICE_4_ITEM.get())
+                || stack.is(Xevitia.COMPRESSED_ICE_5_ITEM.get());
     }
 
     public void dropContents(Level level, BlockPos pos) {
@@ -217,7 +217,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("container.dddsendgame.galaxy_freezer");
+        return Component.translatable("container.xevitia.galaxy_freezer");
     }
 
     @Nullable
@@ -257,7 +257,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         double x = pos.getX() + 0.5D;
         double y = pos.getY() + 0.5D;
         double z = pos.getZ() + 0.5D;
-        ItemEntity explosionSource = new ItemEntity(level, x, y, z, new ItemStack(dddsendgame.GALAXY_INGOT.get()));
+        ItemEntity explosionSource = new ItemEntity(level, x, y, z, new ItemStack(Xevitia.GALAXY_INGOT.get()));
         for (int slot = 0; slot < INGOT_SLOT_COUNT; slot++) {
             ItemStack stack = blockEntity.itemHandler.getStackInSlot(slot);
             if (GalaxyInstability.isGalaxyMaterial(stack)) {
@@ -271,7 +271,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
                 x,
                 y,
                 z,
-                dddsendgame.GALAXY_INSTABILITY_EXPLOSION_RADIUS,
+                Xevitia.GALAXY_INSTABILITY_EXPLOSION_RADIUS,
                 false,
                 Level.ExplosionInteraction.BLOCK
         );
@@ -373,19 +373,19 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
     }
 
     public static int coolingPeriod(ItemStack stack) {
-        if (stack.is(dddsendgame.COMPRESSED_ICE_5_ITEM.get())) {
+        if (stack.is(Xevitia.COMPRESSED_ICE_5_ITEM.get())) {
             return COMPRESSED_ICE_5_COOLING_TICKS;
         }
-        if (stack.is(dddsendgame.COMPRESSED_ICE_4_ITEM.get())) {
+        if (stack.is(Xevitia.COMPRESSED_ICE_4_ITEM.get())) {
             return COMPRESSED_ICE_4_COOLING_TICKS;
         }
-        if (stack.is(dddsendgame.COMPRESSED_ICE_3_ITEM.get())) {
+        if (stack.is(Xevitia.COMPRESSED_ICE_3_ITEM.get())) {
             return COMPRESSED_ICE_3_COOLING_TICKS;
         }
-        if (stack.is(dddsendgame.COMPRESSED_ICE_2_ITEM.get())) {
+        if (stack.is(Xevitia.COMPRESSED_ICE_2_ITEM.get())) {
             return COMPRESSED_ICE_2_COOLING_TICKS;
         }
-        if (stack.is(dddsendgame.COMPRESSED_ICE_1_ITEM.get())) {
+        if (stack.is(Xevitia.COMPRESSED_ICE_1_ITEM.get())) {
             return COMPRESSED_ICE_1_COOLING_TICKS;
         }
         if (stack.is(Items.ICE)) {

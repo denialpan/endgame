@@ -1,6 +1,6 @@
 package com.ddd.endgame.galaxy;
 
-import com.ddd.endgame.dddsendgame;
+import com.ddd.endgame.Xevitia;
 
 import com.ddd.endgame.EndgameRequirement;
 
@@ -33,7 +33,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.fml.ModList;
 
 public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompressorMenu> {
-    private static final ResourceLocation ATLAS = ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "textures/gui/atlas.png");
+    private static final ResourceLocation ATLAS = ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "textures/gui/atlas.png");
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getIntegerInstance(Locale.US);
     private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.0000000");
 
@@ -108,7 +108,7 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
                 this.topPos + SEARCH_Y,
                 SEARCH_WIDTH,
                 SEARCH_HEIGHT,
-                Component.translatable("container.dddsendgame.galaxy_compressor.search")
+                Component.translatable("container.xevitia.galaxy_compressor.search")
         );
         this.searchBox.setMaxLength(64);
         this.searchBox.setBordered(false);
@@ -133,7 +133,7 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
         int y = this.topPos;
         guiGraphics.blit(ATLAS, x, y, 0, 0, TEMPLATE_WIDTH, TEMPLATE_HEIGHT);
         if (this.searchBox != null && this.searchBox.getValue().isEmpty() && !this.searchBox.isFocused()) {
-            guiGraphics.drawString(this.font, Component.translatable("container.dddsendgame.galaxy_compressor.search.short"), x + SEARCH_X + 2, y + SEARCH_Y + 1, 0xFFB0B0B0, false);
+            guiGraphics.drawString(this.font, Component.translatable("container.xevitia.galaxy_compressor.search.short"), x + SEARCH_X + 2, y + SEARCH_Y + 1, 0xFFB0B0B0, false);
         }
 
         if (this.hasNetworkConflict()) {

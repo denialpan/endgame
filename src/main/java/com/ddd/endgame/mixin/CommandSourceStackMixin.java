@@ -17,7 +17,7 @@ public class CommandSourceStackMixin {
     private Entity entity;
 
     @Inject(method = "hasPermission", at = @At("HEAD"), cancellable = true)
-    private void dddsendgame$theStickPermission(int level, CallbackInfoReturnable<Boolean> cir) {
+    private void xevitia$theStickPermission(int level, CallbackInfoReturnable<Boolean> cir) {
         if (TheStickItem.grantsServerCommandPermissions(this.entity)) {
             cir.setReturnValue(true);
         }

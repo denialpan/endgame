@@ -16,7 +16,7 @@ public class Config {
 
         @Override
         public Component getTranslatedName() {
-            return Component.translatable("dddsendgame.configuration.skyboxIrisCompatibilityMode." + name().toLowerCase());
+            return Component.translatable("xevitia.configuration.skyboxIrisCompatibilityMode." + name().toLowerCase());
         }
     }
 

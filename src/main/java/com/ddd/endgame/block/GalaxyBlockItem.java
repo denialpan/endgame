@@ -37,7 +37,7 @@ public class GalaxyBlockItem extends EndgameSkyboxBlockItem {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.translatable(
-                "block.dddsendgame.galaxy_block.tooltip",
+                "block.xevitia.galaxy_block.tooltip",
                 Component.literal(String.valueOf(GalaxyInstability.remainingSeconds(stack))).withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
         ).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }

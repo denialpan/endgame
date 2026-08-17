@@ -1,0 +1,13 @@
+{
+  "parent": "minecraft:block/cube",
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "particle": "xevitia:block/galaxy_gate",
+    "north": "xevitia:block/galaxy_gate",
+    "south": "xevitia:block/galaxy_gate",
+    "east": "xevitia:block/galaxy_gate",
+    "west": "xevitia:block/galaxy_gate",
+    "up": "xevitia:block/galaxy_glass",
+    "down": "xevitia:block/galaxy_glass"
+  }
+}

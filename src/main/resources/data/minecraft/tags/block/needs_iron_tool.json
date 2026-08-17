@@ -1,13 +1,13 @@
 {
   "replace": false,
   "values": [
-    "dddsendgame:galaxy_compressor",
-    "dddsendgame:galaxy_connector",
-    "dddsendgame:galaxy_obsidian",
-    "dddsendgame:galaxy_glass",
-    "dddsendgame:galaxy_hardened_glass",
-    "dddsendgame:galaxy_full_glass",
-    "dddsendgame:galaxy_block",
-    "dddsendgame:galaxy_freezer"
+    "xevitia:galaxy_compressor",
+    "xevitia:galaxy_connector",
+    "xevitia:galaxy_obsidian",
+    "xevitia:galaxy_glass",
+    "xevitia:galaxy_hardened_glass",
+    "xevitia:galaxy_full_glass",
+    "xevitia:galaxy_block",
+    "xevitia:galaxy_freezer"
   ]
 }

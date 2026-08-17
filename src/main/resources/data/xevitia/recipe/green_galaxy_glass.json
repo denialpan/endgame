@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "xevitia:galaxy_glass"
+  },
+  "result": {
+    "id": "xevitia:green_galaxy_glass",
+    "count": 1
+  }
+}

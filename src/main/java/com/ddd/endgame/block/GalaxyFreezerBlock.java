@@ -1,6 +1,6 @@
 package com.ddd.endgame.block;
 
-import com.ddd.endgame.dddsendgame;
+import com.ddd.endgame.Xevitia;
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -49,7 +49,7 @@ public class GalaxyFreezerBlock extends HorizontalFacingEntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
-        return blockEntityType == dddsendgame.GALAXY_FREEZER_BLOCK_ENTITY.get()
+        return blockEntityType == Xevitia.GALAXY_FREEZER_BLOCK_ENTITY.get()
                 ? (tickerLevel, pos, tickerState, blockEntity) -> GalaxyFreezerBlockEntity.tick(tickerLevel, pos, tickerState, (GalaxyFreezerBlockEntity) blockEntity)
                 : null;
     }

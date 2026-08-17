@@ -32,7 +32,7 @@ public class EntityPurgeItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.dddsendgame.entity_purge_core.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.xevitia.entity_purge_core.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override
@@ -55,7 +55,7 @@ public class EntityPurgeItem extends Item {
             purgeTarget(serverLevel, player, target);
         }
 
-        player.displayClientMessage(Component.translatable("message.dddsendgame.entity_purge", targets.size(), radius), true);
+        player.displayClientMessage(Component.translatable("message.xevitia.entity_purge", targets.size(), radius), true);
         player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
         return InteractionResultHolder.consume(stack);
     }

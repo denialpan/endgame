@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PPP",
+    "PGP",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "item": "xevitia:compressed_glass_9"
+    },
+    "G": {
+      "item": "xevitia:galaxy_obsidian"
+    }
+  },
+  "result": {
+    "id": "xevitia:galaxy_hardened_glass",
+    "count": 1
+  }
+}
