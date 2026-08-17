@@ -154,6 +154,10 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         this.lastMultiblockCheck = Long.MIN_VALUE;
     }
 
+    public int coolantTicks() {
+        return this.coolantTicks;
+    }
+
     public static boolean isCoolant(ItemStack stack) {
         return stack.is(Items.ICE)
                 || stack.is(Items.PACKED_ICE)
@@ -326,7 +330,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         }
     }
 
-    private static int coolingPeriod(ItemStack stack) {
+    public static int coolingPeriod(ItemStack stack) {
         if (stack.is(dddsendgame.COMPRESSED_ICE_5_ITEM.get())) {
             return COMPRESSED_ICE_5_COOLING_TICKS;
         }

@@ -11,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
@@ -26,6 +27,7 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
     private static final int PLAYER_INVENTORY_X = 8;
     private static final int PLAYER_INVENTORY_Y = 84;
     private static final int HOTBAR_Y = 142;
+    private final DataSlot coolantTicksSlot;
     private final BlockPos pos;
     @Nullable
     private final GalaxyFreezerBlockEntity blockEntity;
@@ -40,6 +42,16 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
         this.blockEntity = blockEntity;
         addFreezerSlots(blockEntity.itemHandler());
         addPlayerSlots(playerInventory);
+        this.coolantTicksSlot = this.addDataSlot(new DataSlot() {
+            @Override
+            public int get() {
+                return blockEntity.coolantTicks();
+            }
+
+            @Override
+            public void set(int value) {
+            }
+        });
     }
 
     private GalaxyFreezerMenu(int containerId, Inventory playerInventory, ClientTarget target) {
@@ -48,11 +60,23 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
         this.blockEntity = target.blockEntity();
         addFreezerSlots(target.itemHandler());
         addPlayerSlots(playerInventory);
+        this.coolantTicksSlot = this.addDataSlot(DataSlot.standalone());
     }
 
     @Nullable
     public GalaxyFreezerBlockEntity blockEntity() {
         return this.blockEntity;
+    }
+
+    public int coolantTicks() {
+        return this.coolantTicksSlot.get();
+    }
+
+    public ItemStack freezerStack(int slot) {
+        if (slot < 0 || slot >= SLOT_COUNT) {
+            return ItemStack.EMPTY;
+        }
+        return this.slots.get(slot).getItem();
     }
 
     @Override
