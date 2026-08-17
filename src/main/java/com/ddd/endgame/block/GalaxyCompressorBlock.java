@@ -18,6 +18,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.neoforged.neoforge.fluids.FluidActionResult;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
 public class GalaxyCompressorBlock extends HorizontalFacingEntityBlock {
     public static final MapCodec<GalaxyCompressorBlock> CODEC = simpleCodec(GalaxyCompressorBlock::new);
@@ -65,8 +68,40 @@ public class GalaxyCompressorBlock extends HorizontalFacingEntityBlock {
 
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (FluidUtil.getFluidContained(stack).isPresent()) {
+            if (level.isClientSide) {
+                return ItemInteractionResult.sidedSuccess(true);
+            }
+
+            if (tryDepositHeldFluid(level, pos, player, hand, stack)) {
+                return ItemInteractionResult.SUCCESS;
+            }
+        }
+
         open(level, pos, player);
         return ItemInteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    private static boolean tryDepositHeldFluid(Level level, BlockPos pos, Player player, InteractionHand hand, ItemStack stack) {
+        if (!(level.getBlockEntity(pos) instanceof GalaxyCompressorBlockEntity blockEntity)) {
+            return false;
+        }
+
+        blockEntity.initializeRequirementsFromRecipes();
+        FluidActionResult result = FluidUtil.tryEmptyContainerAndStow(
+                stack,
+                blockEntity.fluidHandler(),
+                new InvWrapper(player.getInventory()),
+                Integer.MAX_VALUE,
+                player,
+                true
+        );
+        if (!result.isSuccess()) {
+            return false;
+        }
+
+        player.setItemInHand(hand, result.getResult());
+        return true;
     }
 
     private static void open(Level level, BlockPos pos, Player player) {
