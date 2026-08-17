@@ -1,7 +1,5 @@
 package com.ddd.endgame.galaxy;
 
-import com.ddd.endgame.dddsendgame;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -16,7 +14,7 @@ public final class GalaxyInstabilityVisuals {
 
     public static float tintProgress(ItemStack renderedStack) {
         if (isLocalPlayerStack(renderedStack)) {
-            return Math.min(1.0F, (float)playerVisualTicks(renderedStack) / (float)dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS);
+            return Math.min(1.0F, (float)playerVisualTicks(renderedStack) / (float)GalaxyInstability.detonationTicks(renderedStack));
         }
         return GalaxyInstability.tintProgress(renderedStack);
     }
@@ -50,7 +48,7 @@ public final class GalaxyInstabilityVisuals {
             return;
         }
 
-        playerVisualTicks = Math.min(dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS, Math.max(playerVisualTicks, maxStackTicks) + 1);
+        playerVisualTicks = Math.max(playerVisualTicks, maxStackTicks) + 1;
     }
 
     private static boolean isLocalPlayerStack(ItemStack renderedStack) {

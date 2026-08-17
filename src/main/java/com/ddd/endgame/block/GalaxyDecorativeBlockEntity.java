@@ -1,6 +1,7 @@
 package com.ddd.endgame.block;
 
 import com.ddd.endgame.dddsendgame;
+import com.ddd.endgame.galaxy.GalaxyInstability;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -26,18 +27,18 @@ public class GalaxyDecorativeBlockEntity extends BlockEntity {
             return;
         }
 
-        blockEntity.galaxyInstabilityTicks = Math.min(blockEntity.galaxyInstabilityTicks + 1, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS);
+        blockEntity.galaxyInstabilityTicks = Math.min(blockEntity.galaxyInstabilityTicks + 1, GalaxyInstability.galaxyBlockDetonationTicks());
         if (level.isClientSide && blockEntity.galaxyInstabilityTicks % GALAXY_TINT_RERENDER_INTERVAL_TICKS == 0) {
             level.sendBlockUpdated(pos, state, state, 8);
         }
-        if (!level.isClientSide && blockEntity.galaxyInstabilityTicks >= dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS) {
+        if (!level.isClientSide && blockEntity.galaxyInstabilityTicks >= GalaxyInstability.galaxyBlockDetonationTicks()) {
             level.removeBlock(pos, false);
             level.explode(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, dddsendgame.GALAXY_INSTABILITY_EXPLOSION_RADIUS, false, Level.ExplosionInteraction.BLOCK);
         }
     }
 
     public void setGalaxyInstabilityTicks(int ticks) {
-        this.galaxyInstabilityTicks = Math.max(0, Math.min(ticks, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS));
+        this.galaxyInstabilityTicks = Math.max(0, Math.min(ticks, GalaxyInstability.galaxyBlockDetonationTicks()));
         this.setChanged();
         if (this.level != null && !this.level.isClientSide) {
             this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
@@ -45,7 +46,7 @@ public class GalaxyDecorativeBlockEntity extends BlockEntity {
     }
 
     public float galaxyTintGreenBlue() {
-        return 1.0F - Math.min(1.0F, (float)this.galaxyInstabilityTicks / (float)dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS);
+        return 1.0F - Math.min(1.0F, (float)this.galaxyInstabilityTicks / (float)GalaxyInstability.galaxyBlockDetonationTicks());
     }
 
     @Override

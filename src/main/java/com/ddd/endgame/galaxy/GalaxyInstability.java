@@ -18,6 +18,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 
 public final class GalaxyInstability {
+    private static final int GALAXY_BLOCK_DETONATION_TICKS = 5 * 20;
     private static final String TICKS_TAG = "GalaxyInstabilityTicks";
     private static final String FROZEN_STABLE_TAG = "GalaxyInstabilityFrozenStable";
     private static final String PLAYER_TICKS_TAG = "GalaxyInstabilityPlayerTicks";
@@ -50,8 +51,9 @@ public final class GalaxyInstability {
             return;
         }
 
+        int playerOwnedDetonationTicks = playerOwnedDetonationTicks(player, carried);
         ticks = Math.min(ticks + 1, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS);
-        if (ticks >= dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS && hasPlayerOwnedGalaxyMaterial) {
+        if (ticks >= playerOwnedDetonationTicks && hasPlayerOwnedGalaxyMaterial) {
             removeGalaxyMaterials(player.getInventory().items);
             removeGalaxyMaterials(player.getInventory().armor);
             removeGalaxyMaterials(player.getInventory().offhand);
@@ -80,8 +82,9 @@ public final class GalaxyInstability {
             return;
         }
 
-        int ticks = Math.min(ticks(stack) + 1, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS);
-        if (ticks < dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS) {
+        int detonationTicks = detonationTicks(stack);
+        int ticks = Math.min(ticks(stack) + 1, detonationTicks);
+        if (ticks < detonationTicks) {
             setTicks(stack, ticks);
             return;
         }
@@ -103,10 +106,11 @@ public final class GalaxyInstability {
 
         initializeDroppedTimer(stack, entity);
         normalizeNearbyDroppedEntityTimers(entity);
-        int ticks = Math.min(droppedTicks(entity) + 1, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS);
+        int detonationTicks = detonationTicks(stack);
+        int ticks = Math.min(droppedTicks(entity) + 1, detonationTicks);
         setDroppedTicks(entity, ticks);
         setTicks(stack, ticks);
-        if (ticks >= dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS) {
+        if (ticks >= detonationTicks) {
             stack.setCount(0);
             entity.setItem(ItemStack.EMPTY);
             entity.level().explode(entity, entity.getX(), entity.getY(), entity.getZ(), dddsendgame.GALAXY_INSTABILITY_EXPLOSION_RADIUS, false, Level.ExplosionInteraction.BLOCK);
@@ -120,8 +124,16 @@ public final class GalaxyInstability {
     }
 
     public static int remainingSeconds(ItemStack stack) {
-        int remainingTicks = Math.max(0, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS - ticks(stack));
+        int remainingTicks = Math.max(0, detonationTicks(stack) - ticks(stack));
         return (remainingTicks + 19) / 20;
+    }
+
+    public static int galaxyBlockDetonationTicks() {
+        return GALAXY_BLOCK_DETONATION_TICKS;
+    }
+
+    public static int detonationTicks(ItemStack stack) {
+        return stack.is(dddsendgame.GALAXY_BLOCK_ITEM.get()) ? GALAXY_BLOCK_DETONATION_TICKS : dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS;
     }
 
     public static boolean isFrozenStable(ItemStack stack) {
@@ -163,9 +175,9 @@ public final class GalaxyInstability {
         int ticks = ticks(stack);
         Entity entity = stack.getEntityRepresentation();
         if (entity instanceof ItemEntity itemEntity) {
-            ticks = Math.min(dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS, ticks + itemEntity.tickCount);
+            ticks = Math.min(detonationTicks(stack), ticks + itemEntity.tickCount);
         }
-        return Math.min(1.0F, (float)ticks / (float)dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS);
+        return Math.min(1.0F, (float)ticks / (float)detonationTicks(stack));
     }
 
     public static float tintGreenBlue(ItemStack stack) {
@@ -180,7 +192,7 @@ public final class GalaxyInstability {
         if (stack.isEmpty() || !isGalaxyMaterial(stack)) {
             return;
         }
-        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> updateTicks(tag, ticks));
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> updateTicks(tag, Math.min(ticks, detonationTicks(stack))));
     }
 
     private static void updateTicks(CompoundTag tag, int ticks) {
@@ -194,6 +206,27 @@ public final class GalaxyInstability {
 
     private static void setPlayerTicks(Player player, int ticks) {
         player.getPersistentData().putInt(PLAYER_TICKS_TAG, Math.max(0, Math.min(ticks, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS)));
+    }
+
+    private static int playerOwnedDetonationTicks(ServerPlayer player, ItemStack carried) {
+        int detonationTicks = dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS;
+        detonationTicks = Math.min(detonationTicks, minDetonationTicks(player.getInventory().items));
+        detonationTicks = Math.min(detonationTicks, minDetonationTicks(player.getInventory().armor));
+        detonationTicks = Math.min(detonationTicks, minDetonationTicks(player.getInventory().offhand));
+        if (isGalaxyMaterial(carried)) {
+            detonationTicks = Math.min(detonationTicks, detonationTicks(carried));
+        }
+        return detonationTicks;
+    }
+
+    private static int minDetonationTicks(Iterable<ItemStack> stacks) {
+        int min = dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS;
+        for (ItemStack stack : stacks) {
+            if (isGalaxyMaterial(stack)) {
+                min = Math.min(min, detonationTicks(stack));
+            }
+        }
+        return min;
     }
 
     private static int maxTicks(Iterable<ItemStack> stacks) {
@@ -271,7 +304,7 @@ public final class GalaxyInstability {
     }
 
     private static void setDroppedTicks(ItemEntity entity, int ticks) {
-        entity.getPersistentData().putInt(DROPPED_TICKS_TAG, Math.max(0, Math.min(ticks, dddsendgame.GALAXY_INSTABILITY_DETONATION_TICKS)));
+        entity.getPersistentData().putInt(DROPPED_TICKS_TAG, Math.max(0, Math.min(ticks, detonationTicks(entity.getItem()))));
     }
 
     private static void normalizeNearbyDroppedEntityTimers(ItemEntity entity) {
