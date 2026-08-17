@@ -82,6 +82,42 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         return this.connectorInputHandler;
     }
 
+    public ItemStack insertFromConnector(ItemStack stack, boolean simulate) {
+        if (stack.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack remainder = stack;
+        int startSlot = isCoolant(stack) ? ICE_SLOT_START : 0;
+        int endSlot = isCoolant(stack) ? SLOT_COUNT : INGOT_SLOT_COUNT;
+        for (int slot = startSlot; slot < endSlot && !remainder.isEmpty(); slot++) {
+            remainder = this.itemHandler.insertItem(slot, remainder, simulate);
+        }
+        return remainder;
+    }
+
+    public boolean canInsertFromConnector(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+
+        if (isCoolant(stack)) {
+            for (int slot = ICE_SLOT_START; slot < SLOT_COUNT; slot++) {
+                if (this.itemHandler.isItemValid(slot, stack)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        for (int slot = 0; slot < INGOT_SLOT_COUNT; slot++) {
+            if (this.itemHandler.isItemValid(slot, stack)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void tick(Level level, BlockPos pos, BlockState state, GalaxyFreezerBlockEntity blockEntity) {
         if (level.isClientSide) {
             return;
@@ -287,6 +323,12 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
 
         @Override
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+            if (!isIceSlot(slot) && isCoolant(stack)) {
+                return stack;
+            }
+            if (slot >= INGOT_SLOT_COUNT && !isCoolant(stack)) {
+                return stack;
+            }
             return GalaxyFreezerBlockEntity.this.itemHandler.insertItem(slot, stack, simulate);
         }
 

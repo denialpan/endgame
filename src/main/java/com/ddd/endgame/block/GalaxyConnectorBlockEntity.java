@@ -91,12 +91,7 @@ public class GalaxyConnectorBlockEntity extends BlockEntity {
                 if (slot != SLOT_INPUT) {
                     return stack;
                 }
-
-                ItemStack remainder = stack;
-                for (int freezerSlot = 0; freezerSlot < freezer.connectorInputHandler().getSlots() && !remainder.isEmpty(); freezerSlot++) {
-                    remainder = freezer.connectorInputHandler().insertItem(freezerSlot, remainder, simulate);
-                }
-                return remainder;
+                return freezer.insertFromConnector(stack, simulate);
             }
 
             GalaxyCompressorBlockEntity compressor = GalaxyConnectorBlockEntity.this.connectedController();
@@ -129,7 +124,7 @@ public class GalaxyConnectorBlockEntity extends BlockEntity {
             validateSlot(slot);
             GalaxyFreezerBlockEntity freezer = GalaxyConnectorBlockEntity.this.connectedGalaxyFreezer();
             if (freezer != null) {
-                return slot == SLOT_INPUT && freezer.connectorInputHandler().isItemValid(0, stack);
+                return slot == SLOT_INPUT && freezer.canInsertFromConnector(stack);
             }
 
             GalaxyCompressorBlockEntity compressor = GalaxyConnectorBlockEntity.this.connectedController();
