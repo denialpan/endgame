@@ -63,6 +63,11 @@
   "block.dddsendgame.compressed_glass_7": "Structural Laminated Glass",
   "block.dddsendgame.compressed_glass_8": "Ballistic-Proof Glass",
   "block.dddsendgame.compressed_glass_9": "Sapphire Crystallic Galaxy-Proof Glass",
+  "block.dddsendgame.compressed_ice_1": "Sub-Zero Compressed Ice",
+  "block.dddsendgame.compressed_ice_2": "Laboratory Compressed Ice",
+  "block.dddsendgame.compressed_ice_3": "Cryogenic Compressed Ice",
+  "block.dddsendgame.compressed_ice_4": "Nitrogen Compressed Ice",
+  "block.dddsendgame.compressed_ice_5": "Atomically Pure Ice",
 
   "advancements.dddsendgame.slightly_compressed_obsidian.title": "Begin completing the game",
   "advancements.dddsendgame.slightly_compressed_obsidian.description": "Obtain the first block for the endgame.",

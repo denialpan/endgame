@@ -343,6 +343,16 @@ public class dddsendgame {
     public static final DeferredItem<BlockItem> COMPRESSED_GLASS_8_ITEM = registerBlockItem("compressed_glass_8", COMPRESSED_GLASS_8_BLOCK);
     public static final DeferredBlock<TransparentBlock> COMPRESSED_GLASS_9_BLOCK = registerCompressedGlassBlock("compressed_glass_9", 5.4F);
     public static final DeferredItem<BlockItem> COMPRESSED_GLASS_9_ITEM = registerBlockItem("compressed_glass_9", COMPRESSED_GLASS_9_BLOCK);
+    public static final DeferredBlock<Block> COMPRESSED_ICE_1_BLOCK = registerCompressedIceBlock("compressed_ice_1", 1.2F);
+    public static final DeferredItem<BlockItem> COMPRESSED_ICE_1_ITEM = registerBlockItem("compressed_ice_1", COMPRESSED_ICE_1_BLOCK);
+    public static final DeferredBlock<Block> COMPRESSED_ICE_2_BLOCK = registerCompressedIceBlock("compressed_ice_2", 2.4F);
+    public static final DeferredItem<BlockItem> COMPRESSED_ICE_2_ITEM = registerBlockItem("compressed_ice_2", COMPRESSED_ICE_2_BLOCK);
+    public static final DeferredBlock<Block> COMPRESSED_ICE_3_BLOCK = registerCompressedIceBlock("compressed_ice_3", 3.6F);
+    public static final DeferredItem<BlockItem> COMPRESSED_ICE_3_ITEM = registerBlockItem("compressed_ice_3", COMPRESSED_ICE_3_BLOCK);
+    public static final DeferredBlock<Block> COMPRESSED_ICE_4_BLOCK = registerCompressedIceBlock("compressed_ice_4", 4.8F);
+    public static final DeferredItem<BlockItem> COMPRESSED_ICE_4_ITEM = registerBlockItem("compressed_ice_4", COMPRESSED_ICE_4_BLOCK);
+    public static final DeferredBlock<Block> COMPRESSED_ICE_5_BLOCK = registerCompressedIceBlock("compressed_ice_5", 6.0F);
+    public static final DeferredItem<BlockItem> COMPRESSED_ICE_5_ITEM = registerBlockItem("compressed_ice_5", COMPRESSED_ICE_5_BLOCK);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GalaxyCompressorBlockEntity>> GALAXY_COMPRESSOR_BLOCK_ENTITY =
             BLOCK_ENTITY_TYPES.register("galaxy_compressor", () -> BlockEntityType.Builder.of(GalaxyCompressorBlockEntity::new, GALAXY_COMPRESSOR_BLOCK.get()).build(null));
@@ -414,6 +424,11 @@ public class dddsendgame {
                 output.accept(COMPRESSED_GLASS_7_ITEM.get());
                 output.accept(COMPRESSED_GLASS_8_ITEM.get());
                 output.accept(COMPRESSED_GLASS_9_ITEM.get());
+                output.accept(COMPRESSED_ICE_1_ITEM.get());
+                output.accept(COMPRESSED_ICE_2_ITEM.get());
+                output.accept(COMPRESSED_ICE_3_ITEM.get());
+                output.accept(COMPRESSED_ICE_4_ITEM.get());
+                output.accept(COMPRESSED_ICE_5_ITEM.get());
                 output.accept(WEATHER_CYCLER.get());
                 output.accept(DAY_NIGHT_TOGGLE.get());
                 output.accept(ENTITY_PURGE_CORE.get());
@@ -579,6 +594,11 @@ public class dddsendgame {
             event.accept(COMPRESSED_GLASS_7_ITEM);
             event.accept(COMPRESSED_GLASS_8_ITEM);
             event.accept(COMPRESSED_GLASS_9_ITEM);
+            event.accept(COMPRESSED_ICE_1_ITEM);
+            event.accept(COMPRESSED_ICE_2_ITEM);
+            event.accept(COMPRESSED_ICE_3_ITEM);
+            event.accept(COMPRESSED_ICE_4_ITEM);
+            event.accept(COMPRESSED_ICE_5_ITEM);
         }
     }
 
@@ -592,6 +612,10 @@ public class dddsendgame {
 
     private static DeferredBlock<TransparentBlock> registerTransparentGlassBlock(String name, float destroyTime) {
         return BLOCKS.registerBlock(name, TransparentBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS).strength(destroyTime, 1200.0F));
+    }
+
+    private static DeferredBlock<Block> registerCompressedIceBlock(String name, float destroyTime) {
+        return BLOCKS.registerBlock(name, Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.PACKED_ICE).strength(destroyTime, 1200.0F));
     }
 
     private static BlockBehaviour.Properties galaxyBlockProperties(Block block) {
