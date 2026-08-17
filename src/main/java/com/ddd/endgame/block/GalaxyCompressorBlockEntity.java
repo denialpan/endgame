@@ -170,6 +170,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
         }
 
         changed |= clampRequirementsToConfiguredAmounts();
+        changed |= removeModItemRequirements();
 
         if (Config.DEBUG_STONE_ONLY.getAsBoolean()) {
             changed |= this.remaining.keySet().removeIf(itemId -> !recipeItems.containsKey(itemId));
@@ -216,14 +217,12 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
     }
 
     private static void addRecipeOutputItem(Map<ResourceLocation, Item> recipeItems, ItemStack result) {
-        if (result.isEmpty()
-                || result.is(dddsendgame.THE_STICK.get())
-                || result.is(dddsendgame.GALAXY_COMPRESSOR_ITEM.get())) {
+        if (result.isEmpty()) {
             return;
         }
 
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(result.getItem());
-        if (itemId != null) {
+        if (itemId != null && !dddsendgame.MODID.equals(itemId.getNamespace())) {
             recipeItems.putIfAbsent(itemId, result.getItem());
         }
     }
@@ -280,6 +279,9 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
 
         this.initializeRequirementsFromRecipes();
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        if (isModItem(itemId)) {
+            return 0;
+        }
         Long current = this.remaining.get(itemId);
         if (current == null || current <= 0L) {
             return 0;
@@ -300,6 +302,9 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
 
         this.initializeRequirementsFromRecipes();
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        if (isModItem(itemId)) {
+            return 0;
+        }
         Long current = this.remaining.get(itemId);
         return current == null || current <= 0L ? 0 : (int)Math.min((long)stack.getCount(), current);
     }
@@ -313,6 +318,18 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
         this.fluidRemaining.replaceAll((fluidId, count) -> Config.fluidRequirementMb());
         this.markRequirementsDirty();
         this.setChangedAndSync();
+    }
+
+    private boolean removeModItemRequirements() {
+        boolean changed = this.remaining.keySet().removeIf(GalaxyCompressorBlockEntity::isModItem);
+        if (changed) {
+            this.markRequirementsDirty();
+        }
+        return changed;
+    }
+
+    private static boolean isModItem(@Nullable ResourceLocation itemId) {
+        return itemId != null && dddsendgame.MODID.equals(itemId.getNamespace());
     }
 
     private int acceptFluidContribution(FluidStack stack, IFluidHandler.FluidAction action) {
