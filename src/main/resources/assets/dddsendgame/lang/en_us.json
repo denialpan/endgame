@@ -69,6 +69,7 @@
   "block.dddsendgame.compressed_ice_3": "Cryogenic Compressed Ice",
   "block.dddsendgame.compressed_ice_4": "Nitrogen Compressed Ice",
   "block.dddsendgame.compressed_ice_5": "Atomically Pure Ice",
+  "tooltip.dddsendgame.cooling_time": "Cooling time: %s seconds",
 
   "advancements.dddsendgame.slightly_compressed_obsidian.title": "Begin completing the game",
   "advancements.dddsendgame.slightly_compressed_obsidian.description": "Obtain the first block for the endgame.",

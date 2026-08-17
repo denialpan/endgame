@@ -396,4 +396,8 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         }
         return BLUE_ICE_COOLING_TICKS;
     }
+
+    public static int coolingPeriodSeconds(ItemStack stack) {
+        return (coolingPeriod(stack) + 19) / 20;
+    }
 }

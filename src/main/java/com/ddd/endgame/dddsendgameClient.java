@@ -11,6 +11,7 @@ import com.ddd.endgame.galaxy.GalaxyFreezerPreviewRenderer;
 import com.ddd.endgame.galaxy.GalaxyCompressorScreen;
 
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
+import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
 import com.ddd.endgame.compat.IrisCompat;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
 import com.ddd.endgame.item.models.*;
@@ -91,6 +92,13 @@ public class dddsendgameClient {
 
     private static void onItemTooltip(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
+        if (GalaxyFreezerBlockEntity.isCoolant(stack)) {
+            event.getToolTip().add(Component.translatable(
+                    "tooltip.dddsendgame.cooling_time",
+                    Component.literal(String.valueOf(GalaxyFreezerBlockEntity.coolingPeriodSeconds(stack))).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD)
+            ).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        }
+
         if (event.getToolTip().isEmpty() || !usesGalaxyName(stack)) {
             return;
         }
