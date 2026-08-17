@@ -442,6 +442,22 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
             return;
         }
 
+        if (isMouseOver(mouseX, mouseY, SORT_BUTTON_X, SORT_BY_BUTTON_Y, SORT_BUTTON_WIDTH, SORT_BUTTON_HEIGHT)) {
+            Component value = Component.translatable(this.sortMode == SortMode.NAME
+                    ? "container.xevitia.galaxy_compressor.sort.name"
+                    : "container.xevitia.galaxy_compressor.sort.progress");
+            guiGraphics.renderTooltip(this.font, Component.translatable("container.xevitia.galaxy_compressor.sort_by.tooltip", value), mouseX, mouseY);
+            return;
+        }
+
+        if (isMouseOver(mouseX, mouseY, SORT_BUTTON_X, SORT_DIRECTION_BUTTON_Y, SORT_BUTTON_WIDTH, SORT_BUTTON_HEIGHT)) {
+            Component value = Component.translatable(this.sortAscending
+                    ? "container.xevitia.galaxy_compressor.sort.asc"
+                    : "container.xevitia.galaxy_compressor.sort.desc");
+            guiGraphics.renderTooltip(this.font, Component.translatable("container.xevitia.galaxy_compressor.sort_direction.tooltip", value), mouseX, mouseY);
+            return;
+        }
+
         long totalContributed = Math.max(0L, this.cachedTotalRequired - this.cachedTotalRemaining);
         if (isMouseOver(mouseX, mouseY, TOTAL_BAR_X, TOTAL_BAR_Y, TOTAL_BAR_WIDTH, TOTAL_BAR_HEIGHT)) {
             guiGraphics.renderTooltip(this.font, List.of(

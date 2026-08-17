@@ -114,8 +114,10 @@
   "container.xevitia.galaxy_compressor.search.short": "search",
   "container.xevitia.galaxy_compressor.sort.name": "Name",
   "container.xevitia.galaxy_compressor.sort.progress": "Progress",
-  "container.xevitia.galaxy_compressor.sort.asc": "Asc",
-  "container.xevitia.galaxy_compressor.sort.desc": "Desc",
+  "container.xevitia.galaxy_compressor.sort.asc": "Ascending",
+  "container.xevitia.galaxy_compressor.sort.desc": "Descending",
+  "container.xevitia.galaxy_compressor.sort_by.tooltip": "Sort by: %s",
+  "container.xevitia.galaxy_compressor.sort_direction.tooltip": "Order: %s",
   "container.xevitia.galaxy_freezer": "Galaxy Freezer",
   "container.xevitia.galaxy_freezer.invalid": "Incomplete multiblock",
 
