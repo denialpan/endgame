@@ -1,6 +1,7 @@
 package com.ddd.endgame;
 
 import net.minecraft.network.chat.Component;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.TranslatableEnum;
 
@@ -20,17 +21,34 @@ public class Config {
         }
     }
 
+    public enum RequirementDetectionMode implements TranslatableEnum {
+        AUTO,
+        MANUAL;
+
+        @Override
+        public Component getTranslatedName() {
+            return Component.translatable("xevitia.configuration.requirementDetectionMode." + name().toLowerCase());
+        }
+    }
+
     public static final ModConfigSpec.LongValue ITEM_REQUIREMENT = BUILDER
-            .comment("How many of each required item stack must be inserted into the endgame compressor.")
+            .comment("Manual mode: how many of each required item stack must be inserted into the galaxy compressor.")
             .defineInRange("itemRequirement", 1_048_576L, 1L, Long.MAX_VALUE);
 
     public static final ModConfigSpec.LongValue FLUID_REQUIREMENT_MB = BUILDER
-            .comment("How many millibuckets of each required fluid must be inserted into the endgame compressor.")
+            .comment("Manual mode: how many millibuckets of each required fluid must be inserted into the galaxy compressor.")
             .defineInRange("fluidRequirementMb", 1_048_576L, 1L, Long.MAX_VALUE);
 
     public static final ModConfigSpec.BooleanValue DEBUG_STONE_ONLY = BUILDER
             .comment("Debug mode: require only 20 minecraft:stone and ignore generated item/fluid recipe requirements.")
             .define("debugStoneOnly", false);
+
+    public static final ModConfigSpec.EnumValue<RequirementDetectionMode> REQUIREMENT_DETECTION_MODE = BUILDER
+            .comment(
+                    "Controls how the galaxy compressor determines the amount required for each item and fluid.",
+                    "AUTO starts at 999 for vanilla, uses 9999 if AE2 is loaded, multiplies by 100 if Create is loaded, and multiplies by 1000 if Modern Industrialization is loaded.",
+                    "MANUAL uses itemRequirement and fluidRequirementMb.")
+            .defineEnum("requirementDetectionMode", RequirementDetectionMode.AUTO);
 
     public static final ModConfigSpec.BooleanValue THE_STICK_GRANTS_CREATIVE = BUILDER
             .comment("Whether holding The Stick in inventory sets the player to Creative mode.")
@@ -97,10 +115,36 @@ public class Config {
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 
     public static long itemRequirement() {
-        return DEBUG_STONE_ONLY.getAsBoolean() ? 20L : ITEM_REQUIREMENT.get();
+        return DEBUG_STONE_ONLY.getAsBoolean() ? 20L : configuredRequirementAmount(ITEM_REQUIREMENT.get());
     }
 
     public static long fluidRequirementMb() {
-        return FLUID_REQUIREMENT_MB.get();
+        return configuredRequirementAmount(FLUID_REQUIREMENT_MB.get());
+    }
+
+    private static long configuredRequirementAmount(long manualAmount) {
+        if (REQUIREMENT_DETECTION_MODE.get() == RequirementDetectionMode.MANUAL) {
+            return manualAmount;
+        }
+
+        long amount = isModLoaded("ae2") ? 9_999L : 999L;
+        if (isModLoaded("create")) {
+            amount = saturatedMultiply(amount, 100L);
+        }
+        if (isModLoaded("modern_industrialization")) {
+            amount = saturatedMultiply(amount, 1_000L);
+        }
+        return amount;
+    }
+
+    private static boolean isModLoaded(String modId) {
+        return ModList.get().isLoaded(modId);
+    }
+
+    private static long saturatedMultiply(long value, long multiplier) {
+        if (value > Long.MAX_VALUE / multiplier) {
+            return Long.MAX_VALUE;
+        }
+        return value * multiplier;
     }
 }
