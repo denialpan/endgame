@@ -12,7 +12,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.items.SlotItemHandler;
@@ -114,7 +113,7 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
             if (!this.moveItemStackTo(stack, 0, GalaxyFreezerBlockEntity.INGOT_SLOT_COUNT, false)) {
                 return ItemStack.EMPTY;
             }
-        } else if (stack.is(Items.BLUE_ICE)) {
+        } else if (GalaxyFreezerBlockEntity.isCoolant(stack)) {
             if (!this.moveItemStackTo(stack, GalaxyFreezerBlockEntity.ICE_SLOT_START, SLOT_COUNT, false)) {
                 return ItemStack.EMPTY;
             }
@@ -148,7 +147,7 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
                 if (slot < GalaxyFreezerBlockEntity.INGOT_SLOT_COUNT) {
                     return stack.is(dddsendgame.GALAXY_INGOT.get());
                 }
-                return stack.is(Items.BLUE_ICE);
+                return GalaxyFreezerBlockEntity.isCoolant(stack);
             }
         });
     }

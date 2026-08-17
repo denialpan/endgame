@@ -31,7 +31,14 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
     public static final int ICE_SLOT_START = INGOT_SLOT_COUNT;
     public static final int SLOT_COUNT = INGOT_SLOT_COUNT + ICE_SLOT_COUNT;
     private static final long MULTIBLOCK_CHECK_INTERVAL_TICKS = 20L;
-    private static final int BLUE_ICE_CONSUME_TICKS = 48_000;
+    private static final int ICE_COOLING_TICKS = 750;
+    private static final int PACKED_ICE_COOLING_TICKS = 1_500;
+    private static final int BLUE_ICE_COOLING_TICKS = 3_000;
+    private static final int COMPRESSED_ICE_1_COOLING_TICKS = 6_000;
+    private static final int COMPRESSED_ICE_2_COOLING_TICKS = 12_000;
+    private static final int COMPRESSED_ICE_3_COOLING_TICKS = 24_000;
+    private static final int COMPRESSED_ICE_4_COOLING_TICKS = 48_000;
+    private static final int COMPRESSED_ICE_5_COOLING_TICKS = 96_000;
     private static final String ITEMS_TAG = "Items";
     private static final String COOLANT_TICKS_TAG = "CoolantTicks";
     private boolean multiblockValid;
@@ -45,7 +52,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
             if (slot < INGOT_SLOT_COUNT) {
                 return stack.is(dddsendgame.GALAXY_INGOT.get()) && GalaxyFreezerBlockEntity.this.isMultiblockValid();
             }
-            return isIceSlot(slot) && stack.is(Items.BLUE_ICE);
+            return isIceSlot(slot) && isCoolant(stack);
         }
 
         @Override
@@ -81,8 +88,8 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         }
 
         boolean valid = blockEntity.isMultiblockValid();
-        boolean hasCoolant = blockEntity.hasBlueIce();
-        boolean coolingActive = valid && hasCoolant;
+        ItemStack coolant = blockEntity.activeCoolant();
+        boolean coolingActive = valid && !coolant.isEmpty();
         boolean hasGalaxyMaterial = false;
         boolean changed = false;
         for (int slot = 0; slot < INGOT_SLOT_COUNT; slot++) {
@@ -111,9 +118,9 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
 
         if (coolingActive && hasGalaxyMaterial) {
             blockEntity.coolantTicks++;
-            if (blockEntity.coolantTicks >= BLUE_ICE_CONSUME_TICKS) {
+            if (blockEntity.coolantTicks >= coolingPeriod(coolant)) {
                 blockEntity.coolantTicks = 0;
-                blockEntity.consumeBlueIce();
+                blockEntity.consumeCoolant();
             }
             changed = true;
         } else if (blockEntity.coolantTicks != 0) {
@@ -145,6 +152,17 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
 
     public void invalidateMultiblockCache() {
         this.lastMultiblockCheck = Long.MIN_VALUE;
+    }
+
+    public static boolean isCoolant(ItemStack stack) {
+        return stack.is(Items.ICE)
+                || stack.is(Items.PACKED_ICE)
+                || stack.is(Items.BLUE_ICE)
+                || stack.is(dddsendgame.COMPRESSED_ICE_1_ITEM.get())
+                || stack.is(dddsendgame.COMPRESSED_ICE_2_ITEM.get())
+                || stack.is(dddsendgame.COMPRESSED_ICE_3_ITEM.get())
+                || stack.is(dddsendgame.COMPRESSED_ICE_4_ITEM.get())
+                || stack.is(dddsendgame.COMPRESSED_ICE_5_ITEM.get());
     }
 
     public void dropContents(Level level, BlockPos pos) {
@@ -288,22 +306,48 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         return slot >= ICE_SLOT_START && slot < SLOT_COUNT;
     }
 
-    private boolean hasBlueIce() {
-        for (int slot = ICE_SLOT_START; slot < SLOT_COUNT; slot++) {
-            if (this.itemHandler.getStackInSlot(slot).is(Items.BLUE_ICE)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void consumeBlueIce() {
+    private ItemStack activeCoolant() {
         for (int slot = ICE_SLOT_START; slot < SLOT_COUNT; slot++) {
             ItemStack stack = this.itemHandler.getStackInSlot(slot);
-            if (stack.is(Items.BLUE_ICE)) {
+            if (isCoolant(stack)) {
+                return stack;
+            }
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private void consumeCoolant() {
+        for (int slot = ICE_SLOT_START; slot < SLOT_COUNT; slot++) {
+            ItemStack stack = this.itemHandler.getStackInSlot(slot);
+            if (isCoolant(stack)) {
                 stack.shrink(1);
                 return;
             }
         }
+    }
+
+    private static int coolingPeriod(ItemStack stack) {
+        if (stack.is(dddsendgame.COMPRESSED_ICE_5_ITEM.get())) {
+            return COMPRESSED_ICE_5_COOLING_TICKS;
+        }
+        if (stack.is(dddsendgame.COMPRESSED_ICE_4_ITEM.get())) {
+            return COMPRESSED_ICE_4_COOLING_TICKS;
+        }
+        if (stack.is(dddsendgame.COMPRESSED_ICE_3_ITEM.get())) {
+            return COMPRESSED_ICE_3_COOLING_TICKS;
+        }
+        if (stack.is(dddsendgame.COMPRESSED_ICE_2_ITEM.get())) {
+            return COMPRESSED_ICE_2_COOLING_TICKS;
+        }
+        if (stack.is(dddsendgame.COMPRESSED_ICE_1_ITEM.get())) {
+            return COMPRESSED_ICE_1_COOLING_TICKS;
+        }
+        if (stack.is(Items.ICE)) {
+            return ICE_COOLING_TICKS;
+        }
+        if (stack.is(Items.PACKED_ICE)) {
+            return PACKED_ICE_COOLING_TICKS;
+        }
+        return BLUE_ICE_COOLING_TICKS;
     }
 }

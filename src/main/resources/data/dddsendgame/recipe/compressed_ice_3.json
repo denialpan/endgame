@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "dddsendgame:compressed_ice_2"
+    }
+  },
+  "result": {
+    "id": "dddsendgame:compressed_ice_3",
+    "count": 1
+  }
+}
