@@ -1,6 +1,6 @@
 package com.ddd.endgame.mixin;
 
-import com.ddd.endgame.item.GodStickItem;
+import com.ddd.endgame.item.TheStickItem;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Final;
@@ -17,8 +17,8 @@ public class CommandSourceStackMixin {
     private Entity entity;
 
     @Inject(method = "hasPermission", at = @At("HEAD"), cancellable = true)
-    private void dddsendgame$godStickPermission(int level, CallbackInfoReturnable<Boolean> cir) {
-        if (GodStickItem.grantsServerCommandPermissions(this.entity)) {
+    private void dddsendgame$theStickPermission(int level, CallbackInfoReturnable<Boolean> cir) {
+        if (TheStickItem.grantsServerCommandPermissions(this.entity)) {
             cir.setReturnValue(true);
         }
     }

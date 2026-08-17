@@ -15,7 +15,7 @@ import com.ddd.endgame.compat.IrisCompat;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
 import com.ddd.endgame.item.models.*;
 import com.ddd.endgame.payload.BlockFabricatorSelectionPayload;
-import com.ddd.endgame.payload.GodStickModePayload;
+import com.ddd.endgame.payload.TheStickModePayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -95,7 +95,7 @@ public class dddsendgameClient {
             return;
         }
 
-        event.getToolTip().set(0, GalaxyTooltip.purpleWhite(stack.getHoverName().getString(), stack.is(dddsendgame.GOD_STICK.get())));
+        event.getToolTip().set(0, GalaxyTooltip.purpleWhite(stack.getHoverName().getString(), stack.is(dddsendgame.THE_STICK.get())));
     }
 
     private static void onRenderGuiLayerPre(RenderGuiLayerEvent.Pre event) {
@@ -120,7 +120,7 @@ public class dddsendgameClient {
     private static void renderGalaxyHotbarName(RenderGuiLayerEvent.Pre event, ItemStack selected) {
         Minecraft minecraft = Minecraft.getInstance();
         Font font = minecraft.font;
-        Component name = GalaxyTooltip.purpleWhite(selected.getHoverName().getString(), selected.is(dddsendgame.GOD_STICK.get()));
+        Component name = GalaxyTooltip.purpleWhite(selected.getHoverName().getString(), selected.is(dddsendgame.THE_STICK.get()));
         int width = font.width(name);
         int x = (event.getGuiGraphics().guiWidth() - width) / 2;
         int y = event.getGuiGraphics().guiHeight() - 59;
@@ -180,7 +180,7 @@ public class dddsendgameClient {
                 || stack.is(dddsendgame.CHUNK_ANNIHILATOR.get())
                 || stack.is(dddsendgame.GALAXY_INGOT.get())
                 || stack.is(dddsendgame.GALAXY_BLOCK_ITEM.get())
-                || stack.is(dddsendgame.GOD_STICK.get());
+                || stack.is(dddsendgame.THE_STICK.get());
     }
 
     private static void onMouseScrolled(InputEvent.MouseScrollingEvent event) {
@@ -195,9 +195,9 @@ public class dddsendgameClient {
         }
 
         int direction = scroll > 0.0D ? 1 : -1;
-        if (minecraft.player.getMainHandItem().is(dddsendgame.GOD_STICK.get())
-                || minecraft.player.getOffhandItem().is(dddsendgame.GOD_STICK.get())) {
-            PacketDistributor.sendToServer(new GodStickModePayload(direction));
+        if (minecraft.player.getMainHandItem().is(dddsendgame.THE_STICK.get())
+                || minecraft.player.getOffhandItem().is(dddsendgame.THE_STICK.get())) {
+            PacketDistributor.sendToServer(new TheStickModePayload(direction));
             event.setCanceled(true);
             return;
         }
@@ -358,10 +358,10 @@ public class dddsendgameClient {
             event.getModels().put(chunkAnnihilatorLocation, new ChunkAnnihilatorModel(chunkAnnihilatorOriginal));
         }
 
-        ModelResourceLocation endgameTestStickLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "god_stick"));
-        BakedModel endgameTestStickOriginal = event.getModels().get(endgameTestStickLocation);
-        if (endgameTestStickOriginal != null && !(endgameTestStickOriginal instanceof GodStickModel)) {
-            event.getModels().put(endgameTestStickLocation, new GodStickModel(endgameTestStickOriginal));
+        ModelResourceLocation theStickLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "the_stick"));
+        BakedModel theStickOriginal = event.getModels().get(theStickLocation);
+        if (theStickOriginal != null && !(theStickOriginal instanceof TheStickModel)) {
+            event.getModels().put(theStickLocation, new TheStickModel(theStickOriginal));
         }
 
         ModelResourceLocation weatherLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(dddsendgame.MODID, "weather_cycler"));

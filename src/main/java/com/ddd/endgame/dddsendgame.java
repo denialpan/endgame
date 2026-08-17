@@ -20,7 +20,7 @@ import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
 import com.ddd.endgame.compat.BlockFabricatorInventoryHandler;
 import com.ddd.endgame.item.ChunkAnnihilatorItem;
 import com.ddd.endgame.item.DayNightToggleItem;
-import com.ddd.endgame.item.GodStickItem;
+import com.ddd.endgame.item.TheStickItem;
 import com.ddd.endgame.item.EntityPurgeItem;
 import com.ddd.endgame.item.GalaxyIngotItem;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
@@ -29,7 +29,7 @@ import com.ddd.endgame.item.SpectatorPhaseItem;
 import com.ddd.endgame.item.SurvivalFlightItem;
 import com.ddd.endgame.item.WeatherCycleItem;
 import com.ddd.endgame.payload.BlockFabricatorSelectionPayload;
-import com.ddd.endgame.payload.GodStickModePayload;
+import com.ddd.endgame.payload.TheStickModePayload;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.registries.Registries;
@@ -98,8 +98,8 @@ import java.util.UUID;
 public class dddsendgame {
     public static final String MODID = "dddsendgame";
     public static final long ENDGAME_ITEM_REQUIREMENT = 1_048_576L;
-    private static final String GOD_STICK_CREATIVE_KEY = MODID + ".god_stick_creative";
-    private static final String GOD_STICK_COMMAND_TREE_KEY = MODID + ".god_stick_command_tree";
+    private static final String THE_STICK_CREATIVE_KEY = MODID + ".the_stick_creative";
+    private static final String THE_STICK_COMMAND_TREE_KEY = MODID + ".the_stick_command_tree";
     private static final String SURVIVAL_FLIGHT_GRANTED_KEY = MODID + ".survival_flight_granted";
     private static final int SPECTATOR_PHASE_TICKS = 15 * 20;
     public static final int GALAXY_INSTABILITY_DETONATION_TICKS = 10 * 20;
@@ -118,9 +118,9 @@ public class dddsendgame {
             "galaxy_ingot",
             () -> new GalaxyIngotItem(new Item.Properties())
     );
-    public static final DeferredItem<Item> GOD_STICK = ITEMS.register(
-            "god_stick",
-            () -> new GodStickItem(new Item.Properties().stacksTo(1).component(net.minecraft.core.component.DataComponents.DEBUG_STICK_STATE, DebugStickState.EMPTY))
+    public static final DeferredItem<Item> THE_STICK = ITEMS.register(
+            "the_stick",
+            () -> new TheStickItem(new Item.Properties().stacksTo(1).component(net.minecraft.core.component.DataComponents.DEBUG_STICK_STATE, DebugStickState.EMPTY))
     );
     public static final DeferredItem<Item> WEATHER_CYCLER = ITEMS.register(
             "weather_cycler",
@@ -439,7 +439,7 @@ public class dddsendgame {
                 output.accept(CHUNK_ANNIHILATOR.get());
                 output.accept(GALAXY_INGOT.get());
                 output.accept(GALAXY_BLOCK_ITEM.get());
-                output.accept(GodStickRecipe.createResult(parameters.holders()));
+                output.accept(TheStickRecipe.createResult(parameters.holders()));
             }).build());
 
     public dddsendgame(IEventBus modEventBus, ModContainer modContainer) {
@@ -542,9 +542,9 @@ public class dddsendgame {
 
     private void registerPayloads(RegisterPayloadHandlersEvent event) {
         event.registrar("1").playToServer(
-                GodStickModePayload.TYPE,
-                GodStickModePayload.STREAM_CODEC,
-                GodStickModePayload::handle
+                TheStickModePayload.TYPE,
+                TheStickModePayload.STREAM_CODEC,
+                TheStickModePayload::handle
         );
         event.registrar("1").playToServer(
                 BlockFabricatorSelectionPayload.TYPE,
@@ -638,24 +638,24 @@ public class dddsendgame {
         }
 
         updateSurvivalFlight(player);
-        updateGodStickCommandTree(player);
+        updateTheStickCommandTree(player);
         GalaxyInstability.tickPlayerStacks(player);
-        boolean changedByStick = player.getPersistentData().getBoolean(GOD_STICK_CREATIVE_KEY);
-        if (!Config.GOD_STICK_GRANTS_CREATIVE.getAsBoolean()) {
+        boolean changedByStick = player.getPersistentData().getBoolean(THE_STICK_CREATIVE_KEY);
+        if (!Config.THE_STICK_GRANTS_CREATIVE.getAsBoolean()) {
             if (changedByStick) {
                 if (player.isCreative()) {
                     player.setGameMode(GameType.SURVIVAL);
                 }
-                player.getPersistentData().remove(GOD_STICK_CREATIVE_KEY);
+                player.getPersistentData().remove(THE_STICK_CREATIVE_KEY);
             }
             return;
         }
 
-        boolean hasGodStick = player.getInventory().contains(stack -> stack.is(GOD_STICK.get()));
-        if (hasGodStick) {
+        boolean hasTheStick = player.getInventory().contains(stack -> stack.is(THE_STICK.get()));
+        if (hasTheStick) {
             if (!player.isCreative()) {
                 if (player.setGameMode(GameType.CREATIVE)) {
-                    player.getPersistentData().putBoolean(GOD_STICK_CREATIVE_KEY, true);
+                    player.getPersistentData().putBoolean(THE_STICK_CREATIVE_KEY, true);
                 }
             }
             return;
@@ -665,7 +665,7 @@ public class dddsendgame {
             if (player.isCreative()) {
                 player.setGameMode(GameType.SURVIVAL);
             }
-            player.getPersistentData().remove(GOD_STICK_CREATIVE_KEY);
+            player.getPersistentData().remove(THE_STICK_CREATIVE_KEY);
         }
     }
 
@@ -699,17 +699,17 @@ public class dddsendgame {
         tickSpectatorPhases(event.getServer());
     }
 
-    private static void updateGodStickCommandTree(ServerPlayer player) {
-        boolean hasCommandStick = GodStickItem.grantsServerCommandPermissions(player);
-        boolean hadCommandStick = player.getPersistentData().getBoolean(GOD_STICK_COMMAND_TREE_KEY);
+    private static void updateTheStickCommandTree(ServerPlayer player) {
+        boolean hasCommandStick = TheStickItem.grantsServerCommandPermissions(player);
+        boolean hadCommandStick = player.getPersistentData().getBoolean(THE_STICK_COMMAND_TREE_KEY);
         if (hasCommandStick == hadCommandStick) {
             return;
         }
 
         if (hasCommandStick) {
-            player.getPersistentData().putBoolean(GOD_STICK_COMMAND_TREE_KEY, true);
+            player.getPersistentData().putBoolean(THE_STICK_COMMAND_TREE_KEY, true);
         } else {
-            player.getPersistentData().remove(GOD_STICK_COMMAND_TREE_KEY);
+            player.getPersistentData().remove(THE_STICK_COMMAND_TREE_KEY);
         }
         player.server.getCommands().sendCommands(player);
     }

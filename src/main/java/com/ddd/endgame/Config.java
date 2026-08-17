@@ -32,13 +32,13 @@ public class Config {
             .comment("Debug mode: require only 20 minecraft:stone and ignore generated item/fluid recipe requirements.")
             .define("debugStoneOnly", false);
 
-    public static final ModConfigSpec.BooleanValue GOD_STICK_GRANTS_CREATIVE = BUILDER
-            .comment("Whether holding the god stick in inventory sets the player to Creative mode.")
-            .define("godStickGrantsCreative", true);
+    public static final ModConfigSpec.BooleanValue THE_STICK_GRANTS_CREATIVE = BUILDER
+            .comment("Whether holding The Stick in inventory sets the player to Creative mode.")
+            .define("theStickGrantsCreative", true);
 
-    public static final ModConfigSpec.BooleanValue GOD_STICK_GRANTS_SERVER_COMMANDS = BUILDER
-            .comment("Whether holding the god stick in main hand or offhand grants server command permissions.")
-            .define("godStickGrantsServerCommands", false);
+    public static final ModConfigSpec.BooleanValue THE_STICK_GRANTS_SERVER_COMMANDS = BUILDER
+            .comment("Whether holding The Stick in main hand or offhand grants server command permissions.")
+            .define("theStickGrantsServerCommands", false);
 
     public static final ModConfigSpec.IntValue ENTITY_PURGE_RADIUS = BUILDER
             .comment("Radius in blocks used by the entity purge item.")
