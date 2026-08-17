@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -41,6 +42,7 @@ import java.util.function.Consumer;
 
 public class RandomBlockPlacerItem extends Item {
     private static final String BLOCK_INDEX_TAG = "BlockFabricatorIndex";
+    private static final ResourceLocation DEFAULT_SELECTED_ITEM = ResourceLocation.withDefaultNamespace("grass_block");
     private static List<Item> selectableItems;
 
     public RandomBlockPlacerItem(Properties properties) {
@@ -225,7 +227,11 @@ public class RandomBlockPlacerItem extends Item {
     }
 
     private static int selectedIndex(ItemStack stack) {
-        return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getInt(BLOCK_INDEX_TAG);
+        CustomData customData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        if (customData.copyTag().contains(BLOCK_INDEX_TAG)) {
+            return customData.copyTag().getInt(BLOCK_INDEX_TAG);
+        }
+        return defaultSelectedIndex();
     }
 
     private static void setSelectedIndex(ItemStack stack, int index) {
@@ -264,6 +270,16 @@ public class RandomBlockPlacerItem extends Item {
                 .thenComparing(item -> BuiltInRegistries.ITEM.getKey(item).toString()));
         selectableItems = List.copyOf(items);
         return selectableItems;
+    }
+
+    private static int defaultSelectedIndex() {
+        List<Item> items = selectableItems();
+        for (int index = 0; index < items.size(); index++) {
+            if (BuiltInRegistries.ITEM.getKey(items.get(index)).equals(DEFAULT_SELECTED_ITEM)) {
+                return index;
+            }
+        }
+        return 0;
     }
 
     private static class InfiniteSelectedBlockHandler implements IItemHandler {
