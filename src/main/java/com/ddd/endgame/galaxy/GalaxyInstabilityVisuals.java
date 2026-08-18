@@ -13,6 +13,9 @@ public final class GalaxyInstabilityVisuals {
     }
 
     public static float tintProgress(ItemStack renderedStack) {
+        if (GalaxyInstability.isFrozenStable(renderedStack)) {
+            return 0.0F;
+        }
         if (isLocalPlayerStack(renderedStack)) {
             return Math.min(1.0F, (float)playerVisualTicks(renderedStack) / (float)GalaxyInstability.detonationTicks(renderedStack));
         }
@@ -24,6 +27,9 @@ public final class GalaxyInstabilityVisuals {
     }
 
     private static int playerVisualTicks(ItemStack renderedStack) {
+        if (GalaxyInstability.isFrozenStable(renderedStack)) {
+            return 0;
+        }
         playerVisualTicks = Math.max(playerVisualTicks, GalaxyInstability.ticks(renderedStack));
         return playerVisualTicks;
     }
@@ -52,7 +58,7 @@ public final class GalaxyInstabilityVisuals {
     }
 
     private static boolean isLocalPlayerStack(ItemStack renderedStack) {
-        if (!GalaxyInstability.isGalaxyMaterial(renderedStack)) {
+        if (!GalaxyInstability.isGalaxyMaterial(renderedStack) || GalaxyInstability.isFrozenStable(renderedStack)) {
             return false;
         }
         Entity entity = renderedStack.getEntityRepresentation();

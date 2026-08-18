@@ -129,6 +129,9 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         boolean coolingActive = valid && !coolant.isEmpty();
         boolean hasGalaxyMaterial = false;
         boolean changed = false;
+        if (coolingActive) {
+            changed |= blockEntity.compactFrozenIngots();
+        }
         for (int slot = 0; slot < INGOT_SLOT_COUNT; slot++) {
             ItemStack stack = blockEntity.itemHandler.getStackInSlot(slot);
             if (!GalaxyInstability.isGalaxyMaterial(stack)) {
@@ -168,6 +171,47 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         if (changed) {
             blockEntity.setChanged();
         }
+    }
+
+    private boolean compactFrozenIngots() {
+        int totalIngots = 0;
+        int occupiedSlots = 0;
+        for (int slot = 0; slot < INGOT_SLOT_COUNT; slot++) {
+            ItemStack stack = this.itemHandler.getStackInSlot(slot);
+            if (stack.is(Xevitia.GALAXY_INGOT.get())) {
+                totalIngots += stack.getCount();
+                occupiedSlots++;
+            }
+        }
+
+        if (totalIngots <= 0) {
+            return false;
+        }
+
+        ItemStack firstStack = this.itemHandler.getStackInSlot(0);
+        if (occupiedSlots == 1
+                && firstStack.is(Xevitia.GALAXY_INGOT.get())
+                && firstStack.getCount() == totalIngots
+                && GalaxyInstability.ticks(firstStack) == 0
+                && GalaxyInstability.isFrozenStable(firstStack)) {
+            return false;
+        }
+
+        int remaining = totalIngots;
+        for (int slot = 0; slot < INGOT_SLOT_COUNT; slot++) {
+            if (remaining <= 0) {
+                this.itemHandler.setStackInSlot(slot, ItemStack.EMPTY);
+                continue;
+            }
+
+            ItemStack merged = new ItemStack(Xevitia.GALAXY_INGOT.get());
+            int count = Math.min(remaining, merged.getMaxStackSize());
+            merged.setCount(count);
+            GalaxyInstability.freezeTicks(merged);
+            this.itemHandler.setStackInSlot(slot, merged);
+            remaining -= count;
+        }
+        return true;
     }
 
     public boolean isMultiblockValid() {

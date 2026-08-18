@@ -169,7 +169,7 @@ public final class GalaxyInstability {
     }
 
     public static float tintProgress(ItemStack stack) {
-        if (!isGalaxyMaterial(stack)) {
+        if (!isGalaxyMaterial(stack) || isFrozenStable(stack)) {
             return 0.0F;
         }
         int ticks = ticks(stack);
