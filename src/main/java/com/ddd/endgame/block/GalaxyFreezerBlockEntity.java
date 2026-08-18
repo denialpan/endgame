@@ -31,6 +31,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
     public static final int ICE_SLOT_START = INGOT_SLOT_COUNT;
     public static final int SLOT_COUNT = INGOT_SLOT_COUNT + ICE_SLOT_COUNT;
     private static final long MULTIBLOCK_CHECK_INTERVAL_TICKS = 20L;
+    private static final int INGOTS_PER_EXPLOSION_SIZE_STEP = 16;
     private static final int ICE_COOLING_TICKS = 750;
     private static final int PACKED_ICE_COOLING_TICKS = 1_500;
     private static final int BLUE_ICE_COOLING_TICKS = 3_000;
@@ -258,24 +259,40 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         double y = pos.getY() + 0.5D;
         double z = pos.getZ() + 0.5D;
         ItemEntity explosionSource = new ItemEntity(level, x, y, z, new ItemStack(Xevitia.GALAXY_INGOT.get()));
+        int galaxyMaterialCount = 0;
         for (int slot = 0; slot < INGOT_SLOT_COUNT; slot++) {
             ItemStack stack = blockEntity.itemHandler.getStackInSlot(slot);
             if (GalaxyInstability.isGalaxyMaterial(stack)) {
+                galaxyMaterialCount += stack.getCount();
                 stack.setCount(0);
             }
         }
+        float explosionRadius = Xevitia.GALAXY_INSTABILITY_EXPLOSION_RADIUS
+                * Math.max(1, (int)Math.ceil((double)galaxyMaterialCount / (double)INGOTS_PER_EXPLOSION_SIZE_STEP));
         blockEntity.setChanged();
-        level.removeBlock(pos, false);
+        destroyFreezerMultiblock(level, pos, blockEntity);
         level.explode(
                 explosionSource,
                 x,
                 y,
                 z,
-                Xevitia.GALAXY_INSTABILITY_EXPLOSION_RADIUS,
+                explosionRadius,
                 false,
                 Level.ExplosionInteraction.BLOCK
         );
         explosionSource.discard();
+    }
+
+    private static void destroyFreezerMultiblock(Level level, BlockPos pos, GalaxyFreezerBlockEntity blockEntity) {
+        level.removeBlock(pos, false);
+        for (GalaxyFreezerMultiblock.PreviewBlock previewBlock : GalaxyFreezerMultiblock.previewBlocks(
+                pos,
+                blockEntity.getBlockState().getValue(HorizontalFacingEntityBlock.FACING)
+        )) {
+            if (previewBlock.matches(level.getBlockState(previewBlock.pos()))) {
+                level.removeBlock(previewBlock.pos(), false);
+            }
+        }
     }
 
     private class DirectAutomationItemHandler implements IItemHandler {
