@@ -33,11 +33,11 @@ public class Config {
 
     public static final ModConfigSpec.LongValue ITEM_REQUIREMENT = BUILDER
             .comment("Manual mode: how many of each required item stack must be inserted into the galaxy compressor.")
-            .defineInRange("itemRequirement", 1_048_576L, 1L, Long.MAX_VALUE);
+            .defineInRange("itemRequirement", 999L, 1L, Long.MAX_VALUE);
 
     public static final ModConfigSpec.LongValue FLUID_REQUIREMENT_MB = BUILDER
             .comment("Manual mode: how many millibuckets of each required fluid must be inserted into the galaxy compressor.")
-            .defineInRange("fluidRequirementMb", 1_048_576L, 1L, Long.MAX_VALUE);
+            .defineInRange("fluidRequirementMb", 999L, 1L, Long.MAX_VALUE);
 
     public static final ModConfigSpec.BooleanValue DEBUG_STONE_ONLY = BUILDER
             .comment("Debug mode: require only 20 minecraft:stone and ignore generated item/fluid recipe requirements.")
