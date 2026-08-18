@@ -13,9 +13,11 @@ import com.ddd.endgame.galaxy.GalaxyCompressorScreen;
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
 import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
 import com.ddd.endgame.compat.ModCompatibility;
+import com.ddd.endgame.item.GalaxyMultitoolItem;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
 import com.ddd.endgame.item.models.*;
 import com.ddd.endgame.payload.BlockFabricatorSelectionPayload;
+import com.ddd.endgame.payload.GalaxyMultitoolSelectionPayload;
 import com.ddd.endgame.payload.TheStickModePayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -182,6 +184,7 @@ public class XavitiaClient {
                 || stack.is(Xavitia.DAY_NIGHT_TOGGLE.get())
                 || stack.is(Xavitia.ENTITY_PURGE_CORE.get())
                 || stack.is(Xavitia.RANDOM_BLOCK_PLACER.get())
+                || stack.is(Xavitia.GALAXY_MULTITOOL.get())
                 || stack.is(Xavitia.REALITY_RESTORER.get())
                 || stack.is(Xavitia.SURVIVAL_FLIGHT_CORE.get())
                 || stack.is(Xavitia.SPECTATOR_PHASE_CORE.get())
@@ -218,6 +221,16 @@ public class XavitiaClient {
             int fabricatorDirection = -direction;
             RandomBlockPlacerItem.cycleSelectedItem(fabricator, fabricatorDirection);
             PacketDistributor.sendToServer(new BlockFabricatorSelectionPayload(fabricatorDirection));
+            event.setCanceled(true);
+        }
+
+        if (minecraft.player.getMainHandItem().is(Xavitia.GALAXY_MULTITOOL.get())
+                || minecraft.player.getOffhandItem().is(Xavitia.GALAXY_MULTITOOL.get())) {
+            ItemStack multitool = minecraft.player.getMainHandItem().is(Xavitia.GALAXY_MULTITOOL.get())
+                    ? minecraft.player.getMainHandItem()
+                    : minecraft.player.getOffhandItem();
+            GalaxyMultitoolItem.cycleSelectedTool(multitool, direction);
+            PacketDistributor.sendToServer(new GalaxyMultitoolSelectionPayload(direction));
             event.setCanceled(true);
         }
     }
@@ -320,6 +333,9 @@ public class XavitiaClient {
     @SubscribeEvent
     static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
         event.register(WEATHER_CONTROLLER_HAND_MODEL);
+        for (ModelResourceLocation location : GalaxyMultitoolItemRenderer.modelLocations()) {
+            event.register(location);
+        }
     }
 
     @SubscribeEvent

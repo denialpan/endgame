@@ -22,6 +22,7 @@ import com.ddd.endgame.item.ChunkAnnihilatorItem;
 import com.ddd.endgame.item.DayNightToggleItem;
 import com.ddd.endgame.item.TheStickItem;
 import com.ddd.endgame.item.EntityPurgeItem;
+import com.ddd.endgame.item.GalaxyMultitoolItem;
 import com.ddd.endgame.item.GalaxyIngotItem;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
 import com.ddd.endgame.item.RealityRestorerItem;
@@ -29,6 +30,7 @@ import com.ddd.endgame.item.SpectatorPhaseItem;
 import com.ddd.endgame.item.SurvivalFlightItem;
 import com.ddd.endgame.item.WeatherCycleItem;
 import com.ddd.endgame.payload.BlockFabricatorSelectionPayload;
+import com.ddd.endgame.payload.GalaxyMultitoolSelectionPayload;
 import com.ddd.endgame.payload.TheStickModePayload;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceKey;
@@ -137,6 +139,10 @@ public class Xavitia {
     public static final DeferredItem<Item> RANDOM_BLOCK_PLACER = ITEMS.register(
             "random_block_placer",
             () -> new RandomBlockPlacerItem(new Item.Properties().stacksTo(1))
+    );
+    public static final DeferredItem<Item> GALAXY_MULTITOOL = ITEMS.register(
+            "galaxy_multitool",
+            () -> new GalaxyMultitoolItem(new Item.Properties().stacksTo(1))
     );
     public static final DeferredItem<Item> REALITY_RESTORER = ITEMS.register(
             "reality_restorer",
@@ -433,6 +439,7 @@ public class Xavitia {
                 output.accept(DAY_NIGHT_TOGGLE.get());
                 output.accept(ENTITY_PURGE_CORE.get());
                 output.accept(RANDOM_BLOCK_PLACER.get());
+                output.accept(GALAXY_MULTITOOL.get());
                 output.accept(REALITY_RESTORER.get());
                 output.accept(SURVIVAL_FLIGHT_CORE.get());
                 output.accept(SPECTATOR_PHASE_CORE.get());
@@ -550,6 +557,11 @@ public class Xavitia {
                 BlockFabricatorSelectionPayload.TYPE,
                 BlockFabricatorSelectionPayload.STREAM_CODEC,
                 BlockFabricatorSelectionPayload::handle
+        );
+        event.registrar("1").playToServer(
+                GalaxyMultitoolSelectionPayload.TYPE,
+                GalaxyMultitoolSelectionPayload.STREAM_CODEC,
+                GalaxyMultitoolSelectionPayload::handle
         );
     }
 

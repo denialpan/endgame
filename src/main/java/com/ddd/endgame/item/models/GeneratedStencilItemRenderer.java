@@ -34,6 +34,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -44,17 +46,25 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
     private static final float BACK_Z = 8.5F / 16.0F;
     private static final float CENTER_Z = 0.5F;
 
-    private final ResourceLocation texture;
-    private final Supplier<BakedModel> originalModel;
+    private final Function<ItemStack, ResourceLocation> texture;
+    private final Function<ItemStack, BakedModel> originalModel;
     private final String warningMessage;
     private final Function<ItemStack, Float> greenBlueSupplier;
-    private PixelMasks cachedMasks;
+    private final Map<ResourceLocation, PixelMasks> cachedMasks = new HashMap<>();
 
     protected GeneratedStencilItemRenderer(ResourceLocation texture, Supplier<BakedModel> originalModel, String warningMessage) {
         this(texture, originalModel, warningMessage, stack -> 1.0F);
     }
 
     protected GeneratedStencilItemRenderer(ResourceLocation texture, Supplier<BakedModel> originalModel, String warningMessage, Function<ItemStack, Float> greenBlueSupplier) {
+        this(stack -> texture, stack -> originalModel.get(), warningMessage, greenBlueSupplier);
+    }
+
+    protected GeneratedStencilItemRenderer(Function<ItemStack, ResourceLocation> texture, Function<ItemStack, BakedModel> originalModel, String warningMessage) {
+        this(texture, originalModel, warningMessage, stack -> 1.0F);
+    }
+
+    protected GeneratedStencilItemRenderer(Function<ItemStack, ResourceLocation> texture, Function<ItemStack, BakedModel> originalModel, String warningMessage, Function<ItemStack, Float> greenBlueSupplier) {
         super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
         this.texture = texture;
         this.originalModel = originalModel;
@@ -65,7 +75,7 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
     @Override
     public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
         ModCompatibility.beforeSkyboxItemRender(displayContext);
-        PixelMasks masks = pixelMasks();
+        PixelMasks masks = pixelMasks(stack);
         float greenBlue = greenBlueSupplier.apply(stack);
         renderOriginalGeneratedModel(stack, displayContext, poseStack, buffer, packedLight, packedOverlay, greenBlue);
         flushItemBuffers(buffer);
@@ -82,7 +92,7 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
     }
 
     private void renderOriginalGeneratedModel(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, float greenBlue) {
-        BakedModel model = originalModel.get();
+        BakedModel model = originalModel.apply(stack);
         if (model == null || GeneratedStencilItemShader.shader() == null) {
             return;
         }
@@ -196,9 +206,11 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
         BufferUploader.drawWithShader(builder.buildOrThrow());
     }
 
-    private PixelMasks pixelMasks() {
-        if (cachedMasks != null) {
-            return cachedMasks;
+    private PixelMasks pixelMasks(ItemStack stack) {
+        ResourceLocation texture = this.texture.apply(stack);
+        PixelMasks cachedMask = cachedMasks.get(texture);
+        if (cachedMask != null) {
+            return cachedMask;
         }
 
         boolean[][] stencil = new boolean[MASK_SIZE][MASK_SIZE];
@@ -222,8 +234,9 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
             }
         }
 
-        cachedMasks = new PixelMasks(stencil);
-        return cachedMasks;
+        PixelMasks masks = new PixelMasks(stencil);
+        cachedMasks.put(texture, masks);
+        return masks;
     }
 
     private static void addDoubleSidedMaskQuad(BufferBuilder builder, Matrix4f pose, float minX, float minY, float maxX, float maxY) {
