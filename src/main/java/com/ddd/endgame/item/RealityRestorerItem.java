@@ -90,7 +90,7 @@ public class RealityRestorerItem extends Item {
 
         try {
             RestoreResult result = restoreChunk(serverLevel, chunkPos, player.getBlockX(), player.getBlockZ());
-            if (player instanceof ServerPlayer serverPlayer) {
+            if (player instanceof ServerPlayer serverPlayer && isSuffocatingAfterRestore(serverLevel, serverPlayer)) {
                 queueSurfaceTeleport(serverLevel, serverPlayer, result.surfaceY());
             }
             player.displayClientMessage(Component.translatable("message.xavitia.reality_restorer.restored", chunkPos.x, chunkPos.z, result.changedBlocks()), true);
@@ -138,6 +138,10 @@ public class RealityRestorerItem extends Item {
         liveChunk.setUnsaved(true);
         sendFullChunkRefresh(level, liveChunk);
         return new RestoreResult(changedBlocks, surfaceY);
+    }
+
+    private static boolean isSuffocatingAfterRestore(ServerLevel level, ServerPlayer player) {
+        return !level.noCollision(player, player.getBoundingBox());
     }
 
     private static void queueSurfaceTeleport(ServerLevel level, ServerPlayer player, int surfaceY) {
