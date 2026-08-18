@@ -35,6 +35,7 @@ import com.ddd.endgame.payload.GalaxyMultitoolSelectionPayload;
 import com.ddd.endgame.payload.TheStickModePayload;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -52,7 +53,14 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DebugStickState;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -96,6 +104,7 @@ import org.slf4j.Logger;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -728,7 +737,11 @@ public class Xavitia {
             return;
         }
 
-        event.getLevel().destroyBlock(pos, true, event.getEntity());
+        if (GalaxyToolItem.isPickaxeMode(event.getItemStack()) && event.getLevel() instanceof ServerLevel serverLevel && event.getEntity() instanceof ServerPlayer serverPlayer) {
+            breakGalaxyPickaxeCube(serverLevel, serverPlayer, event.getItemStack(), pos);
+        } else {
+            event.getLevel().destroyBlock(pos, true, event.getEntity());
+        }
         event.setCanceled(true);
     }
 
@@ -756,6 +769,79 @@ public class Xavitia {
                 || stack.is(GALAXY_HOE.get())
                 || stack.is(GALAXY_SHOVEL.get())
                 || stack.is(GALAXY_SWORD.get());
+    }
+
+    private static void breakGalaxyPickaxeCube(ServerLevel level, ServerPlayer player, ItemStack toolStack, BlockPos center) {
+        boolean processingEnabled = GalaxyToolItem.pickaxeProcessingEnabled(toolStack);
+        ItemStack fortuneTool = galaxyPickaxeLootTool(level, false);
+        ItemStack silkTouchTool = processingEnabled ? galaxyPickaxeLootTool(level, true) : ItemStack.EMPTY;
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        for (int x = -3; x <= 3; x++) {
+            for (int y = -3; y <= 3; y++) {
+                for (int z = -3; z <= 3; z++) {
+                    mutablePos.set(center.getX() + x, center.getY() + y, center.getZ() + z);
+                    if (!level.isInWorldBounds(mutablePos) || !player.mayInteract(level, mutablePos)) {
+                        continue;
+                    }
+
+                    breakGalaxyPickaxeBlock(level, player, mutablePos.immutable(), fortuneTool, silkTouchTool, processingEnabled);
+                }
+            }
+        }
+    }
+
+    private static void breakGalaxyPickaxeBlock(ServerLevel level, ServerPlayer player, BlockPos pos, ItemStack fortuneTool, ItemStack silkTouchTool, boolean processingEnabled) {
+        BlockState state = level.getBlockState(pos);
+        if (state.isAir()) {
+            return;
+        }
+
+        BlockEntity blockEntity = state.hasBlockEntity() ? level.getBlockEntity(pos) : null;
+        List<ItemStack> fortuneDrops = Block.getDrops(state, level, pos, blockEntity, player, fortuneTool);
+        List<ItemStack> silkTouchDrops = processingEnabled
+                ? Block.getDrops(state, level, pos, blockEntity, player, silkTouchTool)
+                : List.of();
+        level.removeBlock(pos, false);
+        for (ItemStack drop : silkTouchDrops) {
+            if (!drop.isEmpty()) {
+                Block.popResource(level, pos, drop);
+            }
+        }
+        for (ItemStack drop : fortuneDrops) {
+            ItemStack output = processingEnabled ? smeltIfPossible(level, drop) : drop;
+            if (!output.isEmpty()) {
+                Block.popResource(level, pos, output);
+            }
+        }
+    }
+
+    private static ItemStack galaxyPickaxeLootTool(ServerLevel level, boolean processingEnabled) {
+        ItemStack lootTool = new ItemStack(Items.DIAMOND_PICKAXE);
+        Holder<Enchantment> enchantment = level.registryAccess()
+                .lookupOrThrow(Registries.ENCHANTMENT)
+                .getOrThrow(processingEnabled ? Enchantments.SILK_TOUCH : Enchantments.FORTUNE);
+        lootTool.enchant(enchantment, processingEnabled ? 1 : Integer.MAX_VALUE);
+        return lootTool;
+    }
+
+    private static ItemStack smeltIfPossible(ServerLevel level, ItemStack stack) {
+        if (stack.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+
+        SingleRecipeInput input = new SingleRecipeInput(stack);
+        return level.getRecipeManager()
+                .getRecipeFor(RecipeType.SMELTING, input, level)
+                .map(RecipeHolder::value)
+                .map(recipe -> smeltedResult(level, input, recipe, stack.getCount()))
+                .filter(result -> !result.isEmpty())
+                .orElse(stack);
+    }
+
+    private static ItemStack smeltedResult(ServerLevel level, SingleRecipeInput input, AbstractCookingRecipe recipe, int inputCount) {
+        ItemStack result = recipe.assemble(input, level.registryAccess()).copy();
+        result.setCount(result.getCount() * inputCount);
+        return result;
     }
 
     private static void updateSurvivalFlight(ServerPlayer player) {
