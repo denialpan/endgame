@@ -92,6 +92,7 @@ public final class GalaxyFreezerMultiblock {
                 || state.is(Xavitia.RED_GALAXY_GLASS_BLOCK.get())
                 || state.is(Xavitia.RAINBOW_GALAXY_GLASS_BLOCK.get())
                 || state.is(Xavitia.YELLOW_GALAXY_GLASS_BLOCK.get())
+                || state.is(Xavitia.GALAXY_FULL_GLASS_BLOCK.get())
                 || state.is(Xavitia.BLUE_GALAXY_FULL_GLASS_BLOCK.get())
                 || state.is(Xavitia.GREEN_GALAXY_FULL_GLASS_BLOCK.get())
                 || state.is(Xavitia.RED_GALAXY_FULL_GLASS_BLOCK.get())
