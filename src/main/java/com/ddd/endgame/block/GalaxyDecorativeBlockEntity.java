@@ -32,8 +32,7 @@ public class GalaxyDecorativeBlockEntity extends BlockEntity {
             level.sendBlockUpdated(pos, state, state, 8);
         }
         if (!level.isClientSide && blockEntity.galaxyInstabilityTicks >= GalaxyInstability.galaxyBlockDetonationTicks()) {
-            level.removeBlock(pos, false);
-            level.explode(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, Xavitia.GALAXY_INSTABILITY_EXPLOSION_RADIUS, false, Level.ExplosionInteraction.BLOCK);
+            GalaxyInstability.removeGalaxyBlockExplosion(level, pos);
         }
     }
 

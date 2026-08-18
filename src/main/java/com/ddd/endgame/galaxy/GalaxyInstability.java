@@ -3,6 +3,7 @@ package com.ddd.endgame.galaxy;
 import com.ddd.endgame.Xavitia;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,9 +17,15 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public final class GalaxyInstability {
     private static final int GALAXY_BLOCK_DETONATION_TICKS = 5 * 20;
+    private static final int EXPLOSION_HEIGHT = 128;
+    private static final int GALAXY_INGOT_EXPLOSION_WIDTH = 2;
+    private static final int GALAXY_BLOCK_EXPLOSION_WIDTH = 4;
+    private static final int GALAXY_FREEZER_EXPLOSION_WIDTH = 8;
     private static final String TICKS_TAG = "GalaxyInstabilityTicks";
     private static final String FROZEN_STABLE_TAG = "GalaxyInstabilityFrozenStable";
     private static final String PLAYER_TICKS_TAG = "GalaxyInstabilityPlayerTicks";
@@ -62,7 +69,7 @@ public final class GalaxyInstability {
             }
             player.getInventory().setChanged();
             player.containerMenu.broadcastChanges();
-            player.level().explode(player, player.getX(), player.getY(), player.getZ(), Xavitia.GALAXY_INSTABILITY_EXPLOSION_RADIUS, false, Level.ExplosionInteraction.BLOCK);
+            removeExplosionBlocks(player.level(), player.getX(), player.getY(), player.getZ(), GALAXY_INGOT_EXPLOSION_WIDTH);
             player.hurt(player.damageSources().genericKill(), Float.MAX_VALUE);
             return;
         }
@@ -93,7 +100,7 @@ public final class GalaxyInstability {
         double x = holder == null ? 0.0D : holder.getX();
         double y = holder == null ? 0.0D : holder.getY();
         double z = holder == null ? 0.0D : holder.getZ();
-        level.explode(holder, x, y, z, Xavitia.GALAXY_INSTABILITY_EXPLOSION_RADIUS, false, Level.ExplosionInteraction.BLOCK);
+        removeExplosionBlocks(level, x, y, z, explosionWidth(stack));
         if (holder instanceof LivingEntity livingEntity) {
             livingEntity.hurt(livingEntity.damageSources().genericKill(), Float.MAX_VALUE);
         }
@@ -111,9 +118,9 @@ public final class GalaxyInstability {
         setDroppedTicks(entity, ticks);
         setTicks(stack, ticks);
         if (ticks >= detonationTicks) {
+            removeExplosionBlocks(entity.level(), entity.getX(), entity.getY(), entity.getZ(), explosionWidth(stack));
             stack.setCount(0);
             entity.setItem(ItemStack.EMPTY);
-            entity.level().explode(entity, entity.getX(), entity.getY(), entity.getZ(), Xavitia.GALAXY_INSTABILITY_EXPLOSION_RADIUS, false, Level.ExplosionInteraction.BLOCK);
             entity.discard();
         }
         return false;
@@ -130,6 +137,14 @@ public final class GalaxyInstability {
 
     public static int galaxyBlockDetonationTicks() {
         return GALAXY_BLOCK_DETONATION_TICKS;
+    }
+
+    public static void removeGalaxyBlockExplosion(Level level, BlockPos origin) {
+        removeExplosionBlocks(level, origin.getX() + 0.5D, origin.getY() + 0.5D, origin.getZ() + 0.5D, GALAXY_BLOCK_EXPLOSION_WIDTH);
+    }
+
+    public static void removeGalaxyFreezerExplosion(Level level, BlockPos origin) {
+        removeExplosionBlocks(level, origin.getX() + 0.5D, origin.getY() + 0.5D, origin.getZ() + 0.5D, GALAXY_FREEZER_EXPLOSION_WIDTH);
     }
 
     public static int detonationTicks(ItemStack stack) {
@@ -190,6 +205,33 @@ public final class GalaxyInstability {
 
     public static boolean isGalaxyMaterial(ItemStack stack) {
         return stack.is(Xavitia.GALAXY_INGOT.get()) || stack.is(Xavitia.GALAXY_BLOCK_ITEM.get());
+    }
+
+    private static int explosionWidth(ItemStack stack) {
+        return stack.is(Xavitia.GALAXY_BLOCK_ITEM.get()) ? GALAXY_BLOCK_EXPLOSION_WIDTH : GALAXY_INGOT_EXPLOSION_WIDTH;
+    }
+
+    private static void removeExplosionBlocks(Level level, double centerX, double centerY, double centerZ, int width) {
+        if (level.isClientSide) {
+            return;
+        }
+
+        int startX = (int)Math.floor(centerX) - width / 2;
+        int startZ = (int)Math.floor(centerZ) - width / 2;
+        int minY = (int)Math.floor(centerY) - EXPLOSION_HEIGHT / 2;
+        int maxY = minY + EXPLOSION_HEIGHT - 1;
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        for (int x = startX; x < startX + width; x++) {
+            for (int z = startZ; z < startZ + width; z++) {
+                for (int y = minY; y <= maxY; y++) {
+                    mutablePos.set(x, y, z);
+                    BlockState state = level.getBlockState(mutablePos);
+                    if (!state.isAir() && !state.is(Blocks.BEDROCK)) {
+                        level.removeBlock(mutablePos, false);
+                    }
+                }
+            }
+        }
     }
 
     public static void setTicks(ItemStack stack, int ticks) {

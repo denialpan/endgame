@@ -104,7 +104,6 @@ public class Xavitia {
     private static final String SURVIVAL_FLIGHT_GRANTED_KEY = MODID + ".survival_flight_granted";
     private static final int SPECTATOR_PHASE_TICKS = 15 * 20;
     public static final int GALAXY_INSTABILITY_DETONATION_TICKS = 10 * 20;
-    public static final float GALAXY_INSTABILITY_EXPLOSION_RADIUS = 8.0F;
     private static final Map<UUID, SpectatorPhaseState> SPECTATOR_PHASES = new HashMap<>();
     private static final Map<ResourceKey<Level>, Map<BlockPos, Long>> FABRICATOR_HOPPER_COOLDOWNS = new HashMap<>();
     public static final Logger LOGGER = LogUtils.getLogger();
