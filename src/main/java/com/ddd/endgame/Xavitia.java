@@ -79,6 +79,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -708,6 +709,37 @@ public class Xavitia {
     }
 
     @SubscribeEvent
+    public void onGalaxyToolLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
+        if (!isGalaxyTool(event.getItemStack())) {
+            return;
+        }
+        if (event.getLevel().isClientSide) {
+            event.setCanceled(true);
+            return;
+        }
+
+        BlockPos pos = event.getPos();
+        if (!event.getEntity().mayInteract(event.getLevel(), pos)) {
+            return;
+        }
+
+        BlockState state = event.getLevel().getBlockState(pos);
+        if (state.isAir()) {
+            return;
+        }
+
+        event.getLevel().destroyBlock(pos, true, event.getEntity());
+        event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public void onGalaxyToolBreakSpeed(PlayerEvent.BreakSpeed event) {
+        if (isGalaxyTool(event.getEntity().getMainHandItem())) {
+            event.setNewSpeed(Float.MAX_VALUE);
+        }
+    }
+
+    @SubscribeEvent
     public void onItemCrafted(PlayerEvent.ItemCraftedEvent event) {
         ItemStack crafted = event.getCrafting();
         if (!crafted.is(GALAXY_BLOCK_ITEM.get())) {
@@ -715,6 +747,15 @@ public class Xavitia {
         }
 
         GalaxyInstability.resetTicks(crafted);
+    }
+
+    private static boolean isGalaxyTool(ItemStack stack) {
+        return stack.is(GALAXY_MULTITOOL.get())
+                || stack.is(GALAXY_PICKAXE.get())
+                || stack.is(GALAXY_AXE.get())
+                || stack.is(GALAXY_HOE.get())
+                || stack.is(GALAXY_SHOVEL.get())
+                || stack.is(GALAXY_SWORD.get());
     }
 
     private static void updateSurvivalFlight(ServerPlayer player) {
