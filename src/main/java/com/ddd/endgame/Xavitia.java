@@ -677,7 +677,6 @@ public class Xavitia {
         }
 
         GalaxyInstability.resetTicks(crafted);
-        GalaxyInstability.resetPlayerTicks(event.getEntity());
     }
 
     private static void updateSurvivalFlight(ServerPlayer player) {

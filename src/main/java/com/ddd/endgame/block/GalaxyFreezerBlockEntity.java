@@ -56,6 +56,12 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
 
         @Override
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+            if (slot < INGOT_SLOT_COUNT && stack.is(Xavitia.GALAXY_INGOT.get()) && GalaxyFreezerBlockEntity.this.isCoolingActive()) {
+                ItemStack stabilized = stack.copy();
+                GalaxyInstability.freezeTicks(stabilized);
+                ItemStack remainder = super.insertItem(slot, stabilized, simulate);
+                return remainder.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(remainder.getCount());
+            }
             return super.insertItem(slot, stack, simulate);
         }
 
@@ -389,6 +395,10 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
             }
         }
         return ItemStack.EMPTY;
+    }
+
+    private boolean isCoolingActive() {
+        return this.isMultiblockValid() && !this.activeCoolant().isEmpty();
     }
 
     private void consumeCoolant() {

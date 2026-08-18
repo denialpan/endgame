@@ -28,7 +28,6 @@ public final class GalaxyInstability {
     private static final int GALAXY_FREEZER_EXPLOSION_WIDTH = 8;
     private static final String TICKS_TAG = "GalaxyInstabilityTicks";
     private static final String FROZEN_STABLE_TAG = "GalaxyInstabilityFrozenStable";
-    private static final String PLAYER_TICKS_TAG = "GalaxyInstabilityPlayerTicks";
     private static final String DROPPED_TICKS_TAG = "GalaxyInstabilityDroppedTicks";
     private static final String DROPPED_INITIALIZED_TAG = "GalaxyInstabilityDroppedInitialized";
 
@@ -36,52 +35,32 @@ public final class GalaxyInstability {
     }
 
     public static void tickPlayerStacks(ServerPlayer player) {
-        Iterable<ItemStack> activeContainerStacks = activeContainerGalaxyStacks(player);
-        boolean hasPlayerOwnedGalaxyMaterial = hasGalaxyMaterial(player.getInventory().items)
-                || hasGalaxyMaterial(player.getInventory().armor)
-                || hasGalaxyMaterial(player.getInventory().offhand)
-                || isGalaxyMaterial(player.containerMenu.getCarried());
-        int ticks = playerTicks(player);
-        ticks = Math.max(ticks, maxTicks(player.getInventory().items));
-        ticks = Math.max(ticks, maxTicks(player.getInventory().armor));
-        ticks = Math.max(ticks, maxTicks(player.getInventory().offhand));
-        ticks = Math.max(ticks, maxTicks(activeContainerStacks));
-        ItemStack carried = player.containerMenu.getCarried();
-        ticks = Math.max(ticks, ticks(carried));
-
-        if (!hasGalaxyMaterial(player.getInventory().items)
-                && !hasGalaxyMaterial(player.getInventory().armor)
-                && !hasGalaxyMaterial(player.getInventory().offhand)
-                && !hasGalaxyMaterial(activeContainerStacks)
-                && !isGalaxyMaterial(carried)) {
-            player.getPersistentData().remove(PLAYER_TICKS_TAG);
-            return;
-        }
-
-        int playerOwnedDetonationTicks = playerOwnedDetonationTicks(player, carried);
-        ticks = Math.min(ticks + 1, Xavitia.GALAXY_INSTABILITY_DETONATION_TICKS);
-        if (ticks >= playerOwnedDetonationTicks && hasPlayerOwnedGalaxyMaterial) {
+        ItemStack detonatingStack = tickPlayerOwnedStacks(player);
+        if (!detonatingStack.isEmpty()) {
             removeGalaxyMaterials(player.getInventory().items);
             removeGalaxyMaterials(player.getInventory().armor);
             removeGalaxyMaterials(player.getInventory().offhand);
-            if (isGalaxyMaterial(carried)) {
+            if (isGalaxyMaterial(player.containerMenu.getCarried())) {
                 player.containerMenu.setCarried(ItemStack.EMPTY);
             }
             player.getInventory().setChanged();
             player.containerMenu.broadcastChanges();
-            removeExplosionBlocks(player.level(), player.getX(), player.getY(), player.getZ(), GALAXY_INGOT_EXPLOSION_WIDTH);
+            removeExplosionBlocks(player.level(), player.getX(), player.getY(), player.getZ(), explosionWidth(detonatingStack));
             player.hurt(player.damageSources().genericKill(), Float.MAX_VALUE);
             return;
         }
 
-        setPlayerTicks(player, ticks);
-        setTicks(player.getInventory().items, ticks);
-        setTicks(player.getInventory().armor, ticks);
-        setTicks(player.getInventory().offhand, ticks);
-        setTicks(activeContainerStacks, ticks);
-        setTicks(carried, ticks);
-        player.getInventory().setChanged();
-        player.containerMenu.broadcastChanges();
+        boolean changed = hasGalaxyMaterial(player.getInventory().items)
+                || hasGalaxyMaterial(player.getInventory().armor)
+                || hasGalaxyMaterial(player.getInventory().offhand)
+                || isGalaxyMaterial(player.containerMenu.getCarried());
+        for (ItemStack stack : activeContainerGalaxyStacks(player)) {
+            changed |= tickVisibleContainerStack(stack);
+        }
+        if (changed) {
+            player.getInventory().setChanged();
+            player.containerMenu.broadcastChanges();
+        }
     }
 
     public static void tickStack(ItemStack stack, Level level, @Nullable Entity holder) {
@@ -112,7 +91,6 @@ public final class GalaxyInstability {
         }
 
         initializeDroppedTimer(stack, entity);
-        normalizeNearbyDroppedEntityTimers(entity);
         int detonationTicks = detonationTicks(stack);
         int ticks = Math.min(droppedTicks(entity) + 1, detonationTicks);
         setDroppedTicks(entity, ticks);
@@ -156,11 +134,7 @@ public final class GalaxyInstability {
     }
 
     public static int carriedTicks(ItemStack stack, @Nullable Entity holder) {
-        int ticks = ticks(stack);
-        if (holder instanceof Player player) {
-            ticks = Math.max(ticks, playerTicks(player));
-        }
-        return ticks;
+        return ticks(stack);
     }
 
     public static void resetTicks(ItemStack stack) {
@@ -173,16 +147,12 @@ public final class GalaxyInstability {
         });
     }
 
-    public static void resetPlayerTicks(Player player) {
-        player.getPersistentData().remove(PLAYER_TICKS_TAG);
-    }
-
     public static void freezeTicks(ItemStack stack) {
         if (stack.isEmpty() || !isGalaxyMaterial(stack)) {
             return;
         }
+        stack.remove(DataComponents.CUSTOM_DATA);
         CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
-            tag.remove(TICKS_TAG);
             tag.putBoolean(FROZEN_STABLE_TAG, true);
         });
     }
@@ -246,43 +216,53 @@ public final class GalaxyInstability {
         tag.remove(FROZEN_STABLE_TAG);
     }
 
-    private static int playerTicks(Player player) {
-        return player.getPersistentData().getInt(PLAYER_TICKS_TAG);
-    }
-
-    private static void setPlayerTicks(Player player, int ticks) {
-        player.getPersistentData().putInt(PLAYER_TICKS_TAG, Math.max(0, Math.min(ticks, Xavitia.GALAXY_INSTABILITY_DETONATION_TICKS)));
-    }
-
-    private static int playerOwnedDetonationTicks(ServerPlayer player, ItemStack carried) {
-        int detonationTicks = Xavitia.GALAXY_INSTABILITY_DETONATION_TICKS;
-        detonationTicks = Math.min(detonationTicks, minDetonationTicks(player.getInventory().items));
-        detonationTicks = Math.min(detonationTicks, minDetonationTicks(player.getInventory().armor));
-        detonationTicks = Math.min(detonationTicks, minDetonationTicks(player.getInventory().offhand));
-        if (isGalaxyMaterial(carried)) {
-            detonationTicks = Math.min(detonationTicks, detonationTicks(carried));
+    private static ItemStack tickPlayerOwnedStacks(ServerPlayer player) {
+        ItemStack detonatingStack = tickPlayerOwnedStacks(player.getInventory().items);
+        if (!detonatingStack.isEmpty()) {
+            return detonatingStack;
         }
-        return detonationTicks;
+        detonatingStack = tickPlayerOwnedStacks(player.getInventory().armor);
+        if (!detonatingStack.isEmpty()) {
+            return detonatingStack;
+        }
+        detonatingStack = tickPlayerOwnedStacks(player.getInventory().offhand);
+        if (!detonatingStack.isEmpty()) {
+            return detonatingStack;
+        }
+        return tickPlayerOwnedStack(player.containerMenu.getCarried());
     }
 
-    private static int minDetonationTicks(Iterable<ItemStack> stacks) {
-        int min = Xavitia.GALAXY_INSTABILITY_DETONATION_TICKS;
+    private static ItemStack tickPlayerOwnedStacks(Iterable<ItemStack> stacks) {
         for (ItemStack stack : stacks) {
-            if (isGalaxyMaterial(stack)) {
-                min = Math.min(min, detonationTicks(stack));
+            ItemStack detonatingStack = tickPlayerOwnedStack(stack);
+            if (!detonatingStack.isEmpty()) {
+                return detonatingStack;
             }
         }
-        return min;
+        return ItemStack.EMPTY;
     }
 
-    private static int maxTicks(Iterable<ItemStack> stacks) {
-        int max = 0;
-        for (ItemStack stack : stacks) {
-            if (isGalaxyMaterial(stack)) {
-                max = Math.max(max, ticks(stack));
-            }
+    private static ItemStack tickPlayerOwnedStack(ItemStack stack) {
+        if (stack.isEmpty() || !isGalaxyMaterial(stack)) {
+            return ItemStack.EMPTY;
         }
-        return max;
+        int detonationTicks = detonationTicks(stack);
+        int ticks = Math.min(ticks(stack) + 1, detonationTicks);
+        setTicks(stack, ticks);
+        return ticks >= detonationTicks ? stack.copyWithCount(1) : ItemStack.EMPTY;
+    }
+
+    private static boolean tickVisibleContainerStack(ItemStack stack) {
+        if (stack.isEmpty() || !isGalaxyMaterial(stack)) {
+            return false;
+        }
+        int detonationTicks = detonationTicks(stack);
+        int ticks = ticks(stack);
+        if (ticks >= detonationTicks) {
+            return false;
+        }
+        setTicks(stack, Math.min(ticks + 1, detonationTicks));
+        return true;
     }
 
     private static boolean hasGalaxyMaterial(Iterable<ItemStack> stacks) {
@@ -292,12 +272,6 @@ public final class GalaxyInstability {
             }
         }
         return false;
-    }
-
-    private static void setTicks(Iterable<ItemStack> stacks, int ticks) {
-        for (ItemStack stack : stacks) {
-            setTicks(stack, ticks);
-        }
     }
 
     private static Iterable<ItemStack> activeContainerGalaxyStacks(ServerPlayer player) {
@@ -335,9 +309,6 @@ public final class GalaxyInstability {
 
         data.putBoolean(DROPPED_INITIALIZED_TAG, true);
         int ticks = Math.max(droppedTicks(entity), ticks(stack));
-        if (entity.getOwner() instanceof Player player) {
-            ticks = Math.max(ticks, playerTicks(player));
-        }
         setDroppedTicks(entity, ticks);
         if (ticks(stack) != ticks) {
             setTicks(stack, ticks);
@@ -351,22 +322,5 @@ public final class GalaxyInstability {
 
     private static void setDroppedTicks(ItemEntity entity, int ticks) {
         entity.getPersistentData().putInt(DROPPED_TICKS_TAG, Math.max(0, Math.min(ticks, detonationTicks(entity.getItem()))));
-    }
-
-    private static void normalizeNearbyDroppedEntityTimers(ItemEntity entity) {
-        if (entity.level().isClientSide || !isGalaxyMaterial(entity.getItem())) {
-            return;
-        }
-
-        int max = droppedTicks(entity);
-        for (ItemEntity nearby : entity.level().getEntitiesOfClass(ItemEntity.class, entity.getBoundingBox().inflate(0.5D, 0.0D, 0.5D), nearby -> nearby != entity && isGalaxyMaterial(nearby.getItem()))) {
-            initializeDroppedTimer(nearby.getItem(), nearby);
-            max = Math.max(max, droppedTicks(nearby));
-        }
-
-        setDroppedTicks(entity, max);
-        for (ItemEntity nearby : entity.level().getEntitiesOfClass(ItemEntity.class, entity.getBoundingBox().inflate(0.5D, 0.0D, 0.5D), nearby -> nearby != entity && isGalaxyMaterial(nearby.getItem()))) {
-            setDroppedTicks(nearby, max);
-        }
     }
 }
