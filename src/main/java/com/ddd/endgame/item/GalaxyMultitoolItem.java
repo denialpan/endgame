@@ -72,7 +72,11 @@ public class GalaxyMultitoolItem extends Item {
     }
 
     public static Component selectedToolName(ItemStack stack) {
-        return Component.translatable(TOOL_TRANSLATION_KEYS.get(selectedToolIndex(stack)));
+        return toolName(selectedToolIndex(stack));
+    }
+
+    public static Component toolName(int index) {
+        return Component.translatable(TOOL_TRANSLATION_KEYS.get(Mth.positiveModulo(index, TOOL_TRANSLATION_KEYS.size())));
     }
 
     private static int selectedIndex(ItemStack stack) {

@@ -2,6 +2,7 @@ package com.ddd.endgame.item.models;
 
 import com.ddd.endgame.Xavitia;
 import com.ddd.endgame.item.GalaxyMultitoolItem;
+import com.ddd.endgame.item.GalaxyToolItem;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.BakedModel;
@@ -28,7 +29,7 @@ public class GalaxyMultitoolItemRenderer extends GeneratedStencilItemRenderer {
 
     private GalaxyMultitoolItemRenderer() {
         super(
-                stack -> TOOL_TEXTURES.get(GalaxyMultitoolItem.selectedToolIndex(stack)),
+                stack -> TOOL_TEXTURES.get(toolIndex(stack)),
                 GalaxyMultitoolItemRenderer::selectedModel,
                 "Unable to load galaxy multitool texture masks"
         );
@@ -39,7 +40,14 @@ public class GalaxyMultitoolItemRenderer extends GeneratedStencilItemRenderer {
     }
 
     private static BakedModel selectedModel(ItemStack stack) {
-        return Minecraft.getInstance().getModelManager().getModel(TOOL_MODELS.get(GalaxyMultitoolItem.selectedToolIndex(stack)));
+        return Minecraft.getInstance().getModelManager().getModel(TOOL_MODELS.get(toolIndex(stack)));
+    }
+
+    private static int toolIndex(ItemStack stack) {
+        if (stack.getItem() instanceof GalaxyToolItem toolItem) {
+            return toolItem.toolIndex();
+        }
+        return GalaxyMultitoolItem.selectedToolIndex(stack);
     }
 
     private static ModelResourceLocation model(String path) {

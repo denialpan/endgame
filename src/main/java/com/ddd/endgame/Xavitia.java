@@ -23,6 +23,7 @@ import com.ddd.endgame.item.DayNightToggleItem;
 import com.ddd.endgame.item.TheStickItem;
 import com.ddd.endgame.item.EntityPurgeItem;
 import com.ddd.endgame.item.GalaxyMultitoolItem;
+import com.ddd.endgame.item.GalaxyToolItem;
 import com.ddd.endgame.item.GalaxyIngotItem;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
 import com.ddd.endgame.item.RealityRestorerItem;
@@ -143,6 +144,26 @@ public class Xavitia {
     public static final DeferredItem<Item> GALAXY_MULTITOOL = ITEMS.register(
             "galaxy_multitool",
             () -> new GalaxyMultitoolItem(new Item.Properties().stacksTo(1))
+    );
+    public static final DeferredItem<Item> GALAXY_PICKAXE = ITEMS.register(
+            "galaxy_pickaxe",
+            () -> new GalaxyToolItem(0, new Item.Properties().stacksTo(1))
+    );
+    public static final DeferredItem<Item> GALAXY_AXE = ITEMS.register(
+            "galaxy_axe",
+            () -> new GalaxyToolItem(1, new Item.Properties().stacksTo(1))
+    );
+    public static final DeferredItem<Item> GALAXY_HOE = ITEMS.register(
+            "galaxy_hoe",
+            () -> new GalaxyToolItem(2, new Item.Properties().stacksTo(1))
+    );
+    public static final DeferredItem<Item> GALAXY_SHOVEL = ITEMS.register(
+            "galaxy_shovel",
+            () -> new GalaxyToolItem(3, new Item.Properties().stacksTo(1))
+    );
+    public static final DeferredItem<Item> GALAXY_SWORD = ITEMS.register(
+            "galaxy_sword",
+            () -> new GalaxyToolItem(4, new Item.Properties().stacksTo(1))
     );
     public static final DeferredItem<Item> REALITY_RESTORER = ITEMS.register(
             "reality_restorer",
@@ -440,6 +461,11 @@ public class Xavitia {
                 output.accept(ENTITY_PURGE_CORE.get());
                 output.accept(RANDOM_BLOCK_PLACER.get());
                 output.accept(GALAXY_MULTITOOL.get());
+                output.accept(GALAXY_PICKAXE.get());
+                output.accept(GALAXY_AXE.get());
+                output.accept(GALAXY_HOE.get());
+                output.accept(GALAXY_SHOVEL.get());
+                output.accept(GALAXY_SWORD.get());
                 output.accept(REALITY_RESTORER.get());
                 output.accept(SURVIVAL_FLIGHT_CORE.get());
                 output.accept(SPECTATOR_PHASE_CORE.get());
