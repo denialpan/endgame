@@ -1,6 +1,6 @@
 package com.ddd.endgame.galaxy;
 
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GalaxyFreezerScreen extends AbstractContainerScreen<GalaxyFreezerMenu> {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "textures/gui/galaxy_freezer.png");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "textures/gui/galaxy_freezer.png");
     private static final int WIDTH = 176;
     private static final int HEIGHT = 166;
     private static final int INVALID_MULTIBLOCK_TEXT_Y = 64;

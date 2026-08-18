@@ -1,7 +1,7 @@
 package com.ddd.endgame.item;
 
 import com.ddd.endgame.item.models.RealityShifterItemRenderer;
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
@@ -95,7 +95,7 @@ public class RealityRestorerItem extends Item {
             }
             player.displayClientMessage(Component.translatable("message.xavitia.reality_restorer.restored", chunkPos.x, chunkPos.z, result.changedBlocks()), true);
         } catch (RuntimeException exception) {
-            Xevitia.LOGGER.warn("Failed to restore chunk {} with Reality Restorer", chunkPos, exception);
+            Xavitia.LOGGER.warn("Failed to restore chunk {} with Reality Restorer", chunkPos, exception);
             player.displayClientMessage(Component.translatable("message.xavitia.reality_restorer.failed").withStyle(ChatFormatting.RED), true);
         }
 
@@ -115,7 +115,7 @@ public class RealityRestorerItem extends Item {
                 for (int y = minY; y < maxY; y++) {
                     mutablePos.set(minX + x, y, minZ + z);
                     ResourceLocation key = BuiltInRegistries.BLOCK.getKey(level.getBlockState(mutablePos).getBlock());
-                    if (Xevitia.MODID.equals(key.getNamespace())) {
+                    if (Xavitia.MODID.equals(key.getNamespace())) {
                         return true;
                     }
                 }

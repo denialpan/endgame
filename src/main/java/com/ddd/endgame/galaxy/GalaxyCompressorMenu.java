@@ -1,6 +1,6 @@
 package com.ddd.endgame.galaxy;
 
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 
 import com.ddd.endgame.block.GalaxyCompressorBlockEntity;
 import javax.annotation.Nullable;
@@ -31,7 +31,7 @@ public class GalaxyCompressorMenu extends AbstractContainerMenu {
     }
 
     private GalaxyCompressorMenu(int containerId, Inventory playerInventory, MenuTarget target) {
-        super(Xevitia.GALAXY_COMPRESSOR_MENU.get(), containerId);
+        super(Xavitia.GALAXY_COMPRESSOR_MENU.get(), containerId);
         checkContainerSize(target.container(), TEMPLATE_SLOT_COUNT);
         this.container = target.container();
         this.pos = target.pos();
@@ -56,7 +56,7 @@ public class GalaxyCompressorMenu extends AbstractContainerMenu {
     public boolean stillValid(Player player) {
         return this.blockEntity == null
                 ? true
-                : stillValid(ContainerLevelAccess.create(player.level(), this.pos), player, Xevitia.GALAXY_COMPRESSOR_BLOCK.get());
+                : stillValid(ContainerLevelAccess.create(player.level(), this.pos), player, Xavitia.GALAXY_COMPRESSOR_BLOCK.get());
     }
 
     private static MenuTarget clientContainer(Inventory inventory, BlockPos pos) {

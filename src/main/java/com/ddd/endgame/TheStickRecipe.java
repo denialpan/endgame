@@ -17,7 +17,7 @@ public final class TheStickRecipe {
     }
 
     public static ItemStack createResult(HolderLookup.Provider registries) {
-        ItemStack stack = new ItemStack(Xevitia.THE_STICK.get());
+        ItemStack stack = new ItemStack(Xavitia.THE_STICK.get());
         registries.lookupOrThrow(Registries.ENCHANTMENT)
                 .listElements()
                 .filter(enchantment -> !enchantment.is(Enchantments.VANISHING_CURSE))

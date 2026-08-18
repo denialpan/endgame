@@ -1,6 +1,6 @@
 package com.ddd.endgame.block;
 
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -78,30 +78,30 @@ public final class GalaxyFreezerMultiblock {
     }
 
     private static Requirement solid(int x, int y, int z) {
-        return new Requirement(x, y, z, Xevitia.GALAXY_OBSIDIAN_BLOCK.get(), state -> state.is(Xevitia.GALAXY_OBSIDIAN_BLOCK.get()));
+        return new Requirement(x, y, z, Xavitia.GALAXY_OBSIDIAN_BLOCK.get(), state -> state.is(Xavitia.GALAXY_OBSIDIAN_BLOCK.get()));
     }
 
     private static Requirement glass(int x, int y, int z) {
-        return new Requirement(x, y, z, Xevitia.GALAXY_GLASS_BLOCK.get(), GalaxyFreezerMultiblock::isAcceptedGlass);
+        return new Requirement(x, y, z, Xavitia.GALAXY_GLASS_BLOCK.get(), GalaxyFreezerMultiblock::isAcceptedGlass);
     }
 
     private static boolean isAcceptedGlass(BlockState state) {
-        return state.is(Xevitia.GALAXY_GLASS_BLOCK.get())
-                || state.is(Xevitia.BLUE_GALAXY_GLASS_BLOCK.get())
-                || state.is(Xevitia.GREEN_GALAXY_GLASS_BLOCK.get())
-                || state.is(Xevitia.RED_GALAXY_GLASS_BLOCK.get())
-                || state.is(Xevitia.RAINBOW_GALAXY_GLASS_BLOCK.get())
-                || state.is(Xevitia.YELLOW_GALAXY_GLASS_BLOCK.get())
-                || state.is(Xevitia.BLUE_GALAXY_FULL_GLASS_BLOCK.get())
-                || state.is(Xevitia.GREEN_GALAXY_FULL_GLASS_BLOCK.get())
-                || state.is(Xevitia.RED_GALAXY_FULL_GLASS_BLOCK.get())
-                || state.is(Xevitia.RAINBOW_GALAXY_FULL_GLASS_BLOCK.get())
-                || state.is(Xevitia.YELLOW_GALAXY_FULL_GLASS_BLOCK.get());
+        return state.is(Xavitia.GALAXY_GLASS_BLOCK.get())
+                || state.is(Xavitia.BLUE_GALAXY_GLASS_BLOCK.get())
+                || state.is(Xavitia.GREEN_GALAXY_GLASS_BLOCK.get())
+                || state.is(Xavitia.RED_GALAXY_GLASS_BLOCK.get())
+                || state.is(Xavitia.RAINBOW_GALAXY_GLASS_BLOCK.get())
+                || state.is(Xavitia.YELLOW_GALAXY_GLASS_BLOCK.get())
+                || state.is(Xavitia.BLUE_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(Xavitia.GREEN_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(Xavitia.RED_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(Xavitia.RAINBOW_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(Xavitia.YELLOW_GALAXY_FULL_GLASS_BLOCK.get());
     }
 
     private static Requirement connector(int x, int y, int z) {
-        return new Requirement(x, y, z, Xevitia.GALAXY_CONNECTOR_BLOCK.get(), state ->
-                state.is(Xevitia.GALAXY_CONNECTOR_BLOCK.get())
+        return new Requirement(x, y, z, Xavitia.GALAXY_CONNECTOR_BLOCK.get(), state ->
+                state.is(Xavitia.GALAXY_CONNECTOR_BLOCK.get())
                         && state.getValue(OrientableEntityBlock.AXIS) == Direction.Axis.Y
         );
     }

@@ -1,6 +1,6 @@
 package com.ddd.endgame.compat;
 
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -23,9 +23,9 @@ import java.util.List;
 
 @JeiPlugin
 public class GalaxyIngotJeiPlugin implements IModPlugin {
-    private static final ResourceLocation PLUGIN_UID = ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "jei");
+    private static final ResourceLocation PLUGIN_UID = ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "jei");
     private static final RecipeType<GalaxyIngotRecipe> GALAXY_INGOT_RECIPE_TYPE = RecipeType.create(
-            Xevitia.MODID,
+            Xavitia.MODID,
             "galaxy_compressor",
             GalaxyIngotRecipe.class
     );
@@ -47,7 +47,7 @@ public class GalaxyIngotJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        registration.addRecipeCatalyst(Xevitia.GALAXY_COMPRESSOR_ITEM.get(), GALAXY_INGOT_RECIPE_TYPE);
+        registration.addRecipeCatalyst(Xavitia.GALAXY_COMPRESSOR_ITEM.get(), GALAXY_INGOT_RECIPE_TYPE);
     }
 
     public static final class GalaxyIngotRecipe {
@@ -60,7 +60,7 @@ public class GalaxyIngotJeiPlugin implements IModPlugin {
 
         private GalaxyIngotRecipeCategory(IGuiHelper guiHelper) {
             this.background = guiHelper.createBlankDrawable(126, 54);
-            this.icon = guiHelper.createDrawableItemStack(new ItemStack(Xevitia.GALAXY_COMPRESSOR_ITEM.get()));
+            this.icon = guiHelper.createDrawableItemStack(new ItemStack(Xavitia.GALAXY_COMPRESSOR_ITEM.get()));
             this.arrow = guiHelper.createAnimatedRecipeArrow(200);
         }
 
@@ -88,10 +88,10 @@ public class GalaxyIngotJeiPlugin implements IModPlugin {
         public void setRecipe(IRecipeLayoutBuilder builder, GalaxyIngotRecipe recipe, IFocusGroup focuses) {
             builder.addInputSlot(20, 17)
                     .setStandardSlotBackground()
-                    .addItemStack(new ItemStack(Xevitia.GALAXY_COMPRESSOR_ITEM.get()));
+                    .addItemStack(new ItemStack(Xavitia.GALAXY_COMPRESSOR_ITEM.get()));
             builder.addOutputSlot(88, 17)
                     .setOutputSlotBackground()
-                    .addItemStack(new ItemStack(Xevitia.GALAXY_INGOT.get()));
+                    .addItemStack(new ItemStack(Xavitia.GALAXY_INGOT.get()));
         }
 
         @Override

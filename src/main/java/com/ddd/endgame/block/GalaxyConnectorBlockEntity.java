@@ -1,7 +1,7 @@
 package com.ddd.endgame.block;
 
 import com.ddd.endgame.galaxy.GalaxyCompressorNetwork;
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +19,7 @@ public class GalaxyConnectorBlockEntity extends BlockEntity {
     private final IFluidHandler fluidHandler = new InputFluidHandler();
 
     public GalaxyConnectorBlockEntity(BlockPos pos, BlockState blockState) {
-        super(Xevitia.GALAXY_CONNECTOR_BLOCK_ENTITY.get(), pos, blockState);
+        super(Xavitia.GALAXY_CONNECTOR_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     public IItemHandler itemHandler() {
@@ -51,7 +51,7 @@ public class GalaxyConnectorBlockEntity extends BlockEntity {
             if (!(this.level.getBlockEntity(compressorPos) instanceof GalaxyFreezerBlockEntity freezer)) {
                 continue;
             }
-            if (!freezer.getBlockState().is(Xevitia.GALAXY_FREEZER_BLOCK.get())
+            if (!freezer.getBlockState().is(Xavitia.GALAXY_FREEZER_BLOCK.get())
                     || freezer.getBlockState().getValue(HorizontalFacingEntityBlock.FACING) != facing) {
                 continue;
             }

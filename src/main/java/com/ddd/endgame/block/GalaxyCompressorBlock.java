@@ -1,6 +1,6 @@
 package com.ddd.endgame.block;
 
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -112,7 +112,7 @@ public class GalaxyCompressorBlock extends HorizontalFacingEntityBlock {
     }
 
     private static ItemStack savedControllerStack(GalaxyCompressorBlockEntity blockEntity, ServerLevel level) {
-        ItemStack stack = new ItemStack(Xevitia.GALAXY_COMPRESSOR_ITEM.get());
+        ItemStack stack = new ItemStack(Xavitia.GALAXY_COMPRESSOR_ITEM.get());
         blockEntity.saveToItem(stack, level.registryAccess());
         return stack;
     }

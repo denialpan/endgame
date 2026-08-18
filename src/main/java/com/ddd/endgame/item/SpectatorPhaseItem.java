@@ -1,7 +1,7 @@
 package com.ddd.endgame.item;
 
 import com.ddd.endgame.item.models.NoclipItemRenderer;
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.network.chat.Component;
@@ -43,7 +43,7 @@ public class SpectatorPhaseItem extends Item {
             return InteractionResultHolder.sidedSuccess(stack, true);
         }
 
-        Xevitia.startSpectatorPhase(serverPlayer);
+        Xavitia.startSpectatorPhase(serverPlayer);
         player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
         return InteractionResultHolder.consume(stack);
     }

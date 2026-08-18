@@ -1,6 +1,6 @@
 package com.ddd.endgame.item.models;
 
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
@@ -13,12 +13,12 @@ import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 
 import java.io.IOException;
 
-@EventBusSubscriber(modid = Xevitia.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Xavitia.MODID, value = Dist.CLIENT)
 public final class GeneratedStencilItemShader {
     private static ShaderInstance shader;
     private static final RenderStateShard.ShaderStateShard SHADER_STATE = new RenderStateShard.ShaderStateShard(GeneratedStencilItemShader::shader);
     private static final RenderType MAIN_TARGET_RENDER_TYPE = createRenderType(
-            Xevitia.MODID + ":generated_stencil_item",
+            Xavitia.MODID + ":generated_stencil_item",
             RenderType.CompositeState.builder()
                     .setShaderState(SHADER_STATE)
                     .setTextureState(RenderStateShard.BLOCK_SHEET)
@@ -29,7 +29,7 @@ public final class GeneratedStencilItemShader {
                     .createCompositeState(true)
     );
     private static final RenderType ITEM_ENTITY_TARGET_RENDER_TYPE = createRenderType(
-            Xevitia.MODID + ":generated_stencil_item_entity",
+            Xavitia.MODID + ":generated_stencil_item_entity",
             RenderType.CompositeState.builder()
                     .setShaderState(SHADER_STATE)
                     .setTextureState(RenderStateShard.BLOCK_SHEET)
@@ -61,7 +61,7 @@ public final class GeneratedStencilItemShader {
         event.registerShader(
                 new ShaderInstance(
                         event.getResourceProvider(),
-                        ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "generated_stencil_item"),
+                        ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "generated_stencil_item"),
                         DefaultVertexFormat.BLOCK
                 ),
                 loadedShader -> shader = loadedShader

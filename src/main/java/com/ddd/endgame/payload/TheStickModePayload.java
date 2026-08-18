@@ -1,6 +1,6 @@
 package com.ddd.endgame.payload;
 
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import com.ddd.endgame.item.TheStickItem;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -13,7 +13,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record TheStickModePayload(int direction) implements CustomPacketPayload {
     public static final Type<TheStickModePayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "the_stick_mode")
+            ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "the_stick_mode")
     );
     public static final StreamCodec<RegistryFriendlyByteBuf, TheStickModePayload> STREAM_CODEC = StreamCodec.of(
             (buffer, payload) -> buffer.writeVarInt(payload.direction()),
@@ -41,11 +41,11 @@ public record TheStickModePayload(int direction) implements CustomPacketPayload 
 
     private static ItemStack selectedStick(ServerPlayer player) {
         ItemStack mainHand = player.getMainHandItem();
-        if (mainHand.is(Xevitia.THE_STICK.get())) {
+        if (mainHand.is(Xavitia.THE_STICK.get())) {
             return mainHand;
         }
 
         ItemStack offHand = player.getOffhandItem();
-        return offHand.is(Xevitia.THE_STICK.get()) ? offHand : ItemStack.EMPTY;
+        return offHand.is(Xavitia.THE_STICK.get()) ? offHand : ItemStack.EMPTY;
     }
 }

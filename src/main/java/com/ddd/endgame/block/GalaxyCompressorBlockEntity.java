@@ -4,7 +4,7 @@ import com.ddd.endgame.Config;
 import com.ddd.endgame.galaxy.GalaxyCompressorMenu;
 import com.ddd.endgame.galaxy.GalaxyCompressorNetwork;
 import com.ddd.endgame.EndgameRequirement;
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
     private int requirementsRevision;
 
     public GalaxyCompressorBlockEntity(BlockPos pos, BlockState blockState) {
-        super(Xevitia.GALAXY_COMPRESSOR_BLOCK_ENTITY.get(), pos, blockState);
+        super(Xavitia.GALAXY_COMPRESSOR_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     public List<EndgameRequirement> requirements() {
@@ -187,7 +187,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
         }
 
         if (changed) {
-            Xevitia.LOGGER.info("Endgame compressor at {} tracks {} recipe output items and {} fluids", this.worldPosition, this.remaining.size(), this.fluidRemaining.size());
+            Xavitia.LOGGER.info("Endgame compressor at {} tracks {} recipe output items and {} fluids", this.worldPosition, this.remaining.size(), this.fluidRemaining.size());
             this.setChangedAndSync();
         }
     }
@@ -222,7 +222,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
         }
 
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(result.getItem());
-        if (itemId != null && !Xevitia.MODID.equals(itemId.getNamespace())) {
+        if (itemId != null && !Xavitia.MODID.equals(itemId.getNamespace())) {
             recipeItems.putIfAbsent(itemId, result.getItem());
         }
     }
@@ -268,7 +268,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
                 }
             }
         } catch (ReflectiveOperationException | RuntimeException exception) {
-            Xevitia.LOGGER.debug("Unable to inspect Modern Industrialization machine recipe {}", recipe, exception);
+            Xavitia.LOGGER.debug("Unable to inspect Modern Industrialization machine recipe {}", recipe, exception);
         }
     }
 
@@ -329,7 +329,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
     }
 
     private static boolean isModItem(@Nullable ResourceLocation itemId) {
-        return itemId != null && Xevitia.MODID.equals(itemId.getNamespace());
+        return itemId != null && Xavitia.MODID.equals(itemId.getNamespace());
     }
 
     private int acceptFluidContribution(FluidStack stack, IFluidHandler.FluidAction action) {
@@ -502,7 +502,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
         public ItemStack getStackInSlot(int slot) {
             validateSlot(slot);
             if (slot == SLOT_OUTPUT && GalaxyCompressorBlockEntity.this.level != null && GalaxyCompressorBlockEntity.this.isComplete()) {
-                return new ItemStack(Xevitia.GALAXY_INGOT.get());
+                return new ItemStack(Xavitia.GALAXY_INGOT.get());
             }
             return ItemStack.EMPTY;
         }
@@ -538,7 +538,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
                 return ItemStack.EMPTY;
             }
 
-            ItemStack result = new ItemStack(Xevitia.GALAXY_INGOT.get());
+            ItemStack result = new ItemStack(Xavitia.GALAXY_INGOT.get());
             if (!simulate) {
                 GalaxyCompressorBlockEntity.this.resetRequirements();
             }

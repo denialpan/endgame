@@ -1,6 +1,6 @@
 package com.ddd.endgame.mixin;
 
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class HopperBlockEntityMixin {
     @Inject(method = "pushItemsTick", at = @At("HEAD"), cancellable = true)
     private static void xavitia$pushFabricatorOutput(Level level, BlockPos pos, BlockState state, HopperBlockEntity blockEntity, CallbackInfo callbackInfo) {
-        if (Xevitia.handleFabricatorHopperTick(level, pos, state, blockEntity)) {
+        if (Xavitia.handleFabricatorHopperTick(level, pos, state, blockEntity)) {
             callbackInfo.cancel();
         }
     }

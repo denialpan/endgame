@@ -1,6 +1,6 @@
 package com.ddd.endgame.item.models;
 
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import net.minecraft.resources.ResourceLocation;
 
 public class TheStickItemRenderer extends GeneratedStencilItemRenderer {
@@ -8,7 +8,7 @@ public class TheStickItemRenderer extends GeneratedStencilItemRenderer {
 
     private TheStickItemRenderer() {
         super(
-                ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "textures/item/the_stick.png"),
+                ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "textures/item/the_stick.png"),
                 TheStickModel::originalModel,
                 "Unable to load endgame test stick texture masks"
         );

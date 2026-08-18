@@ -1,7 +1,7 @@
 package com.ddd.endgame.item;
 
 import com.ddd.endgame.item.models.RandomBlockPlacerItemRenderer;
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -260,7 +260,7 @@ public class RandomBlockPlacerItem extends Item {
             if (item == net.minecraft.world.item.Items.AIR) {
                 continue;
             }
-            if (BuiltInRegistries.ITEM.getKey(item).getNamespace().equals(Xevitia.MODID)) {
+            if (BuiltInRegistries.ITEM.getKey(item).getNamespace().equals(Xavitia.MODID)) {
                 continue;
             }
             items.add(item);

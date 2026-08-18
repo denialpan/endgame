@@ -2,7 +2,7 @@ package com.ddd.endgame.block;
 
 import com.ddd.endgame.galaxy.GalaxyFreezerMenu;
 import com.ddd.endgame.galaxy.GalaxyInstability;
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -51,7 +51,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
             if (slot < INGOT_SLOT_COUNT) {
-                return stack.is(Xevitia.GALAXY_INGOT.get()) && GalaxyFreezerBlockEntity.this.isMultiblockValid();
+                return stack.is(Xavitia.GALAXY_INGOT.get()) && GalaxyFreezerBlockEntity.this.isMultiblockValid();
             }
             return isIceSlot(slot) && isCoolant(stack);
         }
@@ -68,7 +68,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
     };
 
     public GalaxyFreezerBlockEntity(BlockPos pos, BlockState blockState) {
-        super(Xevitia.GALAXY_FREEZER_BLOCK_ENTITY.get(), pos, blockState);
+        super(Xavitia.GALAXY_FREEZER_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     public ItemStackHandler itemHandler() {
@@ -147,10 +147,10 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
                 continue;
             }
 
-            int ticks = Math.min(GalaxyInstability.ticks(stack) + 1, Xevitia.GALAXY_INSTABILITY_DETONATION_TICKS);
+            int ticks = Math.min(GalaxyInstability.ticks(stack) + 1, Xavitia.GALAXY_INSTABILITY_DETONATION_TICKS);
             GalaxyInstability.setTicks(stack, ticks);
             changed = true;
-            if (ticks >= Xevitia.GALAXY_INSTABILITY_DETONATION_TICKS) {
+            if (ticks >= Xavitia.GALAXY_INSTABILITY_DETONATION_TICKS) {
                 detonate(level, pos, blockEntity);
                 return;
             }
@@ -178,7 +178,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         int occupiedSlots = 0;
         for (int slot = 0; slot < INGOT_SLOT_COUNT; slot++) {
             ItemStack stack = this.itemHandler.getStackInSlot(slot);
-            if (stack.is(Xevitia.GALAXY_INGOT.get())) {
+            if (stack.is(Xavitia.GALAXY_INGOT.get())) {
                 totalIngots += stack.getCount();
                 occupiedSlots++;
             }
@@ -190,7 +190,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
 
         ItemStack firstStack = this.itemHandler.getStackInSlot(0);
         if (occupiedSlots == 1
-                && firstStack.is(Xevitia.GALAXY_INGOT.get())
+                && firstStack.is(Xavitia.GALAXY_INGOT.get())
                 && firstStack.getCount() == totalIngots
                 && GalaxyInstability.ticks(firstStack) == 0
                 && GalaxyInstability.isFrozenStable(firstStack)) {
@@ -204,7 +204,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
                 continue;
             }
 
-            ItemStack merged = new ItemStack(Xevitia.GALAXY_INGOT.get());
+            ItemStack merged = new ItemStack(Xavitia.GALAXY_INGOT.get());
             int count = Math.min(remaining, merged.getMaxStackSize());
             merged.setCount(count);
             GalaxyInstability.freezeTicks(merged);
@@ -243,11 +243,11 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         return stack.is(Items.ICE)
                 || stack.is(Items.PACKED_ICE)
                 || stack.is(Items.BLUE_ICE)
-                || stack.is(Xevitia.COMPRESSED_ICE_1_ITEM.get())
-                || stack.is(Xevitia.COMPRESSED_ICE_2_ITEM.get())
-                || stack.is(Xevitia.COMPRESSED_ICE_3_ITEM.get())
-                || stack.is(Xevitia.COMPRESSED_ICE_4_ITEM.get())
-                || stack.is(Xevitia.COMPRESSED_ICE_5_ITEM.get());
+                || stack.is(Xavitia.COMPRESSED_ICE_1_ITEM.get())
+                || stack.is(Xavitia.COMPRESSED_ICE_2_ITEM.get())
+                || stack.is(Xavitia.COMPRESSED_ICE_3_ITEM.get())
+                || stack.is(Xavitia.COMPRESSED_ICE_4_ITEM.get())
+                || stack.is(Xavitia.COMPRESSED_ICE_5_ITEM.get());
     }
 
     public void dropContents(Level level, BlockPos pos) {
@@ -302,7 +302,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         double x = pos.getX() + 0.5D;
         double y = pos.getY() + 0.5D;
         double z = pos.getZ() + 0.5D;
-        ItemEntity explosionSource = new ItemEntity(level, x, y, z, new ItemStack(Xevitia.GALAXY_INGOT.get()));
+        ItemEntity explosionSource = new ItemEntity(level, x, y, z, new ItemStack(Xavitia.GALAXY_INGOT.get()));
         int galaxyMaterialCount = 0;
         for (int slot = 0; slot < INGOT_SLOT_COUNT; slot++) {
             ItemStack stack = blockEntity.itemHandler.getStackInSlot(slot);
@@ -311,7 +311,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
                 stack.setCount(0);
             }
         }
-        float explosionRadius = Xevitia.GALAXY_INSTABILITY_EXPLOSION_RADIUS
+        float explosionRadius = Xavitia.GALAXY_INSTABILITY_EXPLOSION_RADIUS
                 * Math.max(1, (int)Math.ceil((double)galaxyMaterialCount / (double)INGOTS_PER_EXPLOSION_SIZE_STEP));
         blockEntity.setChanged();
         destroyFreezerMultiblock(level, pos, blockEntity);
@@ -434,19 +434,19 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
     }
 
     public static int coolingPeriod(ItemStack stack) {
-        if (stack.is(Xevitia.COMPRESSED_ICE_5_ITEM.get())) {
+        if (stack.is(Xavitia.COMPRESSED_ICE_5_ITEM.get())) {
             return COMPRESSED_ICE_5_COOLING_TICKS;
         }
-        if (stack.is(Xevitia.COMPRESSED_ICE_4_ITEM.get())) {
+        if (stack.is(Xavitia.COMPRESSED_ICE_4_ITEM.get())) {
             return COMPRESSED_ICE_4_COOLING_TICKS;
         }
-        if (stack.is(Xevitia.COMPRESSED_ICE_3_ITEM.get())) {
+        if (stack.is(Xavitia.COMPRESSED_ICE_3_ITEM.get())) {
             return COMPRESSED_ICE_3_COOLING_TICKS;
         }
-        if (stack.is(Xevitia.COMPRESSED_ICE_2_ITEM.get())) {
+        if (stack.is(Xavitia.COMPRESSED_ICE_2_ITEM.get())) {
             return COMPRESSED_ICE_2_COOLING_TICKS;
         }
-        if (stack.is(Xevitia.COMPRESSED_ICE_1_ITEM.get())) {
+        if (stack.is(Xavitia.COMPRESSED_ICE_1_ITEM.get())) {
             return COMPRESSED_ICE_1_COOLING_TICKS;
         }
         if (stack.is(Items.ICE)) {

@@ -1,6 +1,6 @@
 package com.ddd.endgame.galaxy;
 
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 
 import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
 import javax.annotation.Nullable;
@@ -37,7 +37,7 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
     }
 
     public GalaxyFreezerMenu(int containerId, Inventory playerInventory, GalaxyFreezerBlockEntity blockEntity) {
-        super(Xevitia.GALAXY_FREEZER_MENU.get(), containerId);
+        super(Xavitia.GALAXY_FREEZER_MENU.get(), containerId);
         this.pos = blockEntity.getBlockPos();
         this.blockEntity = blockEntity;
         addFreezerSlots(blockEntity.itemHandler());
@@ -55,7 +55,7 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
     }
 
     private GalaxyFreezerMenu(int containerId, Inventory playerInventory, ClientTarget target) {
-        super(Xevitia.GALAXY_FREEZER_MENU.get(), containerId);
+        super(Xavitia.GALAXY_FREEZER_MENU.get(), containerId);
         this.pos = target.pos();
         this.blockEntity = target.blockEntity();
         addFreezerSlots(target.itemHandler());
@@ -133,7 +133,7 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
             if (!this.moveItemStackTo(stack, SLOT_COUNT, this.slots.size(), true)) {
                 return ItemStack.EMPTY;
             }
-        } else if (stack.is(Xevitia.GALAXY_INGOT.get())) {
+        } else if (stack.is(Xavitia.GALAXY_INGOT.get())) {
             if (!this.moveItemStackTo(stack, 0, GalaxyFreezerBlockEntity.INGOT_SLOT_COUNT, false)) {
                 return ItemStack.EMPTY;
             }
@@ -158,7 +158,7 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
     public boolean stillValid(Player player) {
         return this.blockEntity == null
                 ? true
-                : stillValid(ContainerLevelAccess.create(player.level(), this.pos), player, Xevitia.GALAXY_FREEZER_BLOCK.get());
+                : stillValid(ContainerLevelAccess.create(player.level(), this.pos), player, Xavitia.GALAXY_FREEZER_BLOCK.get());
     }
 
     private static ClientTarget clientBlockEntity(Inventory inventory, BlockPos pos) {
@@ -169,7 +169,7 @@ public class GalaxyFreezerMenu extends AbstractContainerMenu {
             @Override
             public boolean isItemValid(int slot, ItemStack stack) {
                 if (slot < GalaxyFreezerBlockEntity.INGOT_SLOT_COUNT) {
-                    return stack.is(Xevitia.GALAXY_INGOT.get());
+                    return stack.is(Xavitia.GALAXY_INGOT.get());
                 }
                 return GalaxyFreezerBlockEntity.isCoolant(stack);
             }

@@ -1,7 +1,7 @@
 package com.ddd.endgame.item;
 
 import com.ddd.endgame.item.models.ChunkAnnihilatorItemRenderer;
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
@@ -80,7 +80,7 @@ public class ChunkAnnihilatorItem extends Item {
                 for (int y = minY; y < maxY; y++) {
                     mutablePos.set(minX + x, y, minZ + z);
                     ResourceLocation key = BuiltInRegistries.BLOCK.getKey(level.getBlockState(mutablePos).getBlock());
-                    if (Xevitia.MODID.equals(key.getNamespace())) {
+                    if (Xavitia.MODID.equals(key.getNamespace())) {
                         return true;
                     }
                 }

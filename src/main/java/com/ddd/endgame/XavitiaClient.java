@@ -54,18 +54,18 @@ import com.ddd.endgame.block.GalaxyDecorativeBlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
-@Mod(value = Xevitia.MODID, dist = Dist.CLIENT)
+@Mod(value = Xavitia.MODID, dist = Dist.CLIENT)
 // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
-@EventBusSubscriber(modid = Xevitia.MODID, value = Dist.CLIENT)
-public class XevitiaClient {
+@EventBusSubscriber(modid = Xavitia.MODID, value = Dist.CLIENT)
+public class XavitiaClient {
     private static final ModelResourceLocation WEATHER_CONTROLLER_HAND_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "item/weather_controller")
+            ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "item/weather_controller")
     );
     private static Item lastGalaxyHotbarItem;
     private static Component lastGalaxyHotbarName = Component.empty();
     private static int galaxyHotbarNameTimer;
 
-    public XevitiaClient(ModContainer container) {
+    public XavitiaClient(ModContainer container) {
         // Allows NeoForge to create a config screen for this mod's configs.
         // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking on config.
         // Do not forget to add translations for your config options to the en_us.json file.
@@ -75,14 +75,14 @@ public class XevitiaClient {
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
         // Some client setup code
-        Xevitia.LOGGER.info("HELLO FROM CLIENT SETUP");
-        Xevitia.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
-        NeoForge.EVENT_BUS.addListener(XevitiaClient::onRenderLevelStage);
-        NeoForge.EVENT_BUS.addListener(XevitiaClient::onRenderBlockHighlight);
-        NeoForge.EVENT_BUS.addListener(XevitiaClient::onMouseScrolled);
-        NeoForge.EVENT_BUS.addListener(XevitiaClient::onClientTick);
-        NeoForge.EVENT_BUS.addListener(XevitiaClient::onItemTooltip);
-        NeoForge.EVENT_BUS.addListener(XevitiaClient::onRenderGuiLayerPre);
+        Xavitia.LOGGER.info("HELLO FROM CLIENT SETUP");
+        Xavitia.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+        NeoForge.EVENT_BUS.addListener(XavitiaClient::onRenderLevelStage);
+        NeoForge.EVENT_BUS.addListener(XavitiaClient::onRenderBlockHighlight);
+        NeoForge.EVENT_BUS.addListener(XavitiaClient::onMouseScrolled);
+        NeoForge.EVENT_BUS.addListener(XavitiaClient::onClientTick);
+        NeoForge.EVENT_BUS.addListener(XavitiaClient::onItemTooltip);
+        NeoForge.EVENT_BUS.addListener(XavitiaClient::onRenderGuiLayerPre);
     }
 
     private static void onClientTick(ClientTickEvent.Post event) {
@@ -103,7 +103,7 @@ public class XevitiaClient {
             return;
         }
 
-        event.getToolTip().set(0, GalaxyTooltip.purpleWhite(stack.getHoverName().getString(), stack.is(Xevitia.THE_STICK.get())));
+        event.getToolTip().set(0, GalaxyTooltip.purpleWhite(stack.getHoverName().getString(), stack.is(Xavitia.THE_STICK.get())));
     }
 
     private static void onRenderGuiLayerPre(RenderGuiLayerEvent.Pre event) {
@@ -128,7 +128,7 @@ public class XevitiaClient {
     private static void renderGalaxyHotbarName(RenderGuiLayerEvent.Pre event, ItemStack selected) {
         Minecraft minecraft = Minecraft.getInstance();
         Font font = minecraft.font;
-        Component name = GalaxyTooltip.purpleWhite(selected.getHoverName().getString(), selected.is(Xevitia.THE_STICK.get()));
+        Component name = GalaxyTooltip.purpleWhite(selected.getHoverName().getString(), selected.is(Xavitia.THE_STICK.get()));
         int width = font.width(name);
         int x = (event.getGuiGraphics().guiWidth() - width) / 2;
         int y = event.getGuiGraphics().guiHeight() - 59;
@@ -178,17 +178,17 @@ public class XevitiaClient {
     }
 
     private static boolean usesGalaxyName(ItemStack stack) {
-        return stack.is(Xevitia.WEATHER_CYCLER.get())
-                || stack.is(Xevitia.DAY_NIGHT_TOGGLE.get())
-                || stack.is(Xevitia.ENTITY_PURGE_CORE.get())
-                || stack.is(Xevitia.RANDOM_BLOCK_PLACER.get())
-                || stack.is(Xevitia.REALITY_RESTORER.get())
-                || stack.is(Xevitia.SURVIVAL_FLIGHT_CORE.get())
-                || stack.is(Xevitia.SPECTATOR_PHASE_CORE.get())
-                || stack.is(Xevitia.CHUNK_ANNIHILATOR.get())
-                || stack.is(Xevitia.GALAXY_INGOT.get())
-                || stack.is(Xevitia.GALAXY_BLOCK_ITEM.get())
-                || stack.is(Xevitia.THE_STICK.get());
+        return stack.is(Xavitia.WEATHER_CYCLER.get())
+                || stack.is(Xavitia.DAY_NIGHT_TOGGLE.get())
+                || stack.is(Xavitia.ENTITY_PURGE_CORE.get())
+                || stack.is(Xavitia.RANDOM_BLOCK_PLACER.get())
+                || stack.is(Xavitia.REALITY_RESTORER.get())
+                || stack.is(Xavitia.SURVIVAL_FLIGHT_CORE.get())
+                || stack.is(Xavitia.SPECTATOR_PHASE_CORE.get())
+                || stack.is(Xavitia.CHUNK_ANNIHILATOR.get())
+                || stack.is(Xavitia.GALAXY_INGOT.get())
+                || stack.is(Xavitia.GALAXY_BLOCK_ITEM.get())
+                || stack.is(Xavitia.THE_STICK.get());
     }
 
     private static void onMouseScrolled(InputEvent.MouseScrollingEvent event) {
@@ -203,16 +203,16 @@ public class XevitiaClient {
         }
 
         int direction = scroll > 0.0D ? 1 : -1;
-        if (minecraft.player.getMainHandItem().is(Xevitia.THE_STICK.get())
-                || minecraft.player.getOffhandItem().is(Xevitia.THE_STICK.get())) {
+        if (minecraft.player.getMainHandItem().is(Xavitia.THE_STICK.get())
+                || minecraft.player.getOffhandItem().is(Xavitia.THE_STICK.get())) {
             PacketDistributor.sendToServer(new TheStickModePayload(direction));
             event.setCanceled(true);
             return;
         }
 
-        if (minecraft.player.getMainHandItem().is(Xevitia.RANDOM_BLOCK_PLACER.get())
-                || minecraft.player.getOffhandItem().is(Xevitia.RANDOM_BLOCK_PLACER.get())) {
-            ItemStack fabricator = minecraft.player.getMainHandItem().is(Xevitia.RANDOM_BLOCK_PLACER.get())
+        if (minecraft.player.getMainHandItem().is(Xavitia.RANDOM_BLOCK_PLACER.get())
+                || minecraft.player.getOffhandItem().is(Xavitia.RANDOM_BLOCK_PLACER.get())) {
+            ItemStack fabricator = minecraft.player.getMainHandItem().is(Xavitia.RANDOM_BLOCK_PLACER.get())
                     ? minecraft.player.getMainHandItem()
                     : minecraft.player.getOffhandItem();
             int fabricatorDirection = -direction;
@@ -270,37 +270,37 @@ public class XevitiaClient {
     }
 
     private static boolean isEndgameSkyboxBlock(BlockState state) {
-        return state.is(Xevitia.GALAXY_COMPRESSOR_BLOCK.get())
-                || state.is(Xevitia.GALAXY_CONNECTOR_BLOCK.get())
-                || state.is(Xevitia.GALAXY_OBSIDIAN_BLOCK.get())
-                || state.is(Xevitia.GALAXY_GLASS_BLOCK.get())
-                || state.is(Xevitia.BLUE_GALAXY_GLASS_BLOCK.get())
-                || state.is(Xevitia.GREEN_GALAXY_GLASS_BLOCK.get())
-                || state.is(Xevitia.RED_GALAXY_GLASS_BLOCK.get())
-                || state.is(Xevitia.RAINBOW_GALAXY_GLASS_BLOCK.get())
-                || state.is(Xevitia.YELLOW_GALAXY_GLASS_BLOCK.get())
-                || state.is(Xevitia.GALAXY_FULL_GLASS_BLOCK.get())
-                || state.is(Xevitia.GALAXY_BLOCK.get())
-                || state.is(Xevitia.BLUE_GALAXY_FULL_GLASS_BLOCK.get())
-                || state.is(Xevitia.GREEN_GALAXY_FULL_GLASS_BLOCK.get())
-                || state.is(Xevitia.RED_GALAXY_FULL_GLASS_BLOCK.get())
-                || state.is(Xevitia.RAINBOW_GALAXY_FULL_GLASS_BLOCK.get())
-                || state.is(Xevitia.YELLOW_GALAXY_FULL_GLASS_BLOCK.get())
-                || state.is(Xevitia.GALAXY_FREEZER_BLOCK.get());
+        return state.is(Xavitia.GALAXY_COMPRESSOR_BLOCK.get())
+                || state.is(Xavitia.GALAXY_CONNECTOR_BLOCK.get())
+                || state.is(Xavitia.GALAXY_OBSIDIAN_BLOCK.get())
+                || state.is(Xavitia.GALAXY_GLASS_BLOCK.get())
+                || state.is(Xavitia.BLUE_GALAXY_GLASS_BLOCK.get())
+                || state.is(Xavitia.GREEN_GALAXY_GLASS_BLOCK.get())
+                || state.is(Xavitia.RED_GALAXY_GLASS_BLOCK.get())
+                || state.is(Xavitia.RAINBOW_GALAXY_GLASS_BLOCK.get())
+                || state.is(Xavitia.YELLOW_GALAXY_GLASS_BLOCK.get())
+                || state.is(Xavitia.GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(Xavitia.GALAXY_BLOCK.get())
+                || state.is(Xavitia.BLUE_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(Xavitia.GREEN_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(Xavitia.RED_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(Xavitia.RAINBOW_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(Xavitia.YELLOW_GALAXY_FULL_GLASS_BLOCK.get())
+                || state.is(Xavitia.GALAXY_FREEZER_BLOCK.get());
     }
 
     @SubscribeEvent
     static void registerScreens(RegisterMenuScreensEvent event) {
-        event.register(Xevitia.GALAXY_COMPRESSOR_MENU.get(), GalaxyCompressorScreen::new);
-        event.register(Xevitia.GALAXY_FREEZER_MENU.get(), GalaxyFreezerScreen::new);
+        event.register(Xavitia.GALAXY_COMPRESSOR_MENU.get(), GalaxyCompressorScreen::new);
+        event.register(Xavitia.GALAXY_FREEZER_MENU.get(), GalaxyFreezerScreen::new);
     }
 
     @SubscribeEvent
     static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(Xevitia.GALAXY_COMPRESSOR_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
-        event.registerBlockEntityRenderer(Xevitia.GALAXY_CONNECTOR_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
-        event.registerBlockEntityRenderer(Xevitia.GALAXY_DECORATIVE_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
-        event.registerBlockEntityRenderer(Xevitia.GALAXY_FREEZER_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(Xavitia.GALAXY_COMPRESSOR_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(Xavitia.GALAXY_CONNECTOR_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(Xavitia.GALAXY_DECORATIVE_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(Xavitia.GALAXY_FREEZER_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
     }
 
     @SubscribeEvent
@@ -314,7 +314,7 @@ public class XevitiaClient {
                 return 0xFF0000 | greenBlue << 8 | greenBlue;
             }
             return 0xFFFFFF;
-        }, Xevitia.GALAXY_BLOCK.get());
+        }, Xavitia.GALAXY_BLOCK.get());
     }
 
     @SubscribeEvent
@@ -324,55 +324,55 @@ public class XevitiaClient {
 
     @SubscribeEvent
     static void wrapGalaxyIngotModel(ModelEvent.ModifyBakingResult event) {
-        ModelResourceLocation location = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "galaxy_ingot"));
+        ModelResourceLocation location = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "galaxy_ingot"));
         BakedModel original = event.getModels().get(location);
         if (original != null && !(original instanceof GalaxyIngotGeneratedModel)) {
             event.getModels().put(location, new GalaxyIngotGeneratedModel(original));
         }
 
-        ModelResourceLocation dayLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "day_night_toggle"));
+        ModelResourceLocation dayLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "day_night_toggle"));
         BakedModel dayOriginal = event.getModels().get(dayLocation);
         if (dayOriginal != null && !(dayOriginal instanceof DayControllerModel)) {
             event.getModels().put(dayLocation, new DayControllerModel(dayOriginal));
         }
 
-        ModelResourceLocation mobAnnihilatorLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "entity_purge_core"));
+        ModelResourceLocation mobAnnihilatorLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "entity_purge_core"));
         BakedModel mobAnnihilatorOriginal = event.getModels().get(mobAnnihilatorLocation);
         if (mobAnnihilatorOriginal != null && !(mobAnnihilatorOriginal instanceof MobAnnihilatorModel)) {
             event.getModels().put(mobAnnihilatorLocation, new MobAnnihilatorModel(mobAnnihilatorOriginal));
         }
 
-        ModelResourceLocation realityShifterLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "reality_restorer"));
+        ModelResourceLocation realityShifterLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "reality_restorer"));
         BakedModel realityShifterOriginal = event.getModels().get(realityShifterLocation);
         if (realityShifterOriginal != null && !(realityShifterOriginal instanceof RealityShifterModel)) {
             event.getModels().put(realityShifterLocation, new RealityShifterModel(realityShifterOriginal));
         }
 
-        ModelResourceLocation freeFlightLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "survival_flight_core"));
+        ModelResourceLocation freeFlightLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "survival_flight_core"));
         BakedModel freeFlightOriginal = event.getModels().get(freeFlightLocation);
         if (freeFlightOriginal != null && !(freeFlightOriginal instanceof FreeFlightModel)) {
             event.getModels().put(freeFlightLocation, new FreeFlightModel(freeFlightOriginal));
         }
 
-        ModelResourceLocation noclipLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "spectator_phase_core"));
+        ModelResourceLocation noclipLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "spectator_phase_core"));
         BakedModel noclipOriginal = event.getModels().get(noclipLocation);
         if (noclipOriginal != null && !(noclipOriginal instanceof NoclipModel)) {
             event.getModels().put(noclipLocation, new NoclipModel(noclipOriginal));
         }
 
-        ModelResourceLocation chunkAnnihilatorLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "chunk_annihilator"));
+        ModelResourceLocation chunkAnnihilatorLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "chunk_annihilator"));
         BakedModel chunkAnnihilatorOriginal = event.getModels().get(chunkAnnihilatorLocation);
         if (chunkAnnihilatorOriginal != null && !(chunkAnnihilatorOriginal instanceof ChunkAnnihilatorModel)) {
             event.getModels().put(chunkAnnihilatorLocation, new ChunkAnnihilatorModel(chunkAnnihilatorOriginal));
         }
 
-        ModelResourceLocation theStickLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "the_stick"));
+        ModelResourceLocation theStickLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "the_stick"));
         BakedModel theStickOriginal = event.getModels().get(theStickLocation);
         if (theStickOriginal != null && !(theStickOriginal instanceof TheStickModel)) {
             event.getModels().put(theStickLocation, new TheStickModel(theStickOriginal));
         }
 
-        ModelResourceLocation weatherLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "weather_cycler"));
+        ModelResourceLocation weatherLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "weather_cycler"));
         BakedModel weatherOriginal = event.getModels().get(weatherLocation);
         BakedModel weatherController = event.getModels().get(WEATHER_CONTROLLER_HAND_MODEL);
         if (weatherOriginal != null && !(weatherOriginal instanceof WeatherControllerModel)) {

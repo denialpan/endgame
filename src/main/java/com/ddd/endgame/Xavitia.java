@@ -95,8 +95,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-@Mod(Xevitia.MODID)
-public class Xevitia {
+@Mod(Xavitia.MODID)
+public class Xavitia {
     public static final String MODID = "xavitia";
     public static final long ENDGAME_ITEM_REQUIREMENT = 1_048_576L;
     private static final String THE_STICK_CREATIVE_KEY = MODID + ".the_stick_creative";
@@ -443,7 +443,7 @@ public class Xevitia {
                 output.accept(TheStickRecipe.createResult(parameters.holders()));
             }).build());
 
-    public Xevitia(IEventBus modEventBus, ModContainer modContainer) {
+    public Xavitia(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(EventPriority.HIGH, this::registerCapabilities);
         modEventBus.addListener(this::registerPayloads);
@@ -555,7 +555,7 @@ public class Xevitia {
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
-        LOGGER.info("Xevitia common setup complete");
+        LOGGER.info("Xavitia common setup complete");
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {

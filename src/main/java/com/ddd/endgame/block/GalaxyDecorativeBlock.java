@@ -4,7 +4,7 @@ import com.mojang.serialization.MapCodec;
 import java.util.function.Consumer;
 import com.ddd.endgame.galaxy.GalaxyInstability;
 import javax.annotation.Nullable;
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -45,7 +45,7 @@ public class GalaxyDecorativeBlock extends BaseEntityBlock {
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
-        if (!state.is(Xevitia.GALAXY_BLOCK.get())) {
+        if (!state.is(Xavitia.GALAXY_BLOCK.get())) {
             return;
         }
 
@@ -57,7 +57,7 @@ public class GalaxyDecorativeBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
-        return blockEntityType == Xevitia.GALAXY_DECORATIVE_BLOCK_ENTITY.get()
+        return blockEntityType == Xavitia.GALAXY_DECORATIVE_BLOCK_ENTITY.get()
                 ? (tickerLevel, pos, tickerState, blockEntity) -> GalaxyDecorativeBlockEntity.tick(tickerLevel, pos, tickerState, (GalaxyDecorativeBlockEntity) blockEntity)
                 : null;
     }

@@ -1,6 +1,6 @@
 package com.ddd.endgame.payload;
 
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -14,7 +14,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record BlockFabricatorSelectionPayload(int direction) implements CustomPacketPayload {
     public static final Type<BlockFabricatorSelectionPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "block_fabricator_selection")
+            ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "block_fabricator_selection")
     );
     public static final StreamCodec<RegistryFriendlyByteBuf, BlockFabricatorSelectionPayload> STREAM_CODEC = StreamCodec.of(
             (buffer, payload) -> buffer.writeVarInt(payload.direction()),
@@ -42,11 +42,11 @@ public record BlockFabricatorSelectionPayload(int direction) implements CustomPa
 
     private static ItemStack selectedFabricator(ServerPlayer player) {
         ItemStack mainHand = player.getMainHandItem();
-        if (mainHand.is(Xevitia.RANDOM_BLOCK_PLACER.get())) {
+        if (mainHand.is(Xavitia.RANDOM_BLOCK_PLACER.get())) {
             return mainHand;
         }
 
         ItemStack offHand = player.getOffhandItem();
-        return offHand.is(Xevitia.RANDOM_BLOCK_PLACER.get()) ? offHand : ItemStack.EMPTY;
+        return offHand.is(Xavitia.RANDOM_BLOCK_PLACER.get()) ? offHand : ItemStack.EMPTY;
     }
 }

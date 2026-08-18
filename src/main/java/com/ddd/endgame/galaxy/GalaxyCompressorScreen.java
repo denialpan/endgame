@@ -1,6 +1,6 @@
 package com.ddd.endgame.galaxy;
 
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 
 import com.ddd.endgame.EndgameRequirement;
 
@@ -35,7 +35,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.fml.ModList;
 
 public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompressorMenu> {
-    private static final ResourceLocation ATLAS = ResourceLocation.fromNamespaceAndPath(Xevitia.MODID, "textures/gui/atlas.png");
+    private static final ResourceLocation ATLAS = ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "textures/gui/atlas.png");
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getIntegerInstance(Locale.US);
     private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.0000000");
 

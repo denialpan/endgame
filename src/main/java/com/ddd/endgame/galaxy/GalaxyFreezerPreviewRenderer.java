@@ -1,6 +1,6 @@
 package com.ddd.endgame.galaxy;
 
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 
 import com.ddd.endgame.block.GalaxyFreezerMultiblock;
 import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
@@ -55,7 +55,7 @@ public final class GalaxyFreezerPreviewRenderer {
         }
 
         BlockState state = freezer.getBlockState();
-        if (!state.is(Xevitia.GALAXY_FREEZER_BLOCK.get())) {
+        if (!state.is(Xavitia.GALAXY_FREEZER_BLOCK.get())) {
             return;
         }
 
@@ -135,7 +135,7 @@ public final class GalaxyFreezerPreviewRenderer {
     }
 
     private static boolean isPreviewItem(ItemStack stack) {
-        return stack.is(WRENCHES) || stack.is(Xevitia.GALAXY_FREEZER_ITEM.get());
+        return stack.is(WRENCHES) || stack.is(Xavitia.GALAXY_FREEZER_ITEM.get());
     }
 
     private static PreviewTarget findPlacementTarget(Minecraft minecraft, Player player) {
@@ -151,7 +151,7 @@ public final class GalaxyFreezerPreviewRenderer {
     }
 
     private static boolean isHoldingFreezer(Player player) {
-        return player.getMainHandItem().is(Xevitia.GALAXY_FREEZER_ITEM.get()) || player.getOffhandItem().is(Xevitia.GALAXY_FREEZER_ITEM.get());
+        return player.getMainHandItem().is(Xavitia.GALAXY_FREEZER_ITEM.get()) || player.getOffhandItem().is(Xavitia.GALAXY_FREEZER_ITEM.get());
     }
 
     private static boolean hasVisiblePreviewBlock(Level level, Player player, PreviewTarget target) {

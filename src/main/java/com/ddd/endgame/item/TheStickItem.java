@@ -2,7 +2,7 @@ package com.ddd.endgame.item;
 
 import com.ddd.endgame.Config;
 import com.ddd.endgame.item.models.TheStickItemRenderer;
-import com.ddd.endgame.Xevitia;
+import com.ddd.endgame.Xavitia;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
@@ -50,11 +50,11 @@ public class TheStickItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         ItemStack stack = player.getItemInHand(usedHand);
         return switch (mode(stack)) {
-            case DAY_CONTROLLER -> Xevitia.DAY_NIGHT_TOGGLE.get().use(level, player, usedHand);
-            case WEATHER_CONTROLLER -> Xevitia.WEATHER_CYCLER.get().use(level, player, usedHand);
-            case MOB_ANNIHILATOR -> Xevitia.ENTITY_PURGE_CORE.get().use(level, player, usedHand);
-            case REALITY_SHIFTER -> Xevitia.REALITY_RESTORER.get().use(level, player, usedHand);
-            case CHUNK_ANNIHILATOR -> Xevitia.CHUNK_ANNIHILATOR.get().use(level, player, usedHand);
+            case DAY_CONTROLLER -> Xavitia.DAY_NIGHT_TOGGLE.get().use(level, player, usedHand);
+            case WEATHER_CONTROLLER -> Xavitia.WEATHER_CYCLER.get().use(level, player, usedHand);
+            case MOB_ANNIHILATOR -> Xavitia.ENTITY_PURGE_CORE.get().use(level, player, usedHand);
+            case REALITY_SHIFTER -> Xavitia.REALITY_RESTORER.get().use(level, player, usedHand);
+            case CHUNK_ANNIHILATOR -> Xavitia.CHUNK_ANNIHILATOR.get().use(level, player, usedHand);
             case DEBUG_STICK -> InteractionResultHolder.pass(stack);
         };
     }
@@ -88,7 +88,7 @@ public class TheStickItem extends Item {
         if (!(entity instanceof ServerPlayer player)) {
             return false;
         }
-        return player.getMainHandItem().is(Xevitia.THE_STICK.get()) || player.getOffhandItem().is(Xevitia.THE_STICK.get());
+        return player.getMainHandItem().is(Xavitia.THE_STICK.get()) || player.getOffhandItem().is(Xavitia.THE_STICK.get());
     }
 
     public static Mode cycleMode(ItemStack stack, int direction) {
