@@ -158,6 +158,10 @@ public final class GalaxyInstability {
         });
     }
 
+    public static void resetPlayerTicks(Player player) {
+        player.getPersistentData().remove(PLAYER_TICKS_TAG);
+    }
+
     public static void freezeTicks(ItemStack stack) {
         if (stack.isEmpty() || !isGalaxyMaterial(stack)) {
             return;

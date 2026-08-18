@@ -75,6 +75,7 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -667,6 +668,17 @@ public class Xevitia {
             }
             player.getPersistentData().remove(THE_STICK_CREATIVE_KEY);
         }
+    }
+
+    @SubscribeEvent
+    public void onItemCrafted(PlayerEvent.ItemCraftedEvent event) {
+        ItemStack crafted = event.getCrafting();
+        if (!crafted.is(GALAXY_BLOCK_ITEM.get())) {
+            return;
+        }
+
+        GalaxyInstability.resetTicks(crafted);
+        GalaxyInstability.resetPlayerTicks(event.getEntity());
     }
 
     private static void updateSurvivalFlight(ServerPlayer player) {
