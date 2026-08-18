@@ -22,8 +22,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -193,16 +195,19 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0) {
             if (isMouseOver(mouseX, mouseY, SORT_BUTTON_X, SORT_BY_BUTTON_Y, SORT_BUTTON_WIDTH, SORT_BUTTON_HEIGHT)) {
+                playClickSound();
                 selectSortMode(this.sortMode == SortMode.NAME ? SortMode.PROGRESS : SortMode.NAME);
                 return true;
             }
             if (isMouseOver(mouseX, mouseY, SORT_BUTTON_X, SORT_DIRECTION_BUTTON_Y, SORT_BUTTON_WIDTH, SORT_BUTTON_HEIGHT)) {
+                playClickSound();
                 this.sortAscending = !this.sortAscending;
                 this.scrollRow = 0;
                 return true;
             }
             if (!this.hasNetworkConflict()) {
                 if (maxScrollRows() > 0 && isMouseOver(mouseX, mouseY, SCROLLBAR_X, SCROLLBAR_Y, SCROLLBAR_WIDTH, SCROLLBAR_HEIGHT)) {
+                    playClickSound();
                     this.draggingScrollbar = true;
                     updateScrollFromMouse(mouseY);
                     return true;
@@ -233,6 +238,10 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         this.draggingScrollbar = false;
         return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    private static void playClickSound() {
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
     private GalaxyCompressorBlockEntity currentController() {
