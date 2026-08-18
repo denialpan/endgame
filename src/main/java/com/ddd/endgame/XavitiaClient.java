@@ -12,7 +12,7 @@ import com.ddd.endgame.galaxy.GalaxyCompressorScreen;
 
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
 import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
-import com.ddd.endgame.compat.IrisCompat;
+import com.ddd.endgame.compat.ModCompatibility;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
 import com.ddd.endgame.item.models.*;
 import com.ddd.endgame.payload.BlockFabricatorSelectionPayload;
@@ -244,7 +244,7 @@ public class XavitiaClient {
 
     private static Config.RenderStageMode resolveRenderStageMode() {
         Config.RenderStageMode configured = Config.IRIS_COMPATIBILITY_MODE.get();
-        boolean shaderPackInUse = IrisCompat.isShaderPackInUse();
+        boolean shaderPackInUse = ModCompatibility.isShaderPackInUse();
         if (!shaderPackInUse && configured == Config.RenderStageMode.IRIS_SAFE) {
             return Config.RenderStageMode.VANILLA_STENCIL;
         }

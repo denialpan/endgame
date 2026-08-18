@@ -5,7 +5,7 @@ import com.ddd.endgame.galaxy.GalaxyInstabilityVisuals;
 import com.ddd.endgame.galaxy.GalaxyInstabilityTint;
 
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
-import com.ddd.endgame.compat.RenderOptimizationCompat;
+import com.ddd.endgame.compat.ModCompatibility;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -41,13 +41,13 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
             return;
         }
 
-        RenderOptimizationCompat.beforeSkyboxItemRender(displayContext);
+        ModCompatibility.beforeSkyboxItemRender(displayContext);
         float greenBlue = GalaxyInstabilityVisuals.tintGreenBlue(stack);
         EndgamePortalBlockEntityRenderer.Cubemap cubemap = EndgamePortalBlockEntityRenderer.cubemapForBlock(blockItem.getBlock());
         renderStencilWindow(displayContext, poseStack, greenBlue, cubemap);
         renderBlockModel(blockItem.getBlock(), stack, poseStack, buffer, packedLight, packedOverlay);
         flushItemBuffers(buffer);
-        RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
+        ModCompatibility.afterSkyboxItemRender(displayContext);
     }
 
     private static void renderBlockModel(Block block, ItemStack stack, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {

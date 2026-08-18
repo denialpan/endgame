@@ -2,7 +2,7 @@ package com.ddd.endgame.item.models;
 
 import com.ddd.endgame.EndgameSkyboxItemRenderer;
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
-import com.ddd.endgame.compat.RenderOptimizationCompat;
+import com.ddd.endgame.compat.ModCompatibility;
 import com.ddd.endgame.Xavitia;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -51,7 +51,7 @@ public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRender
 
     @Override
     public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
-        RenderOptimizationCompat.beforeSkyboxItemRender(displayContext);
+        ModCompatibility.beforeSkyboxItemRender(displayContext);
         BakedModel model = displayContext == ItemDisplayContext.GUI
                 ? WeatherControllerModel.inventoryModel()
                 : WeatherControllerModel.handModel();
@@ -59,19 +59,19 @@ public class WeatherControllerItemRenderer extends BlockEntityWithoutLevelRender
         flushItemBuffers(buffer);
 
         if (displayContext == ItemDisplayContext.GUI) {
-            RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
+            ModCompatibility.afterSkyboxItemRender(displayContext);
             return;
         }
 
         List<EndgamePortalBlockEntityRenderer.MaskQuad> quads = maskQuads();
         if (displayContext == ItemDisplayContext.GROUND) {
             EndgamePortalBlockEntityRenderer.registerMeshWindowMask(poseStack.last().pose(), quads, 1.0F);
-            RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
+            ModCompatibility.afterSkyboxItemRender(displayContext);
             return;
         }
 
         renderStencilWindow(displayContext, poseStack, quads);
-        RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
+        ModCompatibility.afterSkyboxItemRender(displayContext);
     }
 
     private static void renderModel(BakedModel model, ItemStack stack, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {

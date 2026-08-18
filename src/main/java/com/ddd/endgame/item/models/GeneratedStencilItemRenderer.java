@@ -3,7 +3,7 @@ package com.ddd.endgame.item.models;
 import com.ddd.endgame.EndgameSkyboxItemRenderer;
 import com.ddd.endgame.galaxy.GalaxyInstabilityTint;
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
-import com.ddd.endgame.compat.RenderOptimizationCompat;
+import com.ddd.endgame.compat.ModCompatibility;
 import com.ddd.endgame.Xavitia;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -64,7 +64,7 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
 
     @Override
     public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
-        RenderOptimizationCompat.beforeSkyboxItemRender(displayContext);
+        ModCompatibility.beforeSkyboxItemRender(displayContext);
         PixelMasks masks = pixelMasks();
         float greenBlue = greenBlueSupplier.apply(stack);
         renderOriginalGeneratedModel(stack, displayContext, poseStack, buffer, packedLight, packedOverlay, greenBlue);
@@ -73,12 +73,12 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
         boolean[][] stencil = masks.stencil();
         if (displayContext == ItemDisplayContext.GROUND) {
             EndgamePortalBlockEntityRenderer.registerPixelWindowMask(poseStack.last().pose(), stencil, MASK_SIZE, FRONT_Z, BACK_Z, greenBlue);
-            RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
+            ModCompatibility.afterSkyboxItemRender(displayContext);
             return;
         }
 
         renderStencilWindow(displayContext, poseStack, stencil, greenBlue);
-        RenderOptimizationCompat.afterSkyboxItemRender(displayContext);
+        ModCompatibility.afterSkyboxItemRender(displayContext);
     }
 
     private void renderOriginalGeneratedModel(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, float greenBlue) {

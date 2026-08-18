@@ -2,7 +2,7 @@ package com.ddd.endgame.block;
 
 import com.ddd.endgame.Config;
 import com.ddd.endgame.galaxy.GalaxyFreezerPreviewRenderer;
-import com.ddd.endgame.compat.IrisCompat;
+import com.ddd.endgame.compat.ModCompatibility;
 import com.ddd.endgame.Xavitia;
 import com.mojang.math.Axis;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -240,7 +240,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static void registerWindowMask(Matrix4f pose, float greenBlue, Cubemap cubemap) {
-        if (!Config.DROPPED_ITEM_WINDOWS.getAsBoolean() || IrisCompat.isRenderingShadowPass()) {
+        if (!Config.DROPPED_ITEM_WINDOWS.getAsBoolean() || ModCompatibility.isRenderingShadowPass()) {
             return;
         }
 
@@ -262,7 +262,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static void registerPixelWindowMask(Matrix4f pose, boolean[][] pixels, int pixelCount, float frontZ, float backZ, float greenBlue) {
-        if (!Config.DROPPED_ITEM_WINDOWS.getAsBoolean() || IrisCompat.isRenderingShadowPass()) {
+        if (!Config.DROPPED_ITEM_WINDOWS.getAsBoolean() || ModCompatibility.isRenderingShadowPass()) {
             return;
         }
 
@@ -277,7 +277,7 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     public static void registerMeshWindowMask(Matrix4f pose, List<MaskQuad> quads, float greenBlue) {
-        if (!Config.DROPPED_ITEM_WINDOWS.getAsBoolean() || IrisCompat.isRenderingShadowPass() || quads.isEmpty()) {
+        if (!Config.DROPPED_ITEM_WINDOWS.getAsBoolean() || ModCompatibility.isRenderingShadowPass() || quads.isEmpty()) {
             return;
         }
 
