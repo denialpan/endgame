@@ -89,6 +89,8 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
     private long cachedTotalRemaining;
     private int cachedCompletedStacks;
     private int cachedTotalStacks;
+    private int cachedCompletedMods;
+    private int cachedTotalMods;
     private final Map<String, String> modDisplayNameCache = new HashMap<>();
 
     public GalaxyCompressorScreen(GalaxyCompressorMenu menu, Inventory playerInventory, Component title) {
@@ -271,6 +273,7 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
         long totalRequired = 0L;
         long totalRemaining = 0L;
         int completedStacks = 0;
+        Map<String, Boolean> completedMods = new HashMap<>();
         for (EndgameRequirement requirement : requirements) {
             ItemStack stack = requirement.displayStack();
             FluidStack fluidStack = requirement.displayFluid();
@@ -284,6 +287,7 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
             if (requirement.complete()) {
                 completedStacks++;
             }
+            completedMods.merge(namespace, requirement.complete(), Boolean::logicalAnd);
             if (!matchesSearch(searchText, name, namespace, modName)) {
                 continue;
             }
@@ -309,6 +313,8 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
         this.cachedTotalRemaining = totalRemaining;
         this.cachedCompletedStacks = completedStacks;
         this.cachedTotalStacks = requirements.size();
+        this.cachedCompletedMods = (int)completedMods.values().stream().filter(Boolean::booleanValue).count();
+        this.cachedTotalMods = completedMods.size();
         this.scrollRow = Math.min(this.scrollRow, maxScrollRows(rows.size()));
         return this.cachedRows;
     }
@@ -468,8 +474,8 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
                     Component.literal("Total progress"),
                     Component.literal(NUMBER_FORMAT.format(totalContributed) + " / " + NUMBER_FORMAT.format(this.cachedTotalRequired)),
                     Component.literal(formatPercent(totalContributed, this.cachedTotalRequired) + "% complete"),
-                    Component.literal("Stacks: " + NUMBER_FORMAT.format(this.cachedCompletedStacks) + " / " + NUMBER_FORMAT.format(this.cachedTotalStacks) + " complete"),
-                    Component.literal("Inputs: " + NUMBER_FORMAT.format(this.connectedInputCount()) + " connected"),
+                    Component.literal("Unique Items: " + NUMBER_FORMAT.format(this.cachedCompletedStacks) + " / " + NUMBER_FORMAT.format(this.cachedTotalStacks) + " complete"),
+                    Component.literal("Mods: " + NUMBER_FORMAT.format(this.cachedCompletedMods) + " / " + NUMBER_FORMAT.format(this.cachedTotalMods) + " complete"),
                     Component.literal(NUMBER_FORMAT.format(this.cachedTotalRemaining) + " remaining")
             ), Optional.empty(), mouseX, mouseY);
             return;
@@ -484,8 +490,6 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
             tooltip.add(Component.literal(hovered.fluid() ? "Endgame fluid progress" : "Endgame progress").withStyle(ChatFormatting.GRAY));
             tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.contributed()) + " / " + NUMBER_FORMAT.format(hovered.required()) + (hovered.fluid() ? " mB" : "")).withStyle(ChatFormatting.DARK_GRAY));
             tooltip.add(Component.literal(formatPercent(hovered.contributed(), hovered.required()) + "% complete").withStyle(ChatFormatting.DARK_GRAY));
-            tooltip.add(Component.literal("Stacks: " + NUMBER_FORMAT.format(this.cachedCompletedStacks) + " / " + NUMBER_FORMAT.format(this.cachedTotalStacks) + " complete").withStyle(ChatFormatting.DARK_GRAY));
-            tooltip.add(Component.literal("Inputs: " + NUMBER_FORMAT.format(this.connectedInputCount()) + " connected").withStyle(ChatFormatting.DARK_GRAY));
             tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.remaining()) + (hovered.fluid() ? " mB" : "") + " remaining").withStyle(ChatFormatting.DARK_GRAY));
             guiGraphics.renderTooltip(this.font, tooltip, hovered.fluid() ? Optional.empty() : hovered.stack().getTooltipImage(), mouseX, mouseY);
         }
