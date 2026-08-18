@@ -8,7 +8,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -36,8 +35,8 @@ public record GalaxyMultitoolSelectionPayload(int direction) implements CustomPa
             return;
         }
 
-        Item item = GalaxyMultitoolItem.cycleSelectedTool(stack, payload.direction());
-        player.displayClientMessage(Component.translatable("message.xavitia.galaxy_multitool.selected", item.getDescription()), true);
+        GalaxyMultitoolItem.cycleSelectedTool(stack, payload.direction());
+        player.displayClientMessage(Component.translatable("message.xavitia.galaxy_multitool.selected", GalaxyMultitoolItem.selectedToolName(stack)), true);
     }
 
     private static ItemStack selectedMultitool(ServerPlayer player) {

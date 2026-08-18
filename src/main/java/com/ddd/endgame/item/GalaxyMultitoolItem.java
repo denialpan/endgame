@@ -16,6 +16,13 @@ import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 public class GalaxyMultitoolItem extends Item {
     private static final String TOOL_INDEX_TAG = "GalaxyMultitoolIndex";
+    private static final List<String> TOOL_TRANSLATION_KEYS = List.of(
+            "item.xavitia.galaxy_multitool.mode.pickaxe",
+            "item.xavitia.galaxy_multitool.mode.axe",
+            "item.xavitia.galaxy_multitool.mode.hoe",
+            "item.xavitia.galaxy_multitool.mode.shovel",
+            "item.xavitia.galaxy_multitool.mode.sword"
+    );
     private static final List<Item> TOOLS = List.of(
             Items.DIAMOND_PICKAXE,
             Items.DIAMOND_AXE,
@@ -41,7 +48,7 @@ public class GalaxyMultitoolItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.translatable("item.xavitia.galaxy_multitool.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-        tooltipComponents.add(Component.translatable("item.xavitia.galaxy_multitool.selected", selectedTool(stack).getDescription()));
+        tooltipComponents.add(Component.translatable("item.xavitia.galaxy_multitool.selected", selectedToolName(stack)));
     }
 
     @Override
@@ -62,6 +69,10 @@ public class GalaxyMultitoolItem extends Item {
         int index = Mth.positiveModulo(selectedIndex(stack) + step, TOOLS.size());
         CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putInt(TOOL_INDEX_TAG, index));
         return TOOLS.get(index);
+    }
+
+    public static Component selectedToolName(ItemStack stack) {
+        return Component.translatable(TOOL_TRANSLATION_KEYS.get(selectedToolIndex(stack)));
     }
 
     private static int selectedIndex(ItemStack stack) {
