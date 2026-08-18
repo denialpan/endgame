@@ -61,8 +61,8 @@ public class RandomBlockPlacerItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.xevitia.random_block_placer.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-        tooltipComponents.add(Component.translatable("item.xevitia.random_block_placer.selected", selectedItem(stack).getDescription()));
+        tooltipComponents.add(Component.translatable("item.xavitia.random_block_placer.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.xavitia.random_block_placer.selected", selectedItem(stack).getDescription()));
     }
 
     @Override

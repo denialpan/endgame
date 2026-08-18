@@ -1,0 +1,35 @@
+{
+  "parent": "xavitia:galaxy_compressor",
+  "display": {
+    "icon": {
+      "id": "xavitia:galaxy_ingot"
+    },
+    "title": {
+      "translate": "advancements.xavitia.galaxy_ingot.title"
+    },
+    "description": {
+      "translate": "advancements.xavitia.galaxy_ingot.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_galaxy_ingot": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xavitia:galaxy_ingot"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_galaxy_ingot"
+    ]
+  ]
+}

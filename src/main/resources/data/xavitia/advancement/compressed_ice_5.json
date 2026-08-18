@@ -1,0 +1,35 @@
+{
+  "parent": "xavitia:compressed_glass_9",
+  "display": {
+    "icon": {
+      "id": "xavitia:compressed_ice_5"
+    },
+    "title": {
+      "translate": "advancements.xavitia.compressed_ice_5.title"
+    },
+    "description": {
+      "translate": "advancements.xavitia.compressed_ice_5.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_compressed_ice_5": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xavitia:compressed_ice_5"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_compressed_ice_5"
+    ]
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "parent": "xavitia:galaxy_ingot",
+  "display": {
+    "icon": {
+      "id": "xavitia:day_night_toggle"
+    },
+    "title": {
+      "translate": "advancements.xavitia.day_controller.title"
+    },
+    "description": {
+      "translate": "advancements.xavitia.day_controller.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_day_controller": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xavitia:day_night_toggle"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_day_controller"
+    ]
+  ]
+}

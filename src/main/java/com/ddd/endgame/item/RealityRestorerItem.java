@@ -65,7 +65,7 @@ public class RealityRestorerItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.xevitia.reality_restorer.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.xavitia.reality_restorer.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override
@@ -83,7 +83,7 @@ public class RealityRestorerItem extends Item {
         ChunkPos chunkPos = new ChunkPos(player.blockPosition());
         boolean containsEndgameBlocks = containsEndgameBlocks(serverLevel, chunkPos);
         if (containsEndgameBlocks && !player.isShiftKeyDown()) {
-            player.displayClientMessage(Component.translatable("message.xevitia.reality_restorer.warning").withStyle(ChatFormatting.RED), true);
+            player.displayClientMessage(Component.translatable("message.xavitia.reality_restorer.warning").withStyle(ChatFormatting.RED), true);
             player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
             return InteractionResultHolder.consume(stack);
         }
@@ -93,10 +93,10 @@ public class RealityRestorerItem extends Item {
             if (player instanceof ServerPlayer serverPlayer) {
                 queueSurfaceTeleport(serverLevel, serverPlayer, result.surfaceY());
             }
-            player.displayClientMessage(Component.translatable("message.xevitia.reality_restorer.restored", chunkPos.x, chunkPos.z, result.changedBlocks()), true);
+            player.displayClientMessage(Component.translatable("message.xavitia.reality_restorer.restored", chunkPos.x, chunkPos.z, result.changedBlocks()), true);
         } catch (RuntimeException exception) {
             Xevitia.LOGGER.warn("Failed to restore chunk {} with Reality Restorer", chunkPos, exception);
-            player.displayClientMessage(Component.translatable("message.xevitia.reality_restorer.failed").withStyle(ChatFormatting.RED), true);
+            player.displayClientMessage(Component.translatable("message.xavitia.reality_restorer.failed").withStyle(ChatFormatting.RED), true);
         }
 
         player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);

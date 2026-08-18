@@ -37,8 +37,8 @@ public class TheStickItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.xevitia.the_stick.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-        tooltipComponents.add(Component.translatable("item.xevitia.the_stick.mode", mode(stack).displayName()).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.xavitia.the_stick.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.xavitia.the_stick.mode", mode(stack).displayName()).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override
@@ -112,11 +112,11 @@ public class TheStickItem extends Item {
     }
 
     public enum Mode {
-        DAY_CONTROLLER("item.xevitia.day_night_toggle"),
-        WEATHER_CONTROLLER("item.xevitia.weather_cycler"),
-        MOB_ANNIHILATOR("item.xevitia.entity_purge_core"),
-        REALITY_SHIFTER("item.xevitia.reality_restorer"),
-        CHUNK_ANNIHILATOR("item.xevitia.chunk_annihilator"),
+        DAY_CONTROLLER("item.xavitia.day_night_toggle"),
+        WEATHER_CONTROLLER("item.xavitia.weather_cycler"),
+        MOB_ANNIHILATOR("item.xavitia.entity_purge_core"),
+        REALITY_SHIFTER("item.xavitia.reality_restorer"),
+        CHUNK_ANNIHILATOR("item.xavitia.chunk_annihilator"),
         DEBUG_STICK("item.minecraft.debug_stick");
 
         private static final Mode[] VALUES = values();

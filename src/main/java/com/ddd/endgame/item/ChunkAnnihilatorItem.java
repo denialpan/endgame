@@ -39,7 +39,7 @@ public class ChunkAnnihilatorItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.xevitia.chunk_annihilator.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.xavitia.chunk_annihilator.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override
@@ -57,13 +57,13 @@ public class ChunkAnnihilatorItem extends Item {
         ChunkPos chunkPos = new ChunkPos(player.blockPosition());
         boolean containsEndgameBlocks = containsEndgameBlocks(serverLevel, chunkPos);
         if (containsEndgameBlocks && !player.isShiftKeyDown()) {
-            player.displayClientMessage(Component.translatable("message.xevitia.chunk_annihilator.warning").withStyle(ChatFormatting.RED), true);
+            player.displayClientMessage(Component.translatable("message.xavitia.chunk_annihilator.warning").withStyle(ChatFormatting.RED), true);
             player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
             return InteractionResultHolder.consume(stack);
         }
 
         int changedBlocks = annihilateChunk(serverLevel, chunkPos);
-        player.displayClientMessage(Component.translatable("message.xevitia.chunk_annihilator.destroyed", chunkPos.x, chunkPos.z, changedBlocks), true);
+        player.displayClientMessage(Component.translatable("message.xavitia.chunk_annihilator.destroyed", chunkPos.x, chunkPos.z, changedBlocks), true);
         player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
         return InteractionResultHolder.consume(stack);
     }

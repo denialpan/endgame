@@ -94,7 +94,7 @@ public class XevitiaClient {
         ItemStack stack = event.getItemStack();
         if (GalaxyFreezerBlockEntity.isCoolant(stack)) {
             event.getToolTip().add(Component.translatable(
-                    "tooltip.xevitia.cooling_time",
+                    "tooltip.xavitia.cooling_time",
                     Component.literal(String.valueOf(GalaxyFreezerBlockEntity.coolingPeriodSeconds(stack))).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD)
             ).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         }

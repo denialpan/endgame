@@ -28,7 +28,7 @@ public class DayNightToggleItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.xevitia.day_night_toggle.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltipComponents.add(Component.translatable("item.xavitia.day_night_toggle.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override
@@ -50,9 +50,9 @@ public class DayNightToggleItem extends Item {
         serverLevel.setDayTime(targetTime);
 
         if (Math.floorMod(targetTime, DAY_LENGTH) == NIGHT_START) {
-            player.displayClientMessage(Component.translatable("message.xevitia.time.night"), true);
+            player.displayClientMessage(Component.translatable("message.xavitia.time.night"), true);
         } else {
-            player.displayClientMessage(Component.translatable("message.xevitia.time.day"), true);
+            player.displayClientMessage(Component.translatable("message.xavitia.time.day"), true);
         }
 
         player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);

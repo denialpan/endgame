@@ -1,0 +1,35 @@
+{
+  "parent": "xavitia:slightly_compressed_obsidian",
+  "display": {
+    "icon": {
+      "id": "xavitia:compressed_glass_9"
+    },
+    "title": {
+      "translate": "advancements.xavitia.compressed_glass_9.title"
+    },
+    "description": {
+      "translate": "advancements.xavitia.compressed_glass_9.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_compressed_glass_9": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xavitia:compressed_glass_9"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_compressed_glass_9"
+    ]
+  ]
+}

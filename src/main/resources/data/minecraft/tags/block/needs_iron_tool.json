@@ -1,13 +1,13 @@
 {
   "replace": false,
   "values": [
-    "xevitia:galaxy_compressor",
-    "xevitia:galaxy_connector",
-    "xevitia:galaxy_obsidian",
-    "xevitia:galaxy_glass",
-    "xevitia:galaxy_hardened_glass",
-    "xevitia:galaxy_full_glass",
-    "xevitia:galaxy_block",
-    "xevitia:galaxy_freezer"
+    "xavitia:galaxy_compressor",
+    "xavitia:galaxy_connector",
+    "xavitia:galaxy_obsidian",
+    "xavitia:galaxy_glass",
+    "xavitia:galaxy_hardened_glass",
+    "xavitia:galaxy_full_glass",
+    "xavitia:galaxy_block",
+    "xavitia:galaxy_freezer"
   ]
 }

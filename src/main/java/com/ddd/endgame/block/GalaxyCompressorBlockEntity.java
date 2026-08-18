@@ -355,7 +355,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("container.xevitia.galaxy_compressor");
+        return Component.translatable("container.xavitia.galaxy_compressor");
     }
 
     @Nullable

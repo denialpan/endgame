@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "xevitia:block/compressed_ice_1"
-  }
-}

@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SDF",
+    "DGD",
+    "FDS"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:sunflower"
+    },
+    "D": {
+      "item": "minecraft:daylight_detector"
+    },
+    "F": {
+      "item": "minecraft:wither_rose"
+    },
+    "G": {
+      "item": "xavitia:galaxy_ingot"
+    }
+  },
+  "result": {
+    "id": "xavitia:day_night_toggle",
+    "count": 1
+  }
+}

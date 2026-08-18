@@ -1,0 +1,35 @@
+{
+  "parent": "xavitia:galaxy_hardened_glass",
+  "display": {
+    "icon": {
+      "id": "xavitia:galaxy_glass"
+    },
+    "title": {
+      "translate": "advancements.xavitia.galaxy_glass.title"
+    },
+    "description": {
+      "translate": "advancements.xavitia.galaxy_glass.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_galaxy_glass": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xavitia:galaxy_glass"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_galaxy_glass"
+    ]
+  ]
+}

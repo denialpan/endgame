@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "render_type": "minecraft:translucent",
-  "textures": {
-    "particle": "xevitia:block/galaxy_plated",
-    "all": "xevitia:block/yellow_galaxy_glass"
-  }
-}

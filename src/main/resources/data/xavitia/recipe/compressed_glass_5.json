@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "xavitia:compressed_glass_4"
+    }
+  },
+  "result": {
+    "id": "xavitia:compressed_glass_5",
+    "count": 1
+  }
+}

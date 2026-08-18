@@ -71,7 +71,7 @@ public class GalaxyIngotJeiPlugin implements IModPlugin {
 
         @Override
         public Component getTitle() {
-            return Component.translatable("jei.xevitia.galaxy_compressor");
+            return Component.translatable("jei.xavitia.galaxy_compressor");
         }
 
         @Override
@@ -97,7 +97,7 @@ public class GalaxyIngotJeiPlugin implements IModPlugin {
         @Override
         public void draw(GalaxyIngotRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
             this.arrow.draw(guiGraphics, 51, 18);
-            Component requirements = Component.translatable("jei.xevitia.galaxy_compressor.requirements");
+            Component requirements = Component.translatable("jei.xavitia.galaxy_compressor.requirements");
             int textX = (this.background.getWidth() - Minecraft.getInstance().font.width(requirements)) / 2;
             guiGraphics.drawString(Minecraft.getInstance().font, requirements, Math.max(0, textX), 42, 0xFF555555, false);
         }

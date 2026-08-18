@@ -1,0 +1,35 @@
+{
+  "parent": "xavitia:galaxy_ingot",
+  "display": {
+    "icon": {
+      "id": "xavitia:survival_flight_core"
+    },
+    "title": {
+      "translate": "advancements.xavitia.free_flight.title"
+    },
+    "description": {
+      "translate": "advancements.xavitia.free_flight.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_free_flight": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xavitia:survival_flight_core"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_free_flight"
+    ]
+  ]
+}

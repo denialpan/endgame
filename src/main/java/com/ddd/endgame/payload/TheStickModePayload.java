@@ -36,7 +36,7 @@ public record TheStickModePayload(int direction) implements CustomPacketPayload 
         }
 
         TheStickItem.Mode mode = TheStickItem.cycleMode(stack, payload.direction());
-        player.displayClientMessage(Component.translatable("message.xevitia.the_stick.mode", mode.displayName()), true);
+        player.displayClientMessage(Component.translatable("message.xavitia.the_stick.mode", mode.displayName()), true);
     }
 
     private static ItemStack selectedStick(ServerPlayer player) {

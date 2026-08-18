@@ -37,7 +37,7 @@ public record BlockFabricatorSelectionPayload(int direction) implements CustomPa
         }
 
         Item item = RandomBlockPlacerItem.cycleSelectedItem(stack, payload.direction());
-        player.displayClientMessage(Component.translatable("message.xevitia.random_block_placer.selected", item.getDescription()), true);
+        player.displayClientMessage(Component.translatable("message.xavitia.random_block_placer.selected", item.getDescription()), true);
     }
 
     private static ItemStack selectedFabricator(ServerPlayer player) {

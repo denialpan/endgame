@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GGG",
+    "GGG",
+    "GGG"
+  ],
+  "key": {
+    "G": {
+      "item": "xavitia:galaxy_ingot"
+    }
+  },
+  "result": {
+    "id": "xavitia:galaxy_block",
+    "count": 1
+  }
+}

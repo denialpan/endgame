@@ -46,7 +46,7 @@ public class GalaxyFreezerScreen extends AbstractContainerScreen<GalaxyFreezerMe
         if (this.menu.blockEntity() != null && !this.menu.blockEntity().isMultiblockValid()) {
             guiGraphics.drawCenteredString(
                     this.font,
-                    Component.translatable("container.xevitia.galaxy_freezer.invalid"),
+                    Component.translatable("container.xavitia.galaxy_freezer.invalid"),
                     this.imageWidth / 2,
                     INVALID_MULTIBLOCK_TEXT_Y,
                     0xFF4040

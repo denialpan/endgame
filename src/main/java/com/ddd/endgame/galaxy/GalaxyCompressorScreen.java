@@ -112,7 +112,7 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
                 this.topPos + SEARCH_Y,
                 SEARCH_WIDTH,
                 SEARCH_HEIGHT,
-                Component.translatable("container.xevitia.galaxy_compressor.search")
+                Component.translatable("container.xavitia.galaxy_compressor.search")
         );
         this.searchBox.setMaxLength(64);
         this.searchBox.setBordered(false);
@@ -137,7 +137,7 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
         int y = this.topPos;
         guiGraphics.blit(ATLAS, x, y, 0, 0, TEMPLATE_WIDTH, TEMPLATE_HEIGHT);
         if (this.searchBox != null && this.searchBox.getValue().isEmpty() && !this.searchBox.isFocused()) {
-            guiGraphics.drawString(this.font, Component.translatable("container.xevitia.galaxy_compressor.search.short"), x + SEARCH_X + 2, y + SEARCH_Y + 1, 0xFFB0B0B0, false);
+            guiGraphics.drawString(this.font, Component.translatable("container.xavitia.galaxy_compressor.search.short"), x + SEARCH_X + 2, y + SEARCH_Y + 1, 0xFFB0B0B0, false);
         }
 
         if (this.hasNetworkConflict()) {
@@ -463,17 +463,17 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
 
         if (isMouseOver(mouseX, mouseY, SORT_BUTTON_X, SORT_BY_BUTTON_Y, SORT_BUTTON_WIDTH, SORT_BUTTON_HEIGHT)) {
             Component value = Component.translatable(this.sortMode == SortMode.NAME
-                    ? "container.xevitia.galaxy_compressor.sort.name"
-                    : "container.xevitia.galaxy_compressor.sort.progress");
-            guiGraphics.renderTooltip(this.font, Component.translatable("container.xevitia.galaxy_compressor.sort_by.tooltip", value), mouseX, mouseY);
+                    ? "container.xavitia.galaxy_compressor.sort.name"
+                    : "container.xavitia.galaxy_compressor.sort.progress");
+            guiGraphics.renderTooltip(this.font, Component.translatable("container.xavitia.galaxy_compressor.sort_by.tooltip", value), mouseX, mouseY);
             return;
         }
 
         if (isMouseOver(mouseX, mouseY, SORT_BUTTON_X, SORT_DIRECTION_BUTTON_Y, SORT_BUTTON_WIDTH, SORT_BUTTON_HEIGHT)) {
             Component value = Component.translatable(this.sortAscending
-                    ? "container.xevitia.galaxy_compressor.sort.asc"
-                    : "container.xevitia.galaxy_compressor.sort.desc");
-            guiGraphics.renderTooltip(this.font, Component.translatable("container.xevitia.galaxy_compressor.sort_direction.tooltip", value), mouseX, mouseY);
+                    ? "container.xavitia.galaxy_compressor.sort.asc"
+                    : "container.xavitia.galaxy_compressor.sort.desc");
+            guiGraphics.renderTooltip(this.font, Component.translatable("container.xavitia.galaxy_compressor.sort_direction.tooltip", value), mouseX, mouseY);
             return;
         }
 

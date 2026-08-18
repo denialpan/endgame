@@ -1,0 +1,35 @@
+{
+  "parent": "xavitia:compressed_glass_9",
+  "display": {
+    "icon": {
+      "id": "xavitia:galaxy_obsidian"
+    },
+    "title": {
+      "translate": "advancements.xavitia.galaxy_obsidian.title"
+    },
+    "description": {
+      "translate": "advancements.xavitia.galaxy_obsidian.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_galaxy_obsidian": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "xavitia:galaxy_obsidian"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_galaxy_obsidian"
+    ]
+  ]
+}

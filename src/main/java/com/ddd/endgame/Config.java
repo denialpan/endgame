@@ -17,7 +17,7 @@ public class Config {
 
         @Override
         public Component getTranslatedName() {
-            return Component.translatable("xevitia.configuration.skyboxIrisCompatibilityMode." + name().toLowerCase());
+            return Component.translatable("xavitia.configuration.skyboxIrisCompatibilityMode." + name().toLowerCase());
         }
     }
 
@@ -27,7 +27,7 @@ public class Config {
 
         @Override
         public Component getTranslatedName() {
-            return Component.translatable("xevitia.configuration.requirementDetectionMode." + name().toLowerCase());
+            return Component.translatable("xavitia.configuration.requirementDetectionMode." + name().toLowerCase());
         }
     }
 

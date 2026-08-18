@@ -97,7 +97,7 @@ import java.util.UUID;
 
 @Mod(Xevitia.MODID)
 public class Xevitia {
-    public static final String MODID = "xevitia";
+    public static final String MODID = "xavitia";
     public static final long ENDGAME_ITEM_REQUIREMENT = 1_048_576L;
     private static final String THE_STICK_CREATIVE_KEY = MODID + ".the_stick_creative";
     private static final String THE_STICK_COMMAND_TREE_KEY = MODID + ".the_stick_command_tree";
@@ -162,7 +162,7 @@ public class Xevitia {
     );
     public static final DeferredItem<BlockItem> GALAXY_COMPRESSOR_ITEM = ITEMS.register(
             "galaxy_compressor",
-            () -> new DescribedEndgameSkyboxBlockItem(GALAXY_COMPRESSOR_BLOCK.get(), new Item.Properties(), "block.xevitia.galaxy_compressor.tooltip")
+            () -> new DescribedEndgameSkyboxBlockItem(GALAXY_COMPRESSOR_BLOCK.get(), new Item.Properties(), "block.xavitia.galaxy_compressor.tooltip")
     );
     public static final DeferredBlock<GalaxyConnectorBlock> GALAXY_CONNECTOR_BLOCK = BLOCKS.registerBlock(
             "galaxy_connector",
@@ -171,7 +171,7 @@ public class Xevitia {
     );
     public static final DeferredItem<BlockItem> GALAXY_CONNECTOR_ITEM = ITEMS.register(
             "galaxy_connector",
-            () -> new DescribedEndgameSkyboxBlockItem(GALAXY_CONNECTOR_BLOCK.get(), new Item.Properties(), "block.xevitia.galaxy_connector.tooltip")
+            () -> new DescribedEndgameSkyboxBlockItem(GALAXY_CONNECTOR_BLOCK.get(), new Item.Properties(), "block.xavitia.galaxy_connector.tooltip")
     );
     public static final DeferredBlock<GalaxyDecorativeBlock> GALAXY_OBSIDIAN_BLOCK = BLOCKS.registerBlock(
             "galaxy_obsidian",
@@ -308,7 +308,7 @@ public class Xevitia {
     );
     public static final DeferredItem<BlockItem> GALAXY_FREEZER_ITEM = ITEMS.register(
             "galaxy_freezer",
-            () -> new DescribedEndgameSkyboxBlockItem(GALAXY_FREEZER_BLOCK.get(), new Item.Properties(), "block.xevitia.galaxy_freezer.tooltip")
+            () -> new DescribedEndgameSkyboxBlockItem(GALAXY_FREEZER_BLOCK.get(), new Item.Properties(), "block.xavitia.galaxy_freezer.tooltip")
     );
     public static final DeferredBlock<Block> COMPRESSED_OBSIDIAN_1_BLOCK = registerCompressedObsidianBlock("compressed_obsidian_1");
     public static final DeferredItem<BlockItem> COMPRESSED_OBSIDIAN_1_ITEM = registerBlockItem("compressed_obsidian_1", COMPRESSED_OBSIDIAN_1_BLOCK);
@@ -386,7 +386,7 @@ public class Xevitia {
             MENU_TYPES.register("galaxy_freezer", () -> IMenuTypeExtension.create(GalaxyFreezerMenu::new));
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> ENDGAME_TAB = CREATIVE_MODE_TABS.register("endgame_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.xevitia"))
+            .title(Component.translatable("itemGroup.xavitia"))
             .withTabsBefore(CreativeModeTabs.COMBAT)
             .icon(() -> GALAXY_COMPRESSOR_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
@@ -745,7 +745,7 @@ public class Xevitia {
         SPECTATOR_PHASES.put(playerId, state);
         player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, SPECTATOR_PHASE_TICKS, 0, false, false, false));
         player.setGameMode(GameType.SPECTATOR);
-        player.displayClientMessage(Component.translatable("message.xevitia.spectator_phase.enter"), true);
+        player.displayClientMessage(Component.translatable("message.xavitia.spectator_phase.enter"), true);
     }
 
     public static boolean handleFabricatorHopperTick(Level level, BlockPos pos, BlockState state, HopperBlockEntity hopper) {
@@ -836,7 +836,7 @@ public class Xevitia {
             if (state.remainingTicks() > 0) {
                 entry.setValue(state);
                 int secondsRemaining = (state.remainingTicks() + 19) / 20;
-                player.displayClientMessage(Component.translatable("message.xevitia.spectator_phase.countdown", secondsRemaining), true);
+                player.displayClientMessage(Component.translatable("message.xavitia.spectator_phase.countdown", secondsRemaining), true);
                 continue;
             }
 
@@ -844,7 +844,7 @@ public class Xevitia {
             ServerLevel targetLevel = originalLevel != null ? originalLevel : player.serverLevel();
             player.teleportTo(targetLevel, state.x(), state.y(), state.z(), state.yRot(), state.xRot());
             player.setGameMode(state.gameType());
-            player.displayClientMessage(Component.translatable("message.xevitia.spectator_phase.return"), true);
+            player.displayClientMessage(Component.translatable("message.xavitia.spectator_phase.return"), true);
             iterator.remove();
         }
     }

@@ -262,7 +262,7 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("container.xevitia.galaxy_freezer");
+        return Component.translatable("container.xavitia.galaxy_freezer");
     }
 
     @Nullable

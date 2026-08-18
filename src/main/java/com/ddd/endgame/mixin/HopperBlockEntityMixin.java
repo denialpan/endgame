@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(HopperBlockEntity.class)
 public class HopperBlockEntityMixin {
     @Inject(method = "pushItemsTick", at = @At("HEAD"), cancellable = true)
-    private static void xevitia$pushFabricatorOutput(Level level, BlockPos pos, BlockState state, HopperBlockEntity blockEntity, CallbackInfo callbackInfo) {
+    private static void xavitia$pushFabricatorOutput(Level level, BlockPos pos, BlockState state, HopperBlockEntity blockEntity, CallbackInfo callbackInfo) {
         if (Xevitia.handleFabricatorHopperTick(level, pos, state, blockEntity)) {
             callbackInfo.cancel();
         }
