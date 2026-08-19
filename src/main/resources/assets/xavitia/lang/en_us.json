@@ -5,8 +5,7 @@
   "item.xavitia.galaxy_ingot.tooltip.frozen": "Currently frozen and stable",
   "item.xavitia.the_stick": "The Stick",
   "item.xavitia.the_stick.lore": "Thank you for playing!",
-  "item.xavitia.the_stick.tooltip": "Gives literal Creative Mode (default true) and elevated server commands (default false)! You may also cycle through all other item modes.",
-  "item.xavitia.the_stick.mode": "Mode: %s",
+  "item.xavitia.the_stick.tooltip": "Gives literal Creative Mode and elevated server commands! (maybe)",
   "item.xavitia.weather_cycler": "Weather Controller",
   "item.xavitia.weather_cycler.tooltip": "This will be helpful for the drought seasons.",
   "item.xavitia.day_night_toggle": "Day Controller",
@@ -156,7 +155,6 @@
   "message.xavitia.spectator_phase.return": "noclip ended",
   "message.xavitia.chunk_annihilator.warning": "Galaxy blocks detected nearby. Sneak + right-click to confirm",
   "message.xavitia.chunk_annihilator.destroyed": "Destroyed chunk %s, %s (%s blocks removed)",
-  "message.xavitia.the_stick.mode": "Mode: %s",
 
   "jei.xavitia.galaxy_compressor": "Galaxy Compressor Processing",
   "jei.xavitia.galaxy_compressor.process": "Processed in compressor",

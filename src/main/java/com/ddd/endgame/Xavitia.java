@@ -32,7 +32,6 @@ import com.ddd.endgame.item.SurvivalFlightItem;
 import com.ddd.endgame.item.WeatherCycleItem;
 import com.ddd.endgame.payload.BlockFabricatorSelectionPayload;
 import com.ddd.endgame.payload.GalaxyMultitoolSelectionPayload;
-import com.ddd.endgame.payload.TheStickModePayload;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.Holder;
@@ -58,7 +57,6 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.DebugStickState;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -149,7 +147,7 @@ public class Xavitia {
     );
     public static final DeferredItem<Item> THE_STICK = ITEMS.register(
             "the_stick",
-            () -> new TheStickItem(new Item.Properties().stacksTo(1).component(net.minecraft.core.component.DataComponents.DEBUG_STICK_STATE, DebugStickState.EMPTY))
+            () -> new TheStickItem(new Item.Properties().stacksTo(1))
     );
     public static final DeferredItem<Item> WEATHER_CYCLER = ITEMS.register(
             "weather_cycler",
@@ -600,11 +598,6 @@ public class Xavitia {
     }
 
     private void registerPayloads(RegisterPayloadHandlersEvent event) {
-        event.registrar("1").playToServer(
-                TheStickModePayload.TYPE,
-                TheStickModePayload.STREAM_CODEC,
-                TheStickModePayload::handle
-        );
         event.registrar("1").playToServer(
                 BlockFabricatorSelectionPayload.TYPE,
                 BlockFabricatorSelectionPayload.STREAM_CODEC,

@@ -21,7 +21,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.ddd.endgame.payload.BlockFabricatorSelectionPayload;
 import com.ddd.endgame.payload.GalaxyMultitoolSelectionPayload;
-import com.ddd.endgame.payload.TheStickModePayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -217,13 +216,6 @@ public class XavitiaClient {
         }
 
         int direction = scroll > 0.0D ? 1 : -1;
-        if (minecraft.player.getMainHandItem().is(Xavitia.THE_STICK.get())
-                || minecraft.player.getOffhandItem().is(Xavitia.THE_STICK.get())) {
-            PacketDistributor.sendToServer(new TheStickModePayload(direction));
-            event.setCanceled(true);
-            return;
-        }
-
         if (minecraft.player.getMainHandItem().is(Xavitia.RANDOM_BLOCK_PLACER.get())
                 || minecraft.player.getOffhandItem().is(Xavitia.RANDOM_BLOCK_PLACER.get())) {
             ItemStack fabricator = minecraft.player.getMainHandItem().is(Xavitia.RANDOM_BLOCK_PLACER.get())
