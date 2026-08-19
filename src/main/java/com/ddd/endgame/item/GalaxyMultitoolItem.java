@@ -55,13 +55,6 @@ public class GalaxyMultitoolItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.translatable("item.xavitia.galaxy_multitool.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         tooltipComponents.add(Component.translatable("item.xavitia.galaxy_multitool.selected", selectedToolName(stack)));
-        if (GalaxyToolItem.isPickaxeMode(stack)) {
-            tooltipComponents.add(Component.translatable(
-                    GalaxyToolItem.pickaxeProcessingEnabled(stack)
-                            ? "item.xavitia.galaxy_tool.pickaxe_processing.enabled"
-                            : "item.xavitia.galaxy_tool.pickaxe_processing.disabled"
-            ).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-        }
     }
 
     @Override

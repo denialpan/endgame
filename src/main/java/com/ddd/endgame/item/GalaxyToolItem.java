@@ -48,14 +48,18 @@ public class GalaxyToolItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.xavitia.galaxy_tool.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-        if (isPickaxeMode(stack)) {
-            tooltipComponents.add(Component.translatable(
-                    pickaxeProcessingEnabled(stack)
-                            ? "item.xavitia.galaxy_tool.pickaxe_processing.enabled"
-                            : "item.xavitia.galaxy_tool.pickaxe_processing.disabled"
-            ).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-        }
+        tooltipComponents.add(Component.translatable(tooltipKey(stack)).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+    }
+
+    private static String tooltipKey(ItemStack stack) {
+        return switch (toolIndex(stack)) {
+            case PICKAXE_INDEX -> "item.xavitia.galaxy_pickaxe.tooltip";
+            case AXE_INDEX -> "item.xavitia.galaxy_axe.tooltip";
+            case HOE_INDEX -> "item.xavitia.galaxy_hoe.tooltip";
+            case SHOVEL_INDEX -> "item.xavitia.galaxy_shovel.tooltip";
+            case SWORD_INDEX -> "item.xavitia.galaxy_sword.tooltip";
+            default -> "item.xavitia.galaxy_tool.tooltip";
+        };
     }
 
     @Override
