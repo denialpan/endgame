@@ -44,6 +44,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.Container;
@@ -66,6 +67,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TransparentBlock;
@@ -719,6 +721,161 @@ public class Xavitia {
             }
             player.getPersistentData().remove(THE_STICK_CREATIVE_KEY);
         }
+    }
+
+    @SubscribeEvent
+    public void onGalaxyToolRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (!isGalaxyTool(event.getItemStack()) || !GalaxyToolItem.isHoeMode(event.getItemStack())) {
+            return;
+        }
+        if (event.getLevel().isClientSide) {
+            event.setCanceled(true);
+            return;
+        }
+        if (!(event.getLevel() instanceof ServerLevel serverLevel) || !(event.getEntity() instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+
+        useGalaxyHoe(serverLevel, serverPlayer, event.getPos());
+        event.setCancellationResult(InteractionResult.SUCCESS);
+        event.setCanceled(true);
+    }
+
+    private static void useGalaxyHoe(ServerLevel level, ServerPlayer player, BlockPos origin) {
+        BlockState clickedState = level.getBlockState(origin);
+        if (clickedState.getBlock() instanceof CropBlock clickedCrop && clickedCrop.isMaxAge(clickedState)) {
+            harvestAndReplantGalaxyHoeArea(level, player, origin);
+            return;
+        }
+
+        boolean growExisting = clickedState.is(Blocks.FARMLAND) || clickedState.getBlock() instanceof CropBlock;
+        boolean foundFarmland = false;
+        boolean placeWater = !growExisting;
+        BlockPos waterPos = galaxyHoeWaterPos(origin, clickedState);
+        if (placeWater) {
+            placeGalaxyHoeWaterSource(level, player, origin);
+        }
+
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        for (int x = -3; x <= 3; x++) {
+            for (int y = -3; y <= 3; y++) {
+                for (int z = -3; z <= 3; z++) {
+                    mutablePos.set(origin.getX() + x, origin.getY() + y, origin.getZ() + z);
+                    BlockPos pos = mutablePos.immutable();
+                    if (!level.isInWorldBounds(pos) || !player.mayInteract(level, pos)) {
+                        continue;
+                    }
+                    if (placeWater && pos.equals(waterPos)) {
+                        continue;
+                    }
+
+                    BlockState state = level.getBlockState(pos);
+                    if (state.getBlock() instanceof CropBlock cropBlock) {
+                        level.setBlock(pos, cropBlock.getStateForAge(cropBlock.getMaxAge()), 3);
+                        continue;
+                    }
+
+                    if (state.is(Blocks.FARMLAND)) {
+                        foundFarmland = true;
+                        plantRandomFullCrop(level, player, pos);
+                    } else if (!growExisting && canGalaxyHoeReplaceWithFarmland(level, pos)) {
+                        level.setBlock(pos, Blocks.FARMLAND.defaultBlockState(), 3);
+                        plantRandomFullCrop(level, player, pos);
+                    }
+                }
+            }
+        }
+
+        if (growExisting && !foundFarmland) {
+            BlockPos farmlandPos = clickedState.getBlock() instanceof CropBlock ? origin.below() : origin;
+            if (level.isInWorldBounds(farmlandPos) && player.mayInteract(level, farmlandPos)) {
+                level.setBlock(farmlandPos, Blocks.FARMLAND.defaultBlockState(), 3);
+                plantRandomFullCrop(level, player, farmlandPos);
+            }
+        }
+    }
+
+    private static void harvestAndReplantGalaxyHoeArea(ServerLevel level, ServerPlayer player, BlockPos origin) {
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        for (int x = -3; x <= 3; x++) {
+            for (int y = -3; y <= 3; y++) {
+                for (int z = -3; z <= 3; z++) {
+                    mutablePos.set(origin.getX() + x, origin.getY() + y, origin.getZ() + z);
+                    BlockPos pos = mutablePos.immutable();
+                    if (!level.isInWorldBounds(pos) || !player.mayInteract(level, pos)) {
+                        continue;
+                    }
+
+                    BlockState state = level.getBlockState(pos);
+                    if (state.getBlock() instanceof CropBlock cropBlock && cropBlock.isMaxAge(state)) {
+                        BlockEntity blockEntity = state.hasBlockEntity() ? level.getBlockEntity(pos) : null;
+                        List<ItemStack> drops = Block.getDrops(state, level, pos, blockEntity, player, ItemStack.EMPTY);
+                        for (ItemStack drop : drops) {
+                            if (!drop.isEmpty()) {
+                                Block.popResource(level, pos, drop);
+                            }
+                        }
+                        level.setBlock(pos, cropBlock.getStateForAge(cropBlock.getMaxAge()), 3);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void placeGalaxyHoeWaterSource(ServerLevel level, ServerPlayer player, BlockPos origin) {
+        BlockPos waterPos = galaxyHoeWaterPos(origin, level.getBlockState(origin));
+        if (!level.isInWorldBounds(waterPos) || !player.mayInteract(level, waterPos)) {
+            return;
+        }
+        BlockState state = level.getBlockState(waterPos);
+        if (state.is(Blocks.BEDROCK) || state.getDestroySpeed(level, waterPos) < 0.0F) {
+            return;
+        }
+        level.setBlock(waterPos, Blocks.WATER.defaultBlockState(), 3);
+    }
+
+    private static BlockPos galaxyHoeWaterPos(BlockPos origin, BlockState clickedState) {
+        return clickedState.getBlock() instanceof CropBlock ? origin.below() : origin;
+    }
+
+    private static boolean canGalaxyHoeReplaceWithFarmland(ServerLevel level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        BlockState aboveState = level.getBlockState(pos.above());
+        return !state.isAir()
+                && !(state.getBlock() instanceof CropBlock)
+                && state.getDestroySpeed(level, pos) >= 0.0F
+                && (aboveState.isAir() || aboveState.canBeReplaced());
+    }
+
+    private static void plantRandomFullCrop(ServerLevel level, ServerPlayer player, BlockPos farmlandPos) {
+        BlockPos cropPos = farmlandPos.above();
+        if (!level.isInWorldBounds(cropPos) || !player.mayInteract(level, cropPos)) {
+            return;
+        }
+
+        BlockState currentCropState = level.getBlockState(cropPos);
+        if (currentCropState.getBlock() instanceof CropBlock cropBlock) {
+            level.setBlock(cropPos, cropBlock.getStateForAge(cropBlock.getMaxAge()), 3);
+            return;
+        }
+        if (!currentCropState.isAir() && !currentCropState.canBeReplaced()) {
+            return;
+        }
+
+        BlockState cropState = randomFullCrop(level);
+        if (cropState.canSurvive(level, cropPos)) {
+            level.setBlock(cropPos, cropState, 3);
+        }
+    }
+
+    private static BlockState randomFullCrop(ServerLevel level) {
+        CropBlock cropBlock = switch (level.random.nextInt(4)) {
+            case 0 -> (CropBlock) Blocks.WHEAT;
+            case 1 -> (CropBlock) Blocks.CARROTS;
+            case 2 -> (CropBlock) Blocks.POTATOES;
+            default -> (CropBlock) Blocks.BEETROOTS;
+        };
+        return cropBlock.getStateForAge(cropBlock.getMaxAge());
     }
 
     @SubscribeEvent
