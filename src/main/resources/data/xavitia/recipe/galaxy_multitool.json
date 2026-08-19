@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " S ",
+    "APH",
+    " L "
+  ],
+  "key": {
+    "S": {
+      "item": "xavitia:galaxy_sword"
+    },
+    "A": {
+      "item": "xavitia:galaxy_axe"
+    },
+    "P": {
+      "item": "xavitia:galaxy_pickaxe"
+    },
+    "H": {
+      "item": "xavitia:galaxy_hoe"
+    },
+    "L": {
+      "item": "xavitia:galaxy_shovel"
+    }
+  },
+  "result": {
+    "id": "xavitia:galaxy_multitool",
+    "count": 1
+  }
+}

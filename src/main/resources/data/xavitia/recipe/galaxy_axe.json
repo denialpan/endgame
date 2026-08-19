@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GG",
+    "GS",
+    " S"
+  ],
+  "key": {
+    "G": {
+      "item": "xavitia:galaxy_ingot"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "xavitia:galaxy_axe",
+    "count": 1
+  }
+}
