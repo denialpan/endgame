@@ -20,6 +20,7 @@ import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 public class GalaxyToolItem extends Item {
     public static final int PICKAXE_INDEX = 0;
+    public static final int SHOVEL_INDEX = 3;
     private static final String PICKAXE_PROCESSING_TAG = "GalaxyPickaxeProcessing";
     private final int toolIndex;
 
@@ -86,10 +87,18 @@ public class GalaxyToolItem extends Item {
     }
 
     public static boolean isPickaxeMode(ItemStack stack) {
+        return toolIndex(stack) == PICKAXE_INDEX;
+    }
+
+    public static boolean isShovelMode(ItemStack stack) {
+        return toolIndex(stack) == SHOVEL_INDEX;
+    }
+
+    public static int toolIndex(ItemStack stack) {
         if (stack.getItem() instanceof GalaxyToolItem toolItem) {
-            return toolItem.toolIndex() == PICKAXE_INDEX;
+            return toolItem.toolIndex();
         }
-        return stack.getItem() instanceof GalaxyMultitoolItem && GalaxyMultitoolItem.selectedToolIndex(stack) == PICKAXE_INDEX;
+        return stack.getItem() instanceof GalaxyMultitoolItem ? GalaxyMultitoolItem.selectedToolIndex(stack) : -1;
     }
 
     public static boolean pickaxeProcessingEnabled(ItemStack stack) {

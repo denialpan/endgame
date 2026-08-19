@@ -74,6 +74,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.GameType;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -118,6 +119,8 @@ public class Xavitia {
     private static final String SURVIVAL_FLIGHT_GRANTED_KEY = MODID + ".survival_flight_granted";
     private static final int SPECTATOR_PHASE_TICKS = 15 * 20;
     public static final int GALAXY_INSTABILITY_DETONATION_TICKS = 10 * 20;
+    private static final int GALAXY_SHOVEL_HORIZONTAL_RADIUS = 5;
+    private static final int GALAXY_SHOVEL_VERTICAL_RADIUS = 3;
     private static final Map<UUID, SpectatorPhaseState> SPECTATOR_PHASES = new HashMap<>();
     private static final Map<ResourceKey<Level>, Map<BlockPos, Long>> FABRICATOR_HOPPER_COOLDOWNS = new HashMap<>();
     public static final Logger LOGGER = LogUtils.getLogger();
@@ -740,6 +743,8 @@ public class Xavitia {
 
         if (GalaxyToolItem.isPickaxeMode(event.getItemStack()) && event.getLevel() instanceof ServerLevel serverLevel && event.getEntity() instanceof ServerPlayer serverPlayer) {
             breakGalaxyPickaxeCube(serverLevel, serverPlayer, event.getItemStack(), galaxyPickaxeMiningCenter(pos, event.getFace()));
+        } else if (GalaxyToolItem.isShovelMode(event.getItemStack())) {
+            breakGalaxyShovelSpread(event.getLevel(), event.getEntity(), pos);
         } else {
             event.getLevel().destroyBlock(pos, true, event.getEntity());
         }
@@ -852,6 +857,52 @@ public class Xavitia {
         ItemStack result = recipe.assemble(input, level.registryAccess()).copy();
         result.setCount(result.getCount() * inputCount);
         return result;
+    }
+
+    private static void breakGalaxyShovelSpread(Level level, net.minecraft.world.entity.player.Player player, BlockPos origin) {
+        ItemStack silkTouchShovel = level instanceof ServerLevel serverLevel ? galaxySilkTouchShovel(serverLevel) : ItemStack.EMPTY;
+        for (int y = -GALAXY_SHOVEL_VERTICAL_RADIUS; y <= GALAXY_SHOVEL_VERTICAL_RADIUS; y++) {
+            for (int x = -GALAXY_SHOVEL_HORIZONTAL_RADIUS; x <= GALAXY_SHOVEL_HORIZONTAL_RADIUS; x++) {
+                for (int z = -GALAXY_SHOVEL_HORIZONTAL_RADIUS; z <= GALAXY_SHOVEL_HORIZONTAL_RADIUS; z++) {
+                    BlockPos pos = origin.offset(x, y, z);
+                    if (!level.isInWorldBounds(pos) || !player.mayInteract(level, pos) || !level.getBlockState(pos).is(BlockTags.DIRT)) {
+                        continue;
+                    }
+
+                    if (level instanceof ServerLevel serverLevel && player instanceof ServerPlayer serverPlayer) {
+                        breakGalaxySilkTouchBlock(serverLevel, serverPlayer, pos, silkTouchShovel);
+                    } else {
+                        level.destroyBlock(pos, true, player);
+                    }
+                }
+            }
+        }
+    }
+
+    private static ItemStack galaxySilkTouchShovel(ServerLevel level) {
+        ItemStack lootTool = new ItemStack(Items.DIAMOND_SHOVEL);
+        Holder<Enchantment> silkTouch = level.registryAccess()
+                .lookupOrThrow(Registries.ENCHANTMENT)
+                .getOrThrow(Enchantments.SILK_TOUCH);
+        lootTool.enchant(silkTouch, 1);
+        return lootTool;
+    }
+
+    private static void breakGalaxySilkTouchBlock(ServerLevel level, ServerPlayer player, BlockPos pos, ItemStack lootTool) {
+        BlockState state = level.getBlockState(pos);
+        if (state.isAir()) {
+            return;
+        }
+
+        BlockEntity blockEntity = state.hasBlockEntity() ? level.getBlockEntity(pos) : null;
+        List<ItemStack> drops = Block.getDrops(state, level, pos, blockEntity, player, lootTool);
+        level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+        player.awardStat(Stats.BLOCK_MINED.get(state.getBlock()));
+        for (ItemStack drop : drops) {
+            if (!drop.isEmpty()) {
+                Block.popResource(level, pos, drop);
+            }
+        }
     }
 
     private static void updateSurvivalFlight(ServerPlayer player) {
