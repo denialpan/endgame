@@ -43,6 +43,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.Container;
@@ -738,7 +739,7 @@ public class Xavitia {
         }
 
         if (GalaxyToolItem.isPickaxeMode(event.getItemStack()) && event.getLevel() instanceof ServerLevel serverLevel && event.getEntity() instanceof ServerPlayer serverPlayer) {
-            breakGalaxyPickaxeCube(serverLevel, serverPlayer, event.getItemStack(), pos);
+            breakGalaxyPickaxeCube(serverLevel, serverPlayer, event.getItemStack(), galaxyPickaxeMiningCenter(pos, event.getFace()));
         } else {
             event.getLevel().destroyBlock(pos, true, event.getEntity());
         }
@@ -762,7 +763,12 @@ public class Xavitia {
         GalaxyInstability.resetTicks(crafted);
     }
 
-    private static boolean isGalaxyTool(ItemStack stack) {
+    public static BlockPos galaxyPickaxeMiningCenter(BlockPos targetedPos, Direction face) {
+        BlockPos center = targetedPos.relative(face.getOpposite(), 3);
+        return face.getAxis().isHorizontal() ? center.above(2) : center;
+    }
+
+    public static boolean isGalaxyTool(ItemStack stack) {
         return stack.is(GALAXY_MULTITOOL.get())
                 || stack.is(GALAXY_PICKAXE.get())
                 || stack.is(GALAXY_AXE.get())
@@ -802,6 +808,7 @@ public class Xavitia {
                 ? Block.getDrops(state, level, pos, blockEntity, player, silkTouchTool)
                 : List.of();
         level.removeBlock(pos, false);
+        player.awardStat(Stats.BLOCK_MINED.get(state.getBlock()));
         for (ItemStack drop : silkTouchDrops) {
             if (!drop.isEmpty()) {
                 Block.popResource(level, pos, drop);

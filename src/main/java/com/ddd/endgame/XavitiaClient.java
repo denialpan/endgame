@@ -13,18 +13,23 @@ import com.ddd.endgame.galaxy.GalaxyCompressorScreen;
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
 import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
 import com.ddd.endgame.compat.ModCompatibility;
+import com.ddd.endgame.item.GalaxyToolItem;
 import com.ddd.endgame.item.GalaxyMultitoolItem;
 import com.ddd.endgame.item.RandomBlockPlacerItem;
 import com.ddd.endgame.item.models.*;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.ddd.endgame.payload.BlockFabricatorSelectionPayload;
 import com.ddd.endgame.payload.GalaxyMultitoolSelectionPayload;
 import com.ddd.endgame.payload.TheStickModePayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
@@ -32,6 +37,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -282,9 +288,83 @@ public class XavitiaClient {
 
         BlockPos pos = event.getTarget().getBlockPos();
         BlockState state = level.getBlockState(pos);
+        if (isGalaxyPickaxeMode(Minecraft.getInstance().player == null ? ItemStack.EMPTY : Minecraft.getInstance().player.getMainHandItem())) {
+            renderGalaxyPickaxePreview(event);
+            event.setCanceled(true);
+            return;
+        }
         if (isEndgameSkyboxBlock(state)) {
             event.setCanceled(true);
         }
+    }
+
+    private static boolean isGalaxyPickaxeMode(ItemStack stack) {
+        return !stack.isEmpty() && Xavitia.isGalaxyTool(stack) && GalaxyToolItem.isPickaxeMode(stack);
+    }
+
+    private static void renderGalaxyPickaxePreview(RenderHighlightEvent.Block event) {
+        BlockPos center = Xavitia.galaxyPickaxeMiningCenter(event.getTarget().getBlockPos(), event.getTarget().getDirection());
+        Direction face = event.getTarget().getDirection();
+        Vec3 camera = event.getCamera().getPosition();
+        double minX = center.getX() - 3 - camera.x;
+        double minY = center.getY() - 3 - camera.y;
+        double minZ = center.getZ() - 3 - camera.z;
+        double maxX = center.getX() + 4 - camera.x;
+        double maxY = center.getY() + 4 - camera.y;
+        double maxZ = center.getZ() + 4 - camera.z;
+        VertexConsumer consumer = event.getMultiBufferSource().getBuffer(RenderType.lines());
+        PoseStack.Pose pose = event.getPoseStack().last();
+        renderFaceGrid(pose, consumer, face, event.getTarget().getBlockPos(), camera, minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+    private static void renderFaceGrid(PoseStack.Pose pose, VertexConsumer consumer, Direction face, BlockPos hoveredPos, Vec3 camera, double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+        int red = 255;
+        int green = 255;
+        int blue = 255;
+        int alpha = 255;
+        switch (face) {
+            case NORTH, SOUTH -> {
+                double z = (face == Direction.NORTH ? hoveredPos.getZ() : hoveredPos.getZ() + 1.0D) - camera.z;
+                for (int i = 0; i <= 7; i++) {
+                    double x = minX + i;
+                    addLine(pose, consumer, x, minY, z, x, maxY, z, red, green, blue, alpha);
+                    double y = minY + i;
+                    addLine(pose, consumer, minX, y, z, maxX, y, z, red, green, blue, alpha);
+                }
+            }
+            case WEST, EAST -> {
+                double x = (face == Direction.WEST ? hoveredPos.getX() : hoveredPos.getX() + 1.0D) - camera.x;
+                for (int i = 0; i <= 7; i++) {
+                    double z = minZ + i;
+                    addLine(pose, consumer, x, minY, z, x, maxY, z, red, green, blue, alpha);
+                    double y = minY + i;
+                    addLine(pose, consumer, x, y, minZ, x, y, maxZ, red, green, blue, alpha);
+                }
+            }
+            case DOWN, UP -> {
+                double y = (face == Direction.DOWN ? hoveredPos.getY() : hoveredPos.getY() + 1.0D) - camera.y;
+                for (int i = 0; i <= 7; i++) {
+                    double x = minX + i;
+                    addLine(pose, consumer, x, y, minZ, x, y, maxZ, red, green, blue, alpha);
+                    double z = minZ + i;
+                    addLine(pose, consumer, minX, y, z, maxX, y, z, red, green, blue, alpha);
+                }
+            }
+        }
+    }
+
+    private static void addLine(PoseStack.Pose pose, VertexConsumer consumer, double x1, double y1, double z1, double x2, double y2, double z2, int red, int green, int blue, int alpha) {
+        float nx = (float)(x2 - x1);
+        float ny = (float)(y2 - y1);
+        float nz = (float)(z2 - z1);
+        float length = (float)Math.sqrt(nx * nx + ny * ny + nz * nz);
+        if (length > 0.0F) {
+            nx /= length;
+            ny /= length;
+            nz /= length;
+        }
+        consumer.addVertex(pose, (float)x1, (float)y1, (float)z1).setColor(red, green, blue, alpha).setNormal(pose, nx, ny, nz);
+        consumer.addVertex(pose, (float)x2, (float)y2, (float)z2).setColor(red, green, blue, alpha).setNormal(pose, nx, ny, nz);
     }
 
     private static boolean isEndgameSkyboxBlock(BlockState state) {
