@@ -187,7 +187,7 @@ public class XavitiaClient {
     private static boolean usesGalaxyName(ItemStack stack) {
         return stack.is(Xavitia.WEATHER_CYCLER.get())
                 || stack.is(Xavitia.DAY_NIGHT_TOGGLE.get())
-                || stack.is(Xavitia.ENTITY_PURGE_CORE.get())
+                || stack.is(Xavitia.MOB_ANNIHILATOR.get())
                 || stack.is(Xavitia.RANDOM_BLOCK_PLACER.get())
                 || stack.is(Xavitia.GALAXY_MULTITOOL.get())
                 || stack.is(Xavitia.GALAXY_PICKAXE.get())
@@ -198,7 +198,7 @@ public class XavitiaClient {
                 || stack.is(Xavitia.REALITY_RESTORER.get())
                 || stack.is(Xavitia.SURVIVAL_FLIGHT_CORE.get())
                 || stack.is(Xavitia.SPECTATOR_PHASE_CORE.get())
-                || stack.is(Xavitia.CHUNK_ANNIHILATOR.get())
+                || stack.is(Xavitia.CHUNK_DESTROYER.get())
                 || stack.is(Xavitia.GALAXY_INGOT.get())
                 || stack.is(Xavitia.GALAXY_BLOCK_ITEM.get())
                 || stack.is(Xavitia.THE_STICK.get());
@@ -420,11 +420,11 @@ public class XavitiaClient {
         wrapGeneratedStencilItemModel(event, "galaxy_ingot");
         wrapGeneratedStencilItemModel(event, "galaxy_multitool");
         wrapGeneratedStencilItemModel(event, "day_night_toggle");
-        wrapGeneratedStencilItemModel(event, "entity_purge_core");
+        wrapGeneratedStencilItemModel(event, "mob_annihilator");
         wrapGeneratedStencilItemModel(event, "reality_restorer");
         wrapGeneratedStencilItemModel(event, "survival_flight_core");
         wrapGeneratedStencilItemModel(event, "spectator_phase_core");
-        wrapGeneratedStencilItemModel(event, "chunk_annihilator");
+        wrapGeneratedStencilItemModel(event, "chunk_destroyer");
         wrapGeneratedStencilItemModel(event, "the_stick");
 
         ModelResourceLocation weatherLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "weather_cycler"));

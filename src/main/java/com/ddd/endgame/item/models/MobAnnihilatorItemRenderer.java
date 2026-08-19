@@ -9,7 +9,7 @@ public class MobAnnihilatorItemRenderer extends GeneratedStencilItemRenderer {
     private MobAnnihilatorItemRenderer() {
         super(
                 ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "textures/item/galaxy_mob_annihilator.png"),
-                () -> GeneratedStencilItemModel.originalModel("entity_purge_core"),
+                () -> GeneratedStencilItemModel.originalModel("mob_annihilator"),
                 "Unable to load mob annihilator texture masks"
         );
     }

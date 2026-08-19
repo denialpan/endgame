@@ -18,10 +18,10 @@ import com.ddd.endgame.block.GalaxyBlockItem;
 import com.ddd.endgame.block.GalaxyFreezerBlock;
 import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
 import com.ddd.endgame.compat.BlockFabricatorInventoryHandler;
-import com.ddd.endgame.item.ChunkAnnihilatorItem;
+import com.ddd.endgame.item.ChunkDestroyerItem;
 import com.ddd.endgame.item.DayNightToggleItem;
 import com.ddd.endgame.item.TheStickItem;
-import com.ddd.endgame.item.EntityPurgeItem;
+import com.ddd.endgame.item.MobAnnihilatorItem;
 import com.ddd.endgame.item.GalaxyMultitoolItem;
 import com.ddd.endgame.item.GalaxyToolItem;
 import com.ddd.endgame.item.GalaxyIngotItem;
@@ -157,9 +157,9 @@ public class Xavitia {
             "day_night_toggle",
             () -> new DayNightToggleItem(new Item.Properties().stacksTo(1))
     );
-    public static final DeferredItem<Item> ENTITY_PURGE_CORE = ITEMS.register(
-            "entity_purge_core",
-            () -> new EntityPurgeItem(new Item.Properties().stacksTo(1))
+    public static final DeferredItem<Item> MOB_ANNIHILATOR = ITEMS.register(
+            "mob_annihilator",
+            () -> new MobAnnihilatorItem(new Item.Properties().stacksTo(1))
     );
     public static final DeferredItem<Item> RANDOM_BLOCK_PLACER = ITEMS.register(
             "random_block_placer",
@@ -201,9 +201,9 @@ public class Xavitia {
             "spectator_phase_core",
             () -> new SpectatorPhaseItem(new Item.Properties().stacksTo(1))
     );
-    public static final DeferredItem<Item> CHUNK_ANNIHILATOR = ITEMS.register(
-            "chunk_annihilator",
-            () -> new ChunkAnnihilatorItem(new Item.Properties().stacksTo(1))
+    public static final DeferredItem<Item> CHUNK_DESTROYER = ITEMS.register(
+            "chunk_destroyer",
+            () -> new ChunkDestroyerItem(new Item.Properties().stacksTo(1))
     );
     public static final DeferredBlock<GalaxyCompressorBlock> GALAXY_COMPRESSOR_BLOCK = BLOCKS.registerBlock(
             "galaxy_compressor",
@@ -482,7 +482,7 @@ public class Xavitia {
                 output.accept(COMPRESSED_ICE_5_ITEM.get());
                 output.accept(WEATHER_CYCLER.get());
                 output.accept(DAY_NIGHT_TOGGLE.get());
-                output.accept(ENTITY_PURGE_CORE.get());
+                output.accept(MOB_ANNIHILATOR.get());
                 output.accept(RANDOM_BLOCK_PLACER.get());
                 output.accept(GALAXY_MULTITOOL.get());
                 output.accept(GALAXY_PICKAXE.get());
@@ -493,7 +493,7 @@ public class Xavitia {
                 output.accept(REALITY_RESTORER.get());
                 output.accept(SURVIVAL_FLIGHT_CORE.get());
                 output.accept(SPECTATOR_PHASE_CORE.get());
-                output.accept(CHUNK_ANNIHILATOR.get());
+                output.accept(CHUNK_DESTROYER.get());
                 output.accept(GALAXY_INGOT.get());
                 output.accept(GALAXY_BLOCK_ITEM.get());
                 output.accept(TheStickRecipe.createResult(parameters.holders()));

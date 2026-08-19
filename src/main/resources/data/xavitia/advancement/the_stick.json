@@ -41,7 +41,7 @@
       "conditions": {
         "items": [
           {
-            "items": "xavitia:entity_purge_core"
+            "items": "xavitia:mob_annihilator"
           }
         ]
       }
@@ -86,12 +86,12 @@
         ]
       }
     },
-    "has_chunk_annihilator": {
+    "has_chunk_destroyer": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": "xavitia:chunk_annihilator"
+            "items": "xavitia:chunk_destroyer"
           }
         ]
       }
@@ -130,7 +130,7 @@
       "has_noclip"
     ],
     [
-      "has_chunk_annihilator"
+      "has_chunk_destroyer"
     ],
     [
       "has_the_stick"

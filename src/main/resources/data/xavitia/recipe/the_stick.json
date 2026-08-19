@@ -13,7 +13,7 @@
       "item": "xavitia:day_night_toggle"
     },
     "M": {
-      "item": "xavitia:entity_purge_core"
+      "item": "xavitia:mob_annihilator"
     },
     "R": {
       "item": "xavitia:random_block_placer"
@@ -31,7 +31,7 @@
       "item": "xavitia:spectator_phase_core"
     },
     "A": {
-      "item": "xavitia:chunk_annihilator"
+      "item": "xavitia:chunk_destroyer"
     }
   },
   "result": {

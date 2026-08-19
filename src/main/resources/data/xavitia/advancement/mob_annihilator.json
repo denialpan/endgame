@@ -2,7 +2,7 @@
   "parent": "xavitia:galaxy_ingot",
   "display": {
     "icon": {
-      "id": "xavitia:entity_purge_core"
+      "id": "xavitia:mob_annihilator"
     },
     "title": {
       "translate": "advancements.xavitia.mob_annihilator.title"
@@ -21,7 +21,7 @@
       "conditions": {
         "items": [
           {
-            "items": "xavitia:entity_purge_core"
+            "items": "xavitia:mob_annihilator"
           }
         ]
       }
