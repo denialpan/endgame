@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "TGT",
+    "TGT",
+    "TTT"
+  ],
+  "key": {
+    "T": {
+      "item": "minecraft:tnt"
+    },
+    "G": {
+      "item": "xavitia:galaxy_ingot"
+    }
+  },
+  "result": {
+    "id": "xavitia:chunk_destroyer",
+    "count": 1
+  }
+}

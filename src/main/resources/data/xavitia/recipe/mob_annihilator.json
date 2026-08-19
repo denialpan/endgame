@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " N ",
+    "WGW",
+    " T "
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:netherite_sword"
+    },
+    "W": {
+      "item": "minecraft:wind_charge"
+    },
+    "G": {
+      "item": "xavitia:galaxy_block"
+    },
+    "T": {
+      "item": "minecraft:tnt"
+    }
+  },
+  "result": {
+    "id": "xavitia:mob_annihilator",
+    "count": 1
+  }
+}
