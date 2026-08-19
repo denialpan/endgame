@@ -106,10 +106,14 @@ import net.neoforged.neoforge.items.wrapper.InvWrapper;
 import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
 import org.slf4j.Logger;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
 
 @Mod(Xavitia.MODID)
@@ -121,6 +125,8 @@ public class Xavitia {
     private static final String SURVIVAL_FLIGHT_GRANTED_KEY = MODID + ".survival_flight_granted";
     private static final int SPECTATOR_PHASE_TICKS = 15 * 20;
     public static final int GALAXY_INSTABILITY_DETONATION_TICKS = 10 * 20;
+    private static final int GALAXY_AXE_RADIUS = 5;
+    private static final int GALAXY_AXE_MAX_BRANCH_BLOCKS = 128;
     private static final int GALAXY_SHOVEL_HORIZONTAL_RADIUS = 5;
     private static final int GALAXY_SHOVEL_VERTICAL_RADIUS = 3;
     private static final Map<UUID, SpectatorPhaseState> SPECTATOR_PHASES = new HashMap<>();
@@ -900,6 +906,8 @@ public class Xavitia {
 
         if (GalaxyToolItem.isPickaxeMode(event.getItemStack()) && event.getLevel() instanceof ServerLevel serverLevel && event.getEntity() instanceof ServerPlayer serverPlayer) {
             breakGalaxyPickaxeCube(serverLevel, serverPlayer, event.getItemStack(), galaxyPickaxeMiningCenter(pos, event.getFace()));
+        } else if (GalaxyToolItem.isAxeMode(event.getItemStack()) && event.getLevel() instanceof ServerLevel serverLevel && event.getEntity() instanceof ServerPlayer serverPlayer) {
+            breakGalaxyAxeTree(serverLevel, serverPlayer, pos);
         } else if (GalaxyToolItem.isShovelMode(event.getItemStack())) {
             breakGalaxyShovelSpread(event.getLevel(), event.getEntity(), pos);
         } else {
@@ -983,6 +991,54 @@ public class Xavitia {
             ItemStack output = processingEnabled ? smeltIfPossible(level, drop) : drop;
             if (!output.isEmpty()) {
                 Block.popResource(level, pos, output);
+            }
+        }
+    }
+
+    private static void breakGalaxyAxeTree(ServerLevel level, ServerPlayer player, BlockPos origin) {
+        Set<BlockPos> visited = new HashSet<>();
+        Queue<BlockPos> branchQueue = new ArrayDeque<>();
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        for (int x = -GALAXY_AXE_RADIUS; x <= GALAXY_AXE_RADIUS; x++) {
+            for (int y = -GALAXY_AXE_RADIUS; y <= GALAXY_AXE_RADIUS; y++) {
+                for (int z = -GALAXY_AXE_RADIUS; z <= GALAXY_AXE_RADIUS; z++) {
+                    mutablePos.set(origin.getX() + x, origin.getY() + y, origin.getZ() + z);
+                    BlockPos pos = mutablePos.immutable();
+                    visited.add(pos);
+                    if (!level.isInWorldBounds(pos) || !player.mayInteract(level, pos) || !isGalaxyAxeTarget(level.getBlockState(pos))) {
+                        continue;
+                    }
+
+                    level.destroyBlock(pos, true, player);
+                    if (Math.abs(x) == GALAXY_AXE_RADIUS || Math.abs(y) == GALAXY_AXE_RADIUS || Math.abs(z) == GALAXY_AXE_RADIUS) {
+                        enqueueGalaxyAxeNeighbors(pos, visited, branchQueue);
+                    }
+                }
+            }
+        }
+
+        int branchBlocks = 0;
+        while (!branchQueue.isEmpty() && branchBlocks < GALAXY_AXE_MAX_BRANCH_BLOCKS) {
+            BlockPos pos = branchQueue.remove();
+            if (!level.isInWorldBounds(pos) || !player.mayInteract(level, pos) || !isGalaxyAxeTarget(level.getBlockState(pos))) {
+                continue;
+            }
+
+            level.destroyBlock(pos, true, player);
+            branchBlocks++;
+            enqueueGalaxyAxeNeighbors(pos, visited, branchQueue);
+        }
+    }
+
+    private static boolean isGalaxyAxeTarget(BlockState state) {
+        return state.is(BlockTags.LOGS) || state.is(BlockTags.LEAVES);
+    }
+
+    private static void enqueueGalaxyAxeNeighbors(BlockPos pos, Set<BlockPos> visited, Queue<BlockPos> queue) {
+        for (Direction direction : Direction.values()) {
+            BlockPos neighbor = pos.relative(direction);
+            if (visited.add(neighbor)) {
+                queue.add(neighbor);
             }
         }
     }
