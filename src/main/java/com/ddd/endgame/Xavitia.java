@@ -799,6 +799,9 @@ public class Xavitia {
     private static void breakGalaxyPickaxeBlock(ServerLevel level, ServerPlayer player, BlockPos pos, ItemStack fortuneTool, ItemStack silkTouchTool, boolean processingEnabled) {
         BlockState state = level.getBlockState(pos);
         if (state.isAir()) {
+            if (!level.getFluidState(pos).isEmpty()) {
+                level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+            }
             return;
         }
 
@@ -807,7 +810,7 @@ public class Xavitia {
         List<ItemStack> silkTouchDrops = processingEnabled
                 ? Block.getDrops(state, level, pos, blockEntity, player, silkTouchTool)
                 : List.of();
-        level.removeBlock(pos, false);
+        level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
         player.awardStat(Stats.BLOCK_MINED.get(state.getBlock()));
         for (ItemStack drop : silkTouchDrops) {
             if (!drop.isEmpty()) {
