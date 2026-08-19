@@ -63,6 +63,7 @@ public class EntityPurgeItem extends Item {
     private static boolean isPurgeTarget(Entity entity, boolean killsPlayers) {
         return entity.isAlive()
                 && !(entity instanceof ItemEntity)
+                && !entity.hasCustomName()
                 && (killsPlayers || !(entity instanceof Player));
     }
 
