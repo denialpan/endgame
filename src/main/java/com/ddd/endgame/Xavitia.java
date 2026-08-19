@@ -47,6 +47,8 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.Container;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.inventory.MenuType;
@@ -90,6 +92,7 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -125,6 +128,7 @@ public class Xavitia {
     private static final String SURVIVAL_FLIGHT_GRANTED_KEY = MODID + ".survival_flight_granted";
     private static final int SPECTATOR_PHASE_TICKS = 15 * 20;
     public static final int GALAXY_INSTABILITY_DETONATION_TICKS = 10 * 20;
+    private static final float GALAXY_SWORD_DAMAGE = Float.MAX_VALUE;
     private static final int GALAXY_AXE_RADIUS = 5;
     private static final int GALAXY_AXE_MAX_BRANCH_BLOCKS = 128;
     private static final int GALAXY_SHOVEL_HORIZONTAL_RADIUS = 5;
@@ -727,6 +731,30 @@ public class Xavitia {
             }
             player.getPersistentData().remove(THE_STICK_CREATIVE_KEY);
         }
+    }
+
+    @SubscribeEvent
+    public void onGalaxyToolAttackEntity(AttackEntityEvent event) {
+        ItemStack stack = event.getEntity().getMainHandItem();
+        if (!isGalaxyTool(stack) || !GalaxyToolItem.isSwordMode(stack) || !(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+
+        Entity target = event.getTarget();
+        ensureGalaxySwordEnchantments(player.serverLevel(), stack);
+        if (target instanceof LivingEntity livingEntity) {
+            livingEntity.hurt(player.damageSources().playerAttack(player), GALAXY_SWORD_DAMAGE);
+        } else {
+            target.hurt(player.damageSources().playerAttack(player), GALAXY_SWORD_DAMAGE);
+        }
+        event.setCanceled(true);
+    }
+
+    private static void ensureGalaxySwordEnchantments(ServerLevel level, ItemStack stack) {
+        Holder<Enchantment> looting = level.registryAccess()
+                .lookupOrThrow(Registries.ENCHANTMENT)
+                .getOrThrow(Enchantments.LOOTING);
+        stack.enchant(looting, Integer.MAX_VALUE);
     }
 
     @SubscribeEvent

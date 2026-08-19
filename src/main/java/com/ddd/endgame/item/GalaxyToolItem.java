@@ -23,6 +23,7 @@ public class GalaxyToolItem extends Item {
     public static final int AXE_INDEX = 1;
     public static final int HOE_INDEX = 2;
     public static final int SHOVEL_INDEX = 3;
+    public static final int SWORD_INDEX = 4;
     private static final String PICKAXE_PROCESSING_TAG = "GalaxyPickaxeProcessing";
     private final int toolIndex;
 
@@ -102,6 +103,10 @@ public class GalaxyToolItem extends Item {
 
     public static boolean isHoeMode(ItemStack stack) {
         return toolIndex(stack) == HOE_INDEX;
+    }
+
+    public static boolean isSwordMode(ItemStack stack) {
+        return toolIndex(stack) == SWORD_INDEX;
     }
 
     public static int toolIndex(ItemStack stack) {
