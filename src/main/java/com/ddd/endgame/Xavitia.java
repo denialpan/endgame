@@ -17,7 +17,7 @@ import com.ddd.endgame.block.EndgameSkyboxBlockItem;
 import com.ddd.endgame.block.GalaxyBlockItem;
 import com.ddd.endgame.block.GalaxyFreezerBlock;
 import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
-import com.ddd.endgame.compat.BlockFabricatorInventoryHandler;
+import com.ddd.endgame.compat.ItemFabricatorInventoryHandler;
 import com.ddd.endgame.item.ChunkDestroyerItem;
 import com.ddd.endgame.item.DayNightToggleItem;
 import com.ddd.endgame.item.TheStickItem;
@@ -25,12 +25,12 @@ import com.ddd.endgame.item.MobAnnihilatorItem;
 import com.ddd.endgame.item.GalaxyMultitoolItem;
 import com.ddd.endgame.item.GalaxyToolItem;
 import com.ddd.endgame.item.GalaxyIngotItem;
-import com.ddd.endgame.item.RandomBlockPlacerItem;
+import com.ddd.endgame.item.ItemFabricatorItem;
 import com.ddd.endgame.item.RealityRestorerItem;
 import com.ddd.endgame.item.SpectatorPhaseItem;
 import com.ddd.endgame.item.SurvivalFlightItem;
 import com.ddd.endgame.item.WeatherCycleItem;
-import com.ddd.endgame.payload.BlockFabricatorSelectionPayload;
+import com.ddd.endgame.payload.ItemFabricatorSelectionPayload;
 import com.ddd.endgame.payload.GalaxyMultitoolSelectionPayload;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceKey;
@@ -161,9 +161,9 @@ public class Xavitia {
             "mob_annihilator",
             () -> new MobAnnihilatorItem(new Item.Properties().stacksTo(1))
     );
-    public static final DeferredItem<Item> RANDOM_BLOCK_PLACER = ITEMS.register(
-            "random_block_placer",
-            () -> new RandomBlockPlacerItem(new Item.Properties().stacksTo(1))
+    public static final DeferredItem<Item> ITEMFABRICATOR = ITEMS.register(
+            "item_fabricator",
+            () -> new ItemFabricatorItem(new Item.Properties().stacksTo(1))
     );
     public static final DeferredItem<Item> GALAXY_MULTITOOL = ITEMS.register(
             "galaxy_multitool",
@@ -483,7 +483,7 @@ public class Xavitia {
                 output.accept(WEATHER_CYCLER.get());
                 output.accept(DAY_NIGHT_TOGGLE.get());
                 output.accept(MOB_ANNIHILATOR.get());
-                output.accept(RANDOM_BLOCK_PLACER.get());
+                output.accept(ITEMFABRICATOR.get());
                 output.accept(GALAXY_MULTITOOL.get());
                 output.accept(GALAXY_PICKAXE.get());
                 output.accept(GALAXY_AXE.get());
@@ -517,7 +517,7 @@ public class Xavitia {
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        registerBlockFabricatorAutomationCapabilities(event);
+        registerItemFabricatorAutomationCapabilities(event);
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 GALAXY_COMPRESSOR_BLOCK_ENTITY.get(),
@@ -545,17 +545,17 @@ public class Xavitia {
         );
         event.registerItem(
                 Capabilities.ItemHandler.ITEM,
-                (stack, context) -> RandomBlockPlacerItem.infiniteItemHandler(stack),
-                RANDOM_BLOCK_PLACER.get()
+                (stack, context) -> ItemFabricatorItem.infiniteItemHandler(stack),
+                ITEMFABRICATOR.get()
         );
     }
 
-    private static void registerBlockFabricatorAutomationCapabilities(RegisterCapabilitiesEvent event) {
+    private static void registerItemFabricatorAutomationCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlock(
                 Capabilities.ItemHandler.BLOCK,
                 (level, pos, state, blockEntity, side) -> {
                     Container container = ChestBlock.getContainer((ChestBlock) state.getBlock(), state, level, pos, true);
-                    return container == null ? null : new BlockFabricatorInventoryHandler(new InvWrapper(container));
+                    return container == null ? null : new ItemFabricatorInventoryHandler(new InvWrapper(container));
                 },
                 Blocks.CHEST,
                 Blocks.TRAPPED_CHEST
@@ -563,7 +563,7 @@ public class Xavitia {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 BlockEntityType.HOPPER,
-                (hopper, side) -> new BlockFabricatorInventoryHandler(new VanillaHopperItemHandler(hopper))
+                (hopper, side) -> new ItemFabricatorInventoryHandler(new VanillaHopperItemHandler(hopper))
         );
 
         registerFabricatorSidedContainer(event, BlockEntityType.BLAST_FURNACE);
@@ -585,7 +585,7 @@ public class Xavitia {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 type,
-                (container, side) -> new BlockFabricatorInventoryHandler(new InvWrapper(container))
+                (container, side) -> new ItemFabricatorInventoryHandler(new InvWrapper(container))
         );
     }
 
@@ -593,15 +593,15 @@ public class Xavitia {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 type,
-                (container, side) -> new BlockFabricatorInventoryHandler(new SidedInvWrapper(container, side))
+                (container, side) -> new ItemFabricatorInventoryHandler(new SidedInvWrapper(container, side))
         );
     }
 
     private void registerPayloads(RegisterPayloadHandlersEvent event) {
         event.registrar("1").playToServer(
-                BlockFabricatorSelectionPayload.TYPE,
-                BlockFabricatorSelectionPayload.STREAM_CODEC,
-                BlockFabricatorSelectionPayload::handle
+                ItemFabricatorSelectionPayload.TYPE,
+                ItemFabricatorSelectionPayload.STREAM_CODEC,
+                ItemFabricatorSelectionPayload::handle
         );
         event.registrar("1").playToServer(
                 GalaxyMultitoolSelectionPayload.TYPE,
@@ -1276,7 +1276,7 @@ public class Xavitia {
 
     private static boolean hopperContainsFabricator(HopperBlockEntity hopper) {
         for (int slot = 0; slot < hopper.getContainerSize(); slot++) {
-            if (hopper.getItem(slot).getItem() instanceof RandomBlockPlacerItem) {
+            if (hopper.getItem(slot).getItem() instanceof ItemFabricatorItem) {
                 return true;
             }
         }
@@ -1287,8 +1287,8 @@ public class Xavitia {
         ItemStack output = ItemStack.EMPTY;
         for (int slot = 0; slot < hopper.getContainerSize(); slot++) {
             ItemStack stack = hopper.getItem(slot);
-            if (stack.getItem() instanceof RandomBlockPlacerItem) {
-                output = RandomBlockPlacerItem.selectedItemStack(stack, 1);
+            if (stack.getItem() instanceof ItemFabricatorItem) {
+                output = ItemFabricatorItem.selectedItemStack(stack, 1);
                 break;
             }
         }

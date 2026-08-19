@@ -2,7 +2,7 @@
   "parent": "xavitia:galaxy_ingot",
   "display": {
     "icon": {
-      "id": "xavitia:random_block_placer"
+      "id": "xavitia:item_fabricator"
     },
     "title": {
       "translate": "advancements.xavitia.item_fabricator.title"
@@ -21,7 +21,7 @@
       "conditions": {
         "items": [
           {
-            "items": "xavitia:random_block_placer"
+            "items": "xavitia:item_fabricator"
           }
         ]
       }

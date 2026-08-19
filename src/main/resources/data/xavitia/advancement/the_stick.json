@@ -51,7 +51,7 @@
       "conditions": {
         "items": [
           {
-            "items": "xavitia:random_block_placer"
+            "items": "xavitia:item_fabricator"
           }
         ]
       }

@@ -15,11 +15,11 @@ import com.ddd.endgame.block.GalaxyFreezerBlockEntity;
 import com.ddd.endgame.compat.ModCompatibility;
 import com.ddd.endgame.item.GalaxyToolItem;
 import com.ddd.endgame.item.GalaxyMultitoolItem;
-import com.ddd.endgame.item.RandomBlockPlacerItem;
+import com.ddd.endgame.item.ItemFabricatorItem;
 import com.ddd.endgame.item.models.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.ddd.endgame.payload.BlockFabricatorSelectionPayload;
+import com.ddd.endgame.payload.ItemFabricatorSelectionPayload;
 import com.ddd.endgame.payload.GalaxyMultitoolSelectionPayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -188,7 +188,7 @@ public class XavitiaClient {
         return stack.is(Xavitia.WEATHER_CYCLER.get())
                 || stack.is(Xavitia.DAY_NIGHT_TOGGLE.get())
                 || stack.is(Xavitia.MOB_ANNIHILATOR.get())
-                || stack.is(Xavitia.RANDOM_BLOCK_PLACER.get())
+                || stack.is(Xavitia.ITEMFABRICATOR.get())
                 || stack.is(Xavitia.GALAXY_MULTITOOL.get())
                 || stack.is(Xavitia.GALAXY_PICKAXE.get())
                 || stack.is(Xavitia.GALAXY_AXE.get())
@@ -216,14 +216,14 @@ public class XavitiaClient {
         }
 
         int direction = scroll > 0.0D ? 1 : -1;
-        if (minecraft.player.getMainHandItem().is(Xavitia.RANDOM_BLOCK_PLACER.get())
-                || minecraft.player.getOffhandItem().is(Xavitia.RANDOM_BLOCK_PLACER.get())) {
-            ItemStack fabricator = minecraft.player.getMainHandItem().is(Xavitia.RANDOM_BLOCK_PLACER.get())
+        if (minecraft.player.getMainHandItem().is(Xavitia.ITEMFABRICATOR.get())
+                || minecraft.player.getOffhandItem().is(Xavitia.ITEMFABRICATOR.get())) {
+            ItemStack fabricator = minecraft.player.getMainHandItem().is(Xavitia.ITEMFABRICATOR.get())
                     ? minecraft.player.getMainHandItem()
                     : minecraft.player.getOffhandItem();
             int fabricatorDirection = -direction;
-            RandomBlockPlacerItem.cycleSelectedItem(fabricator, fabricatorDirection);
-            PacketDistributor.sendToServer(new BlockFabricatorSelectionPayload(fabricatorDirection));
+            ItemFabricatorItem.cycleSelectedItem(fabricator, fabricatorDirection);
+            PacketDistributor.sendToServer(new ItemFabricatorSelectionPayload(fabricatorDirection));
             event.setCanceled(true);
         }
 
