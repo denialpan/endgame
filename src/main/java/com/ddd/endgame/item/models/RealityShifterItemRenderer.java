@@ -9,7 +9,7 @@ public class RealityShifterItemRenderer extends GeneratedStencilItemRenderer {
     private RealityShifterItemRenderer() {
         super(
                 ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "textures/item/galaxy_reality_shifter.png"),
-                RealityShifterModel::originalModel,
+                () -> GeneratedStencilItemModel.originalModel("reality_restorer"),
                 "Unable to load reality shifter texture masks"
         );
     }

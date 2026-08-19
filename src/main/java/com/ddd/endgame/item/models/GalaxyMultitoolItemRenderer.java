@@ -40,7 +40,14 @@ public class GalaxyMultitoolItemRenderer extends GeneratedStencilItemRenderer {
     }
 
     private static BakedModel selectedModel(ItemStack stack) {
-        return Minecraft.getInstance().getModelManager().getModel(TOOL_MODELS.get(toolIndex(stack)));
+        int toolIndex = toolIndex(stack);
+        if (stack.getItem() instanceof GalaxyToolItem) {
+            BakedModel originalModel = GalaxyToolModel.originalModel(toolIndex);
+            if (originalModel != null) {
+                return originalModel;
+            }
+        }
+        return Minecraft.getInstance().getModelManager().getModel(TOOL_MODELS.get(toolIndex));
     }
 
     private static int toolIndex(ItemStack stack) {

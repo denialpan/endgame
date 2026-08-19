@@ -10,7 +10,7 @@ public class GalaxyIngotItemRenderer extends GeneratedStencilItemRenderer {
     private GalaxyIngotItemRenderer() {
         super(
                 ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "textures/item/galaxy_ingot.png"),
-                GalaxyIngotGeneratedModel::originalModel,
+                () -> GeneratedStencilItemModel.originalModel("galaxy_ingot"),
                 "Unable to load galaxy ingot texture masks",
                 GalaxyInstabilityVisuals::tintGreenBlue
         );

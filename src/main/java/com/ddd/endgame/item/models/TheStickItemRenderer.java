@@ -9,7 +9,7 @@ public class TheStickItemRenderer extends GeneratedStencilItemRenderer {
     private TheStickItemRenderer() {
         super(
                 ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "textures/item/the_stick.png"),
-                TheStickModel::originalModel,
+                () -> GeneratedStencilItemModel.originalModel("the_stick"),
                 "Unable to load endgame test stick texture masks"
         );
     }

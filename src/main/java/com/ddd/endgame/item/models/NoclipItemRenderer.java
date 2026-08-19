@@ -9,7 +9,7 @@ public class NoclipItemRenderer extends GeneratedStencilItemRenderer {
     private NoclipItemRenderer() {
         super(
                 ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "textures/item/galaxy_noclip.png"),
-                NoclipModel::originalModel,
+                () -> GeneratedStencilItemModel.originalModel("spectator_phase_core"),
                 "Unable to load noclip texture masks"
         );
     }

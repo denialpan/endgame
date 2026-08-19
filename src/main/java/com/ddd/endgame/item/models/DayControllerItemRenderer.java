@@ -9,7 +9,7 @@ public class DayControllerItemRenderer extends GeneratedStencilItemRenderer {
     private DayControllerItemRenderer() {
         super(
                 ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "textures/item/galaxy_day_controller.png"),
-                DayControllerModel::originalModel,
+                () -> GeneratedStencilItemModel.originalModel("day_night_toggle"),
                 "Unable to load day controller texture masks"
         );
     }

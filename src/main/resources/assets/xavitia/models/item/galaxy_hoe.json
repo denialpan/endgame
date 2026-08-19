@@ -1,3 +1,6 @@
 {
-  "parent": "minecraft:builtin/entity"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "xavitia:item/galaxy_multitool_hoe"
+  }
 }

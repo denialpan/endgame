@@ -345,59 +345,43 @@ public class XavitiaClient {
 
     @SubscribeEvent
     static void wrapGalaxyIngotModel(ModelEvent.ModifyBakingResult event) {
-        ModelResourceLocation location = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "galaxy_ingot"));
-        BakedModel original = event.getModels().get(location);
-        if (original != null && !(original instanceof GalaxyIngotGeneratedModel)) {
-            event.getModels().put(location, new GalaxyIngotGeneratedModel(original));
-        }
-
-        ModelResourceLocation dayLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "day_night_toggle"));
-        BakedModel dayOriginal = event.getModels().get(dayLocation);
-        if (dayOriginal != null && !(dayOriginal instanceof DayControllerModel)) {
-            event.getModels().put(dayLocation, new DayControllerModel(dayOriginal));
-        }
-
-        ModelResourceLocation mobAnnihilatorLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "entity_purge_core"));
-        BakedModel mobAnnihilatorOriginal = event.getModels().get(mobAnnihilatorLocation);
-        if (mobAnnihilatorOriginal != null && !(mobAnnihilatorOriginal instanceof MobAnnihilatorModel)) {
-            event.getModels().put(mobAnnihilatorLocation, new MobAnnihilatorModel(mobAnnihilatorOriginal));
-        }
-
-        ModelResourceLocation realityShifterLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "reality_restorer"));
-        BakedModel realityShifterOriginal = event.getModels().get(realityShifterLocation);
-        if (realityShifterOriginal != null && !(realityShifterOriginal instanceof RealityShifterModel)) {
-            event.getModels().put(realityShifterLocation, new RealityShifterModel(realityShifterOriginal));
-        }
-
-        ModelResourceLocation freeFlightLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "survival_flight_core"));
-        BakedModel freeFlightOriginal = event.getModels().get(freeFlightLocation);
-        if (freeFlightOriginal != null && !(freeFlightOriginal instanceof FreeFlightModel)) {
-            event.getModels().put(freeFlightLocation, new FreeFlightModel(freeFlightOriginal));
-        }
-
-        ModelResourceLocation noclipLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "spectator_phase_core"));
-        BakedModel noclipOriginal = event.getModels().get(noclipLocation);
-        if (noclipOriginal != null && !(noclipOriginal instanceof NoclipModel)) {
-            event.getModels().put(noclipLocation, new NoclipModel(noclipOriginal));
-        }
-
-        ModelResourceLocation chunkAnnihilatorLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "chunk_annihilator"));
-        BakedModel chunkAnnihilatorOriginal = event.getModels().get(chunkAnnihilatorLocation);
-        if (chunkAnnihilatorOriginal != null && !(chunkAnnihilatorOriginal instanceof ChunkAnnihilatorModel)) {
-            event.getModels().put(chunkAnnihilatorLocation, new ChunkAnnihilatorModel(chunkAnnihilatorOriginal));
-        }
-
-        ModelResourceLocation theStickLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "the_stick"));
-        BakedModel theStickOriginal = event.getModels().get(theStickLocation);
-        if (theStickOriginal != null && !(theStickOriginal instanceof TheStickModel)) {
-            event.getModels().put(theStickLocation, new TheStickModel(theStickOriginal));
-        }
+        wrapGeneratedStencilItemModel(event, "galaxy_ingot");
+        wrapGeneratedStencilItemModel(event, "galaxy_multitool");
+        wrapGeneratedStencilItemModel(event, "day_night_toggle");
+        wrapGeneratedStencilItemModel(event, "entity_purge_core");
+        wrapGeneratedStencilItemModel(event, "reality_restorer");
+        wrapGeneratedStencilItemModel(event, "survival_flight_core");
+        wrapGeneratedStencilItemModel(event, "spectator_phase_core");
+        wrapGeneratedStencilItemModel(event, "chunk_annihilator");
+        wrapGeneratedStencilItemModel(event, "the_stick");
 
         ModelResourceLocation weatherLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "weather_cycler"));
         BakedModel weatherOriginal = event.getModels().get(weatherLocation);
         BakedModel weatherController = event.getModels().get(WEATHER_CONTROLLER_HAND_MODEL);
         if (weatherOriginal != null && !(weatherOriginal instanceof WeatherControllerModel)) {
             event.getModels().put(weatherLocation, new WeatherControllerModel(weatherOriginal, weatherController));
+        }
+
+        wrapGalaxyToolModel(event, "galaxy_pickaxe", 0);
+        wrapGalaxyToolModel(event, "galaxy_axe", 1);
+        wrapGalaxyToolModel(event, "galaxy_hoe", 2);
+        wrapGalaxyToolModel(event, "galaxy_shovel", 3);
+        wrapGalaxyToolModel(event, "galaxy_sword", 4);
+    }
+
+    private static void wrapGeneratedStencilItemModel(ModelEvent.ModifyBakingResult event, String path) {
+        ModelResourceLocation location = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, path));
+        BakedModel original = event.getModels().get(location);
+        if (original != null && !(original instanceof GeneratedStencilItemModel)) {
+            event.getModels().put(location, new GeneratedStencilItemModel(original, path));
+        }
+    }
+
+    private static void wrapGalaxyToolModel(ModelEvent.ModifyBakingResult event, String path, int toolIndex) {
+        ModelResourceLocation location = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, path));
+        BakedModel original = event.getModels().get(location);
+        if (original != null && !(original instanceof GalaxyToolModel)) {
+            event.getModels().put(location, new GalaxyToolModel(original, toolIndex));
         }
     }
 }

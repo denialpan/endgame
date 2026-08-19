@@ -9,7 +9,7 @@ public class ChunkAnnihilatorItemRenderer extends GeneratedStencilItemRenderer {
     private ChunkAnnihilatorItemRenderer() {
         super(
                 ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "textures/item/galaxy_chunk_annihilator.png"),
-                ChunkAnnihilatorModel::originalModel,
+                () -> GeneratedStencilItemModel.originalModel("chunk_annihilator"),
                 "Unable to load chunk annihilator texture masks"
         );
     }

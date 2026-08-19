@@ -9,7 +9,7 @@ public class FreeFlightItemRenderer extends GeneratedStencilItemRenderer {
     private FreeFlightItemRenderer() {
         super(
                 ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "textures/item/galaxy_free_flight.png"),
-                FreeFlightModel::originalModel,
+                () -> GeneratedStencilItemModel.originalModel("survival_flight_core"),
                 "Unable to load free flight texture masks"
         );
     }
