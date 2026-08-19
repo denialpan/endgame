@@ -906,10 +906,12 @@ public class Xavitia {
 
         if (GalaxyToolItem.isPickaxeMode(event.getItemStack()) && event.getLevel() instanceof ServerLevel serverLevel && event.getEntity() instanceof ServerPlayer serverPlayer) {
             breakGalaxyPickaxeCube(serverLevel, serverPlayer, event.getItemStack(), galaxyPickaxeMiningCenter(pos, event.getFace()));
-        } else if (GalaxyToolItem.isAxeMode(event.getItemStack()) && event.getLevel() instanceof ServerLevel serverLevel && event.getEntity() instanceof ServerPlayer serverPlayer) {
+        } else if (GalaxyToolItem.isAxeMode(event.getItemStack()) && isGalaxyAxeTarget(state) && event.getLevel() instanceof ServerLevel serverLevel && event.getEntity() instanceof ServerPlayer serverPlayer) {
             breakGalaxyAxeTree(serverLevel, serverPlayer, pos);
-        } else if (GalaxyToolItem.isShovelMode(event.getItemStack())) {
+        } else if (GalaxyToolItem.isShovelMode(event.getItemStack()) && state.is(BlockTags.DIRT)) {
             breakGalaxyShovelSpread(event.getLevel(), event.getEntity(), pos);
+        } else if (GalaxyToolItem.isAxeMode(event.getItemStack()) || GalaxyToolItem.isHoeMode(event.getItemStack()) || GalaxyToolItem.isShovelMode(event.getItemStack())) {
+            event.getLevel().destroyBlock(pos, true, event.getEntity());
         } else {
             event.getLevel().destroyBlock(pos, true, event.getEntity());
         }
