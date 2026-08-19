@@ -1009,7 +1009,7 @@ public class Xavitia {
                         continue;
                     }
 
-                    level.destroyBlock(pos, true, player);
+                    breakGalaxyAxeBlock(level, player, pos);
                     if (Math.abs(x) == GALAXY_AXE_RADIUS || Math.abs(y) == GALAXY_AXE_RADIUS || Math.abs(z) == GALAXY_AXE_RADIUS) {
                         enqueueGalaxyAxeNeighbors(pos, visited, branchQueue);
                     }
@@ -1024,14 +1024,56 @@ public class Xavitia {
                 continue;
             }
 
-            level.destroyBlock(pos, true, player);
+            breakGalaxyAxeBlock(level, player, pos);
             branchBlocks++;
             enqueueGalaxyAxeNeighbors(pos, visited, branchQueue);
         }
     }
 
+    private static void breakGalaxyAxeBlock(ServerLevel level, ServerPlayer player, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        BlockState saplingState = galaxyAxeSaplingForLog(state);
+        boolean shouldReplant = !saplingState.isAir() && canGalaxyAxeReplant(level, pos, saplingState);
+        level.destroyBlock(pos, true, player);
+        if (shouldReplant && level.getBlockState(pos).canBeReplaced()) {
+            level.setBlock(pos, saplingState, 3);
+        }
+    }
+
     private static boolean isGalaxyAxeTarget(BlockState state) {
         return state.is(BlockTags.LOGS) || state.is(BlockTags.LEAVES);
+    }
+
+    private static boolean canGalaxyAxeReplant(ServerLevel level, BlockPos pos, BlockState saplingState) {
+        return level.getBlockState(pos.below()).is(BlockTags.DIRT) && saplingState.canSurvive(level, pos);
+    }
+
+    private static BlockState galaxyAxeSaplingForLog(BlockState state) {
+        if (state.is(Blocks.OAK_LOG) || state.is(Blocks.OAK_WOOD) || state.is(Blocks.STRIPPED_OAK_LOG) || state.is(Blocks.STRIPPED_OAK_WOOD)) {
+            return Blocks.OAK_SAPLING.defaultBlockState();
+        }
+        if (state.is(Blocks.SPRUCE_LOG) || state.is(Blocks.SPRUCE_WOOD) || state.is(Blocks.STRIPPED_SPRUCE_LOG) || state.is(Blocks.STRIPPED_SPRUCE_WOOD)) {
+            return Blocks.SPRUCE_SAPLING.defaultBlockState();
+        }
+        if (state.is(Blocks.BIRCH_LOG) || state.is(Blocks.BIRCH_WOOD) || state.is(Blocks.STRIPPED_BIRCH_LOG) || state.is(Blocks.STRIPPED_BIRCH_WOOD)) {
+            return Blocks.BIRCH_SAPLING.defaultBlockState();
+        }
+        if (state.is(Blocks.JUNGLE_LOG) || state.is(Blocks.JUNGLE_WOOD) || state.is(Blocks.STRIPPED_JUNGLE_LOG) || state.is(Blocks.STRIPPED_JUNGLE_WOOD)) {
+            return Blocks.JUNGLE_SAPLING.defaultBlockState();
+        }
+        if (state.is(Blocks.ACACIA_LOG) || state.is(Blocks.ACACIA_WOOD) || state.is(Blocks.STRIPPED_ACACIA_LOG) || state.is(Blocks.STRIPPED_ACACIA_WOOD)) {
+            return Blocks.ACACIA_SAPLING.defaultBlockState();
+        }
+        if (state.is(Blocks.DARK_OAK_LOG) || state.is(Blocks.DARK_OAK_WOOD) || state.is(Blocks.STRIPPED_DARK_OAK_LOG) || state.is(Blocks.STRIPPED_DARK_OAK_WOOD)) {
+            return Blocks.DARK_OAK_SAPLING.defaultBlockState();
+        }
+        if (state.is(Blocks.MANGROVE_LOG) || state.is(Blocks.MANGROVE_WOOD) || state.is(Blocks.STRIPPED_MANGROVE_LOG) || state.is(Blocks.STRIPPED_MANGROVE_WOOD)) {
+            return Blocks.MANGROVE_PROPAGULE.defaultBlockState();
+        }
+        if (state.is(Blocks.CHERRY_LOG) || state.is(Blocks.CHERRY_WOOD) || state.is(Blocks.STRIPPED_CHERRY_LOG) || state.is(Blocks.STRIPPED_CHERRY_WOOD)) {
+            return Blocks.CHERRY_SAPLING.defaultBlockState();
+        }
+        return Blocks.AIR.defaultBlockState();
     }
 
     private static void enqueueGalaxyAxeNeighbors(BlockPos pos, Set<BlockPos> visited, Queue<BlockPos> queue) {
