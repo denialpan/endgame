@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "xavitia:item/galaxy_weather_controller"
+    "layer0": "xavitia:item/iris/galaxy_weather_controller"
   }
 }

@@ -61,9 +61,6 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
 @EventBusSubscriber(modid = Xavitia.MODID, value = Dist.CLIENT)
 public class XavitiaClient {
-    private static final ModelResourceLocation WEATHER_CONTROLLER_HAND_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "item/weather_controller")
-    );
     private static Item lastGalaxyHotbarItem;
     private static Component lastGalaxyHotbarName = Component.empty();
     private static int galaxyHotbarNameTimer;
@@ -390,8 +387,8 @@ public class XavitiaClient {
 
     @SubscribeEvent
     static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
-        event.register(WEATHER_CONTROLLER_HAND_MODEL);
         registerGeneratedStencilFallbackModel(event, "galaxy_ingot");
+        registerGeneratedStencilFallbackModel(event, "galaxy_weather_controller");
         registerGeneratedStencilFallbackModel(event, "galaxy_day_controller");
         registerGeneratedStencilFallbackModel(event, "galaxy_mob_annihilator");
         registerGeneratedStencilFallbackModel(event, "galaxy_reality_shifter");
@@ -416,6 +413,7 @@ public class XavitiaClient {
     @SubscribeEvent
     static void wrapGalaxyIngotModel(ModelEvent.ModifyBakingResult event) {
         wrapGeneratedStencilItemModel(event, "galaxy_ingot");
+        wrapGeneratedStencilItemModel(event, "weather_cycler");
         wrapGeneratedStencilItemModel(event, "galaxy_multitool");
         wrapGeneratedStencilItemModel(event, "day_night_toggle");
         wrapGeneratedStencilItemModel(event, "mob_annihilator");
@@ -424,13 +422,6 @@ public class XavitiaClient {
         wrapGeneratedStencilItemModel(event, "spectator_phase_core");
         wrapGeneratedStencilItemModel(event, "chunk_destroyer");
         wrapGeneratedStencilItemModel(event, "the_stick");
-
-        ModelResourceLocation weatherLocation = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "weather_cycler"));
-        BakedModel weatherOriginal = event.getModels().get(weatherLocation);
-        BakedModel weatherController = event.getModels().get(WEATHER_CONTROLLER_HAND_MODEL);
-        if (weatherOriginal != null && !(weatherOriginal instanceof WeatherControllerModel)) {
-            event.getModels().put(weatherLocation, new WeatherControllerModel(weatherOriginal, weatherController));
-        }
 
         wrapGalaxyToolModel(event, "galaxy_pickaxe", 0);
         wrapGalaxyToolModel(event, "galaxy_axe", 1);
