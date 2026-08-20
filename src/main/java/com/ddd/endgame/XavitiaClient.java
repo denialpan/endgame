@@ -391,9 +391,26 @@ public class XavitiaClient {
     @SubscribeEvent
     static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
         event.register(WEATHER_CONTROLLER_HAND_MODEL);
+        registerGeneratedStencilFallbackModel(event, "galaxy_ingot");
+        registerGeneratedStencilFallbackModel(event, "galaxy_day_controller");
+        registerGeneratedStencilFallbackModel(event, "galaxy_mob_annihilator");
+        registerGeneratedStencilFallbackModel(event, "galaxy_reality_shifter");
+        registerGeneratedStencilFallbackModel(event, "galaxy_free_flight");
+        registerGeneratedStencilFallbackModel(event, "galaxy_noclip");
+        registerGeneratedStencilFallbackModel(event, "galaxy_chunk_destroyer");
+        registerGeneratedStencilFallbackModel(event, "the_stick");
+        registerGeneratedStencilFallbackModel(event, "galaxy_multitool_pickaxe");
+        registerGeneratedStencilFallbackModel(event, "galaxy_multitool_axe");
+        registerGeneratedStencilFallbackModel(event, "galaxy_multitool_hoe");
+        registerGeneratedStencilFallbackModel(event, "galaxy_multitool_shovel");
+        registerGeneratedStencilFallbackModel(event, "galaxy_multitool_sword");
         for (ModelResourceLocation location : GalaxyMultitoolItemRenderer.modelLocations()) {
             event.register(location);
         }
+    }
+
+    private static void registerGeneratedStencilFallbackModel(ModelEvent.RegisterAdditional event, String path) {
+        event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(Xavitia.MODID, "item/iris/" + path)));
     }
 
     @SubscribeEvent

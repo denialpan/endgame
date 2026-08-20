@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.FastColor;
@@ -34,6 +35,7 @@ import org.lwjgl.opengl.GL11;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -50,6 +52,7 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
     private final String warningMessage;
     private final boolean renderProcessedTextureModel;
     private final Map<ResourceLocation, PixelMasks> cachedMasks = new HashMap<>();
+    private final Map<ResourceLocation, List<EndgamePortalBlockEntityRenderer.MaskQuad>> cachedMaskQuads = new HashMap<>();
 
     protected GeneratedStencilItemRenderer(ResourceLocation texture, Supplier<BakedModel> originalModel, String warningMessage) {
         this(stack -> texture, stack -> originalModel.get(), warningMessage);
@@ -82,29 +85,38 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
     @Override
     public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
         ModCompatibility.beforeSkyboxItemRender(displayContext);
-        PixelMasks masks = pixelMasks(stack);
+        ResourceLocation texture = this.texture.apply(stack);
+        BakedModel model = originalModel.apply(stack);
         float greenBlue = 1.0F;
-        renderOriginalGeneratedModel(stack, displayContext, poseStack, buffer, packedLight, packedOverlay, greenBlue, masks);
-        flushItemBuffers(buffer);
 
-        boolean[][] stencil = masks.stencil();
-        if (displayContext == ItemDisplayContext.GROUND) {
-            EndgamePortalBlockEntityRenderer.registerPixelWindowMask(poseStack.last().pose(), stencil, MASK_SIZE, FRONT_Z, BACK_Z, greenBlue);
+        if (ModCompatibility.isShaderPackInUse()) {
+            renderVanillaModelLists(fallbackModel(texture), stack, packedLight, packedOverlay, poseStack, buffer, greenBlue);
+            flushItemBuffers(buffer);
             ModCompatibility.afterSkyboxItemRender(displayContext);
             return;
         }
 
-        renderStencilWindow(displayContext, poseStack, stencil, greenBlue);
+        PixelMasks masks = pixelMasks(texture);
+        List<EndgamePortalBlockEntityRenderer.MaskQuad> maskQuads = maskQuads(texture, model);
+        renderOriginalGeneratedModel(stack, displayContext, poseStack, buffer, packedLight, packedOverlay, greenBlue, masks, model);
+        flushItemBuffers(buffer);
+
+        if (displayContext == ItemDisplayContext.GROUND) {
+            EndgamePortalBlockEntityRenderer.registerMeshWindowMask(poseStack.last().pose(), maskQuads, greenBlue);
+            ModCompatibility.afterSkyboxItemRender(displayContext);
+            return;
+        }
+
+        renderStencilWindow(displayContext, poseStack, maskQuads, greenBlue);
         ModCompatibility.afterSkyboxItemRender(displayContext);
     }
 
-    private void renderOriginalGeneratedModel(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, float greenBlue, PixelMasks masks) {
-        BakedModel model = originalModel.apply(stack);
+    private void renderOriginalGeneratedModel(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, float greenBlue, PixelMasks masks, BakedModel model) {
         if (model == null) {
             return;
         }
 
-        if (renderProcessedTextureModel || GeneratedStencilItemShader.shader() == null || ModCompatibility.isShaderPackInUse()) {
+        if (renderProcessedTextureModel || GeneratedStencilItemShader.shader() == null) {
             renderProcessedTexturePixels(poseStack.last().pose(), this.texture.apply(stack), masks, greenBlue);
             return;
         }
@@ -200,7 +212,11 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
         }
     }
 
-    private static void renderStencilWindow(ItemDisplayContext displayContext, PoseStack poseStack, boolean[][] stencil, float greenBlue) {
+    private static void renderStencilWindow(ItemDisplayContext displayContext, PoseStack poseStack, List<EndgamePortalBlockEntityRenderer.MaskQuad> maskQuads, float greenBlue) {
+        if (maskQuads.isEmpty()) {
+            return;
+        }
+
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getMainRenderTarget().enableStencil();
 
@@ -216,17 +232,13 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
         RenderSystem.stencilFunc(GL11.GL_ALWAYS, 1, 0xFF);
         RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
         RenderSystem.setShader(GameRenderer::getPositionShader);
-        renderMaskPixels(poseStack.last().pose(), stencil);
+        renderMaskQuads(poseStack.last().pose(), maskQuads);
 
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.stencilMask(0x00);
         RenderSystem.stencilFunc(GL11.GL_EQUAL, 1, 0xFF);
         RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
         RenderSystem.disableDepthTest();
-        if (ModCompatibility.isShaderPackInUse()) {
-            RenderSystem.depthFunc(GL11.GL_ALWAYS);
-            RenderSystem.disableBlend();
-        }
         RenderSystem.depthMask(false);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         if (displayContext == ItemDisplayContext.GUI) {
@@ -239,9 +251,6 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
             EndgamePortalBlockEntityRenderer.renderGlobalSkybox(greenBlue);
         }
 
-        if (ModCompatibility.isShaderPackInUse()) {
-            RenderSystem.enableBlend();
-        }
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
@@ -252,23 +261,12 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
         GL11.glDisable(GL11.GL_STENCIL_TEST);
     }
 
-    private static void renderMaskPixels(Matrix4f pose, boolean[][] stencil) {
+    private static void renderMaskQuads(Matrix4f pose, List<EndgamePortalBlockEntityRenderer.MaskQuad> maskQuads) {
         RenderSystem.disableCull();
 
         BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        float pixel = 1.0F / MASK_SIZE;
-        for (int y = 0; y < MASK_SIZE; y++) {
-            for (int x = 0; x < MASK_SIZE; x++) {
-                if (!stencil[y][x]) {
-                    continue;
-                }
-
-                float minX = x * pixel;
-                float maxX = minX + pixel;
-                float maxY = 1.0F - y * pixel;
-                float minY = maxY - pixel;
-                addDoubleSidedMaskQuad(builder, pose, minX, minY, maxX, maxY);
-            }
+        for (EndgamePortalBlockEntityRenderer.MaskQuad quad : maskQuads) {
+            EndgamePortalBlockEntityRenderer.appendMaskQuad(builder, pose, quad);
         }
         BufferUploader.drawWithShader(builder.buildOrThrow());
     }
@@ -309,6 +307,33 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
         PixelMasks masks = new PixelMasks(stencil, pixels);
         cachedMasks.put(texture, masks);
         return masks;
+    }
+
+    private List<EndgamePortalBlockEntityRenderer.MaskQuad> maskQuads(ResourceLocation texture, BakedModel model) {
+        List<EndgamePortalBlockEntityRenderer.MaskQuad> cached = cachedMaskQuads.get(texture);
+        if (cached != null) {
+            return cached;
+        }
+
+        List<EndgamePortalBlockEntityRenderer.MaskQuad> maskQuads = BakedStencilMaskQuads.build(texture, model, warningMessage);
+        cachedMaskQuads.put(texture, maskQuads);
+        return maskQuads;
+    }
+
+    private static BakedModel fallbackModel(ResourceLocation texture) {
+        String path = texture.getPath();
+        String prefix = "textures/item/";
+        String suffix = ".png";
+        if (path.startsWith(prefix)) {
+            path = path.substring(prefix.length());
+        }
+        if (path.endsWith(suffix)) {
+            path = path.substring(0, path.length() - suffix.length());
+        }
+
+        return Minecraft.getInstance().getModelManager().getModel(ModelResourceLocation.standalone(
+                ResourceLocation.fromNamespaceAndPath(texture.getNamespace(), "item/iris/" + path)
+        ));
     }
 
     private static void addDoubleSidedMaskQuad(BufferBuilder builder, Matrix4f pose, float minX, float minY, float maxX, float maxY) {

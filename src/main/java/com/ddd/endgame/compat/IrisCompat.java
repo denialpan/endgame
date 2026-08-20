@@ -11,6 +11,9 @@ public final class IrisCompat {
     private static Method isRenderingShadowPassMethod;
     private static Method getCurrentPackMethod;
     private static Method getCurrentPackNameMethod;
+    private static Method getPipelineManagerMethod;
+    private static Method getPipelineNullableMethod;
+    private static Class<?> shaderRenderingPipelineClass;
 
     private IrisCompat() {
     }
@@ -28,10 +31,15 @@ public final class IrisCompat {
             if (api == null || !Boolean.TRUE.equals(isShaderPackInUseMethod.invoke(api))) {
                 return false;
             }
+
+            Boolean shaderPipelineActive = isShaderPipelineActive();
+            if (shaderPipelineActive != null) {
+                return shaderPipelineActive;
+            }
+
             if (getCurrentPackMethod == null) {
                 return true;
             }
-
             Object currentPack = getCurrentPackMethod.invoke(null);
             return !(currentPack instanceof Optional<?> optional) || optional.isPresent();
         } catch (ReflectiveOperationException | RuntimeException ignored) {
@@ -85,9 +93,37 @@ public final class IrisCompat {
             Class<?> irisClass = Class.forName("net.irisshaders.iris.Iris");
             getCurrentPackMethod = irisClass.getMethod("getCurrentPack");
             getCurrentPackNameMethod = irisClass.getMethod("getCurrentPackName");
+            getPipelineManagerMethod = irisClass.getMethod("getPipelineManager");
+            Class<?> pipelineManagerClass = Class.forName("net.irisshaders.iris.pipeline.PipelineManager");
+            getPipelineNullableMethod = pipelineManagerClass.getMethod("getPipelineNullable");
+            shaderRenderingPipelineClass = Class.forName("net.irisshaders.iris.pipeline.ShaderRenderingPipeline");
         } catch (ReflectiveOperationException ignored) {
             getCurrentPackMethod = null;
             getCurrentPackNameMethod = null;
+            getPipelineManagerMethod = null;
+            getPipelineNullableMethod = null;
+            shaderRenderingPipelineClass = null;
+        }
+    }
+
+    private static Boolean isShaderPipelineActive() {
+        if (getPipelineManagerMethod == null || getPipelineNullableMethod == null || shaderRenderingPipelineClass == null) {
+            return null;
+        }
+
+        try {
+            Object pipelineManager = getPipelineManagerMethod.invoke(null);
+            if (pipelineManager == null) {
+                return null;
+            }
+
+            Object pipeline = getPipelineNullableMethod.invoke(pipelineManager);
+            if (pipeline == null) {
+                return null;
+            }
+            return shaderRenderingPipelineClass.isInstance(pipeline);
+        } catch (ReflectiveOperationException | RuntimeException ignored) {
+            return null;
         }
     }
 }
