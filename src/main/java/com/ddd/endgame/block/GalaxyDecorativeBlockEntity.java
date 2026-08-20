@@ -44,10 +44,6 @@ public class GalaxyDecorativeBlockEntity extends BlockEntity {
         }
     }
 
-    public float galaxyTintGreenBlue() {
-        return 1.0F - Math.min(1.0F, (float)this.galaxyInstabilityTicks / (float)GalaxyInstability.galaxyBlockDetonationTicks());
-    }
-
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);

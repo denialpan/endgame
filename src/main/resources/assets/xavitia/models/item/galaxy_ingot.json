@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "xavitia:item/galaxy_ingot"
+    "layer0": "xavitia:item/galaxy_ingot_outline"
   }
 }

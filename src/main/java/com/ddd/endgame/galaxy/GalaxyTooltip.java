@@ -1,10 +1,13 @@
 package com.ddd.endgame.galaxy;
 
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 public final class GalaxyTooltip {
     private static final float CYCLE_MILLIS = 2400.0F;
@@ -29,6 +32,11 @@ public final class GalaxyTooltip {
                     .withBold(bold)));
         }
         return component;
+    }
+
+    public static int remainingSeconds(ItemStack stack) {
+        Level level = Minecraft.getInstance().level;
+        return level == null ? GalaxyInstability.remainingSeconds(stack) : GalaxyInstability.remainingSeconds(stack, level);
     }
 
     private static int lerpColor(int from, int to, float amount) {

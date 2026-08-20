@@ -1,6 +1,7 @@
 package com.ddd.endgame.block;
 
 import com.ddd.endgame.galaxy.GalaxyInstability;
+import com.ddd.endgame.galaxy.GalaxyTooltip;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -35,10 +36,15 @@ public class GalaxyBlockItem extends EndgameSkyboxBlockItem {
     }
 
     @Override
+    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+        return slotChanged || !oldStack.is(newStack.getItem());
+    }
+
+    @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.translatable(
                 "block.xavitia.galaxy_block.tooltip",
-                Component.literal(String.valueOf(GalaxyInstability.remainingSeconds(stack))).withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
+                Component.literal(String.valueOf(GalaxyTooltip.remainingSeconds(stack))).withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
         ).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 }

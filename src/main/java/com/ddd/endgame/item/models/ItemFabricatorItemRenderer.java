@@ -1,6 +1,5 @@
 package com.ddd.endgame.item.models;
 
-import com.ddd.endgame.galaxy.GalaxyInstabilityTint;
 import com.ddd.endgame.item.ItemFabricatorItem;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -17,9 +16,6 @@ import org.joml.Vector3f;
 
 public class ItemFabricatorItemRenderer extends BlockEntityWithoutLevelRenderer {
     public static final ItemFabricatorItemRenderer INSTANCE = new ItemFabricatorItemRenderer();
-    private static final float TINT_RED = 0.78F;
-    private static final float TINT_GREEN = 0.45F;
-    private static final float TINT_BLUE = 1.0F;
 
     private ItemFabricatorItemRenderer() {
         super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
@@ -49,8 +45,7 @@ public class ItemFabricatorItemRenderer extends BlockEntityWithoutLevelRenderer 
             Lighting.setupForFlatItems();
         }
 
-        MultiBufferSource tintedBuffer = GalaxyInstabilityTint.wrap(buffer, TINT_RED, TINT_GREEN, TINT_BLUE);
-        minecraft.getItemRenderer().renderStatic(selectedStack, displayContext, packedLight, packedOverlay, poseStack, tintedBuffer, minecraft.level, 0);
+        minecraft.getItemRenderer().renderStatic(selectedStack, displayContext, packedLight, packedOverlay, poseStack, buffer, minecraft.level, 0);
         if (flatGuiLighting && buffer instanceof MultiBufferSource.BufferSource bufferSource) {
             bufferSource.endBatch();
         }

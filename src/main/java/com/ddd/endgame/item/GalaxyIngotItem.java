@@ -2,6 +2,7 @@ package com.ddd.endgame.item;
 
 import com.ddd.endgame.item.models.GalaxyIngotItemRenderer;
 import com.ddd.endgame.galaxy.GalaxyInstability;
+import com.ddd.endgame.galaxy.GalaxyTooltip;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -39,6 +40,11 @@ public class GalaxyIngotItem extends Item {
     }
 
     @Override
+    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+        return slotChanged || !oldStack.is(newStack.getItem());
+    }
+
+    @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         if (GalaxyInstability.isFrozenStable(stack)) {
             tooltipComponents.add(Component.translatable("item.xavitia.galaxy_ingot.tooltip.frozen").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
@@ -46,7 +52,7 @@ public class GalaxyIngotItem extends Item {
         }
         tooltipComponents.add(Component.translatable(
                 "item.xavitia.galaxy_ingot.tooltip",
-                Component.literal(String.valueOf(GalaxyInstability.remainingSeconds(stack))).withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
+                Component.literal(String.valueOf(GalaxyTooltip.remainingSeconds(stack))).withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
         ).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 

@@ -1,9 +1,5 @@
 package com.ddd.endgame;
 
-import com.ddd.endgame.galaxy.GalaxyInstabilityVisuals;
-
-import com.ddd.endgame.galaxy.GalaxyInstabilityTint;
-
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
 import com.ddd.endgame.compat.ModCompatibility;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -42,22 +38,17 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         }
 
         ModCompatibility.beforeSkyboxItemRender(displayContext);
-        float greenBlue = GalaxyInstabilityVisuals.tintGreenBlue(stack);
         EndgamePortalBlockEntityRenderer.Cubemap cubemap = EndgamePortalBlockEntityRenderer.cubemapForBlock(blockItem.getBlock());
-        renderStencilWindow(displayContext, poseStack, greenBlue, cubemap);
+        renderStencilWindow(displayContext, poseStack, cubemap);
         renderBlockModel(blockItem.getBlock(), stack, poseStack, buffer, packedLight, packedOverlay);
         flushItemBuffers(buffer);
         ModCompatibility.afterSkyboxItemRender(displayContext);
     }
 
     private static void renderBlockModel(Block block, ItemStack stack, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
-        float greenBlue = GalaxyInstabilityVisuals.tintGreenBlue(stack);
-        RenderSystem.setShaderColor(1.0F, greenBlue, greenBlue, 1.0F);
         BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
-        MultiBufferSource tintedBuffer = GalaxyInstabilityTint.wrap(buffer, greenBlue);
-        MultiBufferSource foilBuffer = renderType -> ItemRenderer.getFoilBufferDirect(tintedBuffer, renderType, true, stack.hasFoil());
+        MultiBufferSource foilBuffer = renderType -> ItemRenderer.getFoilBufferDirect(buffer, renderType, true, stack.hasFoil());
         dispatcher.renderSingleBlock(block.defaultBlockState(), poseStack, foilBuffer, packedLight, packedOverlay);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     private static void flushItemBuffers(MultiBufferSource buffer) {
@@ -66,9 +57,9 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
         }
     }
 
-    private static void renderStencilWindow(ItemDisplayContext displayContext, PoseStack poseStack, float greenBlue, EndgamePortalBlockEntityRenderer.Cubemap cubemap) {
+    private static void renderStencilWindow(ItemDisplayContext displayContext, PoseStack poseStack, EndgamePortalBlockEntityRenderer.Cubemap cubemap) {
         if (displayContext == ItemDisplayContext.GROUND) {
-            EndgamePortalBlockEntityRenderer.registerWindowMask(poseStack.last().pose(), greenBlue, cubemap);
+            EndgamePortalBlockEntityRenderer.registerWindowMask(poseStack.last().pose(), 1.0F, cubemap);
             return;
         }
 
@@ -99,10 +90,10 @@ public class EndgameSkyboxItemRenderer extends BlockEntityWithoutLevelRenderer {
             poseStack.pushPose();
             poseStack.translate(0.5F, 0.5F, 0.5F);
             EndgamePortalBlockEntityRenderer.applyConfiguredSkyboxRotation(poseStack);
-            EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), GUI_SKYBOX_SIZE, greenBlue, cubemap);
+            EndgamePortalBlockEntityRenderer.renderSkyboxCube(poseStack.last().pose(), GUI_SKYBOX_SIZE, 1.0F, cubemap);
             poseStack.popPose();
         } else {
-            EndgamePortalBlockEntityRenderer.renderGlobalSkybox(greenBlue, cubemap);
+            EndgamePortalBlockEntityRenderer.renderGlobalSkybox(1.0F, cubemap);
         }
 
         RenderSystem.depthMask(true);

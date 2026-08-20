@@ -370,10 +370,6 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     private static float blockEntityTintGreenBlue(BlockEntity blockEntity) {
-        if (blockEntity instanceof GalaxyDecorativeBlockEntity decorativeBlockEntity
-                && decorativeBlockEntity.getBlockState().is(Xavitia.GALAXY_BLOCK.get())) {
-            return decorativeBlockEntity.galaxyTintGreenBlue();
-        }
         return 1.0F;
     }
 

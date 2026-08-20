@@ -2,8 +2,6 @@ package com.ddd.endgame;
 
 import com.ddd.endgame.galaxy.GalaxyTooltip;
 
-import com.ddd.endgame.galaxy.GalaxyInstabilityVisuals;
-
 import com.ddd.endgame.galaxy.GalaxyFreezerScreen;
 
 import com.ddd.endgame.galaxy.GalaxyFreezerPreviewRenderer;
@@ -47,7 +45,6 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -57,7 +54,6 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
-import com.ddd.endgame.block.GalaxyDecorativeBlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
@@ -93,7 +89,6 @@ public class XavitiaClient {
     }
 
     private static void onClientTick(ClientTickEvent.Post event) {
-        GalaxyInstabilityVisuals.clientTick();
         updateGalaxyHotbarName();
     }
 
@@ -391,20 +386,6 @@ public class XavitiaClient {
         event.registerBlockEntityRenderer(Xavitia.GALAXY_CONNECTOR_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
         event.registerBlockEntityRenderer(Xavitia.GALAXY_DECORATIVE_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
         event.registerBlockEntityRenderer(Xavitia.GALAXY_FREEZER_BLOCK_ENTITY.get(), EndgamePortalBlockEntityRenderer::new);
-    }
-
-    @SubscribeEvent
-    static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
-        event.register((state, level, pos, tintIndex) -> {
-            if (level == null || pos == null || tintIndex != 0) {
-                return 0xFFFFFF;
-            }
-            if (level.getBlockEntity(pos) instanceof GalaxyDecorativeBlockEntity blockEntity) {
-                int greenBlue = Math.round(blockEntity.galaxyTintGreenBlue() * 255.0F);
-                return 0xFF0000 | greenBlue << 8 | greenBlue;
-            }
-            return 0xFFFFFF;
-        }, Xavitia.GALAXY_BLOCK.get());
     }
 
     @SubscribeEvent

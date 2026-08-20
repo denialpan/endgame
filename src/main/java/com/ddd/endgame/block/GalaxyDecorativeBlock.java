@@ -50,7 +50,7 @@ public class GalaxyDecorativeBlock extends BaseEntityBlock {
         }
 
         if (level.getBlockEntity(pos) instanceof GalaxyDecorativeBlockEntity blockEntity) {
-            blockEntity.setGalaxyInstabilityTicks(GalaxyInstability.carriedTicks(stack, placer));
+            blockEntity.setGalaxyInstabilityTicks(GalaxyInstability.carriedTicks(stack, level));
         }
     }
 

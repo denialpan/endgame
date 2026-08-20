@@ -1,7 +1,6 @@
 package com.ddd.endgame.item.models;
 
 import com.ddd.endgame.EndgameSkyboxItemRenderer;
-import com.ddd.endgame.galaxy.GalaxyInstabilityTint;
 import com.ddd.endgame.block.EndgamePortalBlockEntityRenderer;
 import com.ddd.endgame.compat.ModCompatibility;
 import com.ddd.endgame.Xavitia;
@@ -49,35 +48,43 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
     private final Function<ItemStack, ResourceLocation> texture;
     private final Function<ItemStack, BakedModel> originalModel;
     private final String warningMessage;
-    private final Function<ItemStack, Float> greenBlueSupplier;
+    private final boolean renderProcessedTextureModel;
     private final Map<ResourceLocation, PixelMasks> cachedMasks = new HashMap<>();
 
     protected GeneratedStencilItemRenderer(ResourceLocation texture, Supplier<BakedModel> originalModel, String warningMessage) {
-        this(texture, originalModel, warningMessage, stack -> 1.0F);
+        this(stack -> texture, stack -> originalModel.get(), warningMessage);
     }
 
     protected GeneratedStencilItemRenderer(ResourceLocation texture, Supplier<BakedModel> originalModel, String warningMessage, Function<ItemStack, Float> greenBlueSupplier) {
-        this(stack -> texture, stack -> originalModel.get(), warningMessage, greenBlueSupplier);
+        this(stack -> texture, stack -> originalModel.get(), warningMessage);
     }
 
     protected GeneratedStencilItemRenderer(Function<ItemStack, ResourceLocation> texture, Function<ItemStack, BakedModel> originalModel, String warningMessage) {
-        this(texture, originalModel, warningMessage, stack -> 1.0F);
+        this(texture, originalModel, warningMessage, false);
     }
 
     protected GeneratedStencilItemRenderer(Function<ItemStack, ResourceLocation> texture, Function<ItemStack, BakedModel> originalModel, String warningMessage, Function<ItemStack, Float> greenBlueSupplier) {
+        this(texture, originalModel, warningMessage, false);
+    }
+
+    protected GeneratedStencilItemRenderer(Function<ItemStack, ResourceLocation> texture, Function<ItemStack, BakedModel> originalModel, String warningMessage, Function<ItemStack, Float> greenBlueSupplier, boolean renderProcessedTextureModel) {
+        this(texture, originalModel, warningMessage, renderProcessedTextureModel);
+    }
+
+    protected GeneratedStencilItemRenderer(Function<ItemStack, ResourceLocation> texture, Function<ItemStack, BakedModel> originalModel, String warningMessage, boolean renderProcessedTextureModel) {
         super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
         this.texture = texture;
         this.originalModel = originalModel;
         this.warningMessage = warningMessage;
-        this.greenBlueSupplier = greenBlueSupplier;
+        this.renderProcessedTextureModel = renderProcessedTextureModel;
     }
 
     @Override
     public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
         ModCompatibility.beforeSkyboxItemRender(displayContext);
         PixelMasks masks = pixelMasks(stack);
-        float greenBlue = greenBlueSupplier.apply(stack);
-        renderOriginalGeneratedModel(stack, displayContext, poseStack, buffer, packedLight, packedOverlay, greenBlue);
+        float greenBlue = 1.0F;
+        renderOriginalGeneratedModel(stack, displayContext, poseStack, buffer, packedLight, packedOverlay, greenBlue, masks);
         flushItemBuffers(buffer);
 
         boolean[][] stencil = masks.stencil();
@@ -91,9 +98,14 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
         ModCompatibility.afterSkyboxItemRender(displayContext);
     }
 
-    private void renderOriginalGeneratedModel(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, float greenBlue) {
+    private void renderOriginalGeneratedModel(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, float greenBlue, PixelMasks masks) {
         BakedModel model = originalModel.apply(stack);
-        if (model == null || GeneratedStencilItemShader.shader() == null) {
+        if (model == null) {
+            return;
+        }
+
+        if (renderProcessedTextureModel || GeneratedStencilItemShader.shader() == null || ModCompatibility.isShaderPackInUse()) {
+            renderProcessedTexturePixels(poseStack.last().pose(), this.texture.apply(stack), masks, greenBlue);
             return;
         }
 
@@ -103,6 +115,22 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
             renderModelLists(renderPass, stack, packedLight, packedOverlay, poseStack, buffer, greenBlue, renderType);
         }
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    private static void renderVanillaModelLists(BakedModel model, ItemStack stack, int packedLight, int packedOverlay, PoseStack poseStack, MultiBufferSource buffer, float greenBlue) {
+        ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+        for (BakedModel renderPass : model.getRenderPasses(stack, true)) {
+            for (RenderType renderType : renderPass.getRenderTypes(stack, true)) {
+                itemRenderer.renderModelLists(
+                        renderPass,
+                        stack,
+                        packedLight,
+                        packedOverlay,
+                        poseStack,
+                        ItemRenderer.getFoilBufferDirect(buffer, renderType, true, stack.hasFoil())
+                );
+            }
+        }
     }
 
     private static void renderModelLists(BakedModel model, ItemStack stack, int packedLight, int packedOverlay, PoseStack poseStack, MultiBufferSource buffer, float greenBlue, RenderType renderType) {
@@ -119,7 +147,7 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
     private static void renderQuadList(PoseStack poseStack, MultiBufferSource buffer, java.util.List<BakedQuad> quads, ItemStack stack, int packedLight, int packedOverlay, float greenBlue, RenderType renderType) {
         ItemColors itemColors = Minecraft.getInstance().getItemColors();
         PoseStack.Pose pose = poseStack.last();
-        var consumer = GalaxyInstabilityTint.wrap(ItemRenderer.getFoilBufferDirect(buffer, renderType, true, stack.hasFoil()), greenBlue);
+        var consumer = ItemRenderer.getFoilBufferDirect(buffer, renderType, true, stack.hasFoil());
         for (BakedQuad quad : quads) {
             int color = -1;
             if (!stack.isEmpty() && quad.isTinted()) {
@@ -132,6 +160,38 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
             float blue = (float) FastColor.ARGB32.blue(color) / 255.0F;
             consumer.putBulkData(pose, quad, red, green, blue, alpha, packedLight, packedOverlay, true);
         }
+    }
+
+    private static void renderProcessedTexturePixels(Matrix4f pose, ResourceLocation texture, PixelMasks masks, float greenBlue) {
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.setShaderTexture(0, texture);
+        RenderSystem.enableBlend();
+        RenderSystem.disableCull();
+
+        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        int[][] pixels = masks.pixels();
+        boolean[][] stencil = masks.stencil();
+        float pixelSize = 1.0F / MASK_SIZE;
+        for (int y = 0; y < MASK_SIZE; y++) {
+            for (int x = 0; x < MASK_SIZE; x++) {
+                int pixel = pixels[y][x];
+                int alpha = pixel & 0xFF;
+                if (alpha <= 0 || stencil[y][x]) {
+                    continue;
+                }
+
+                float minX = x * pixelSize;
+                float maxX = minX + pixelSize;
+                float maxY = 1.0F - y * pixelSize;
+                float minY = maxY - pixelSize;
+                float minU = x * pixelSize;
+                float maxU = minU + pixelSize;
+                float minV = y * pixelSize;
+                float maxV = minV + pixelSize;
+                addDoubleSidedTextureQuad(builder, pose, minX, minY, maxX, maxY, minU, minV, maxU, maxV, 255, 255, 255, 255);
+            }
+        }
+        BufferUploader.drawWithShader(builder.buildOrThrow());
     }
 
     private static void flushItemBuffers(MultiBufferSource buffer) {
@@ -163,6 +223,10 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
         RenderSystem.stencilFunc(GL11.GL_EQUAL, 1, 0xFF);
         RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
         RenderSystem.disableDepthTest();
+        if (ModCompatibility.isShaderPackInUse()) {
+            RenderSystem.depthFunc(GL11.GL_ALWAYS);
+            RenderSystem.disableBlend();
+        }
         RenderSystem.depthMask(false);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         if (displayContext == ItemDisplayContext.GUI) {
@@ -175,6 +239,9 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
             EndgamePortalBlockEntityRenderer.renderGlobalSkybox(greenBlue);
         }
 
+        if (ModCompatibility.isShaderPackInUse()) {
+            RenderSystem.enableBlend();
+        }
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
@@ -207,13 +274,17 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
     }
 
     private PixelMasks pixelMasks(ItemStack stack) {
-        ResourceLocation texture = this.texture.apply(stack);
+        return pixelMasks(this.texture.apply(stack));
+    }
+
+    private PixelMasks pixelMasks(ResourceLocation texture) {
         PixelMasks cachedMask = cachedMasks.get(texture);
         if (cachedMask != null) {
             return cachedMask;
         }
 
         boolean[][] stencil = new boolean[MASK_SIZE][MASK_SIZE];
+        int[][] pixels = new int[MASK_SIZE][MASK_SIZE];
         Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(texture);
         if (resource.isPresent()) {
             try (InputStream stream = resource.get().open(); NativeImage image = NativeImage.read(stream)) {
@@ -226,6 +297,7 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
                         int red = pixel >>> 24;
                         int green = (pixel >>> 16) & 0xFF;
                         int blue = (pixel >>> 8) & 0xFF;
+                        pixels[y][x] = pixel;
                         stencil[y][x] = alpha > 0 && red == 255 && green == 0 && blue == 0;
                     }
                 }
@@ -234,7 +306,7 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
             }
         }
 
-        PixelMasks masks = new PixelMasks(stencil);
+        PixelMasks masks = new PixelMasks(stencil, pixels);
         cachedMasks.put(texture, masks);
         return masks;
     }
@@ -251,6 +323,18 @@ public class GeneratedStencilItemRenderer extends BlockEntityWithoutLevelRendere
         builder.addVertex(pose, minX, minY, BACK_Z);
     }
 
-    private record PixelMasks(boolean[][] stencil) {
+    private static void addDoubleSidedTextureQuad(BufferBuilder builder, Matrix4f pose, float minX, float minY, float maxX, float maxY, float minU, float minV, float maxU, float maxV, int red, int green, int blue, int alpha) {
+        builder.addVertex(pose, minX, minY, FRONT_Z).setUv(minU, maxV).setColor(red, green, blue, alpha);
+        builder.addVertex(pose, maxX, minY, FRONT_Z).setUv(maxU, maxV).setColor(red, green, blue, alpha);
+        builder.addVertex(pose, maxX, maxY, FRONT_Z).setUv(maxU, minV).setColor(red, green, blue, alpha);
+        builder.addVertex(pose, minX, maxY, FRONT_Z).setUv(minU, minV).setColor(red, green, blue, alpha);
+
+        builder.addVertex(pose, minX, maxY, BACK_Z).setUv(minU, minV).setColor(red, green, blue, alpha);
+        builder.addVertex(pose, maxX, maxY, BACK_Z).setUv(maxU, minV).setColor(red, green, blue, alpha);
+        builder.addVertex(pose, maxX, minY, BACK_Z).setUv(maxU, maxV).setColor(red, green, blue, alpha);
+        builder.addVertex(pose, minX, minY, BACK_Z).setUv(minU, maxV).setColor(red, green, blue, alpha);
+    }
+
+    private record PixelMasks(boolean[][] stencil, int[][] pixels) {
     }
 }

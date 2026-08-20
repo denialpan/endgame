@@ -144,17 +144,15 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
 
             hasGalaxyMaterial = true;
             if (coolingActive) {
-                if (GalaxyInstability.ticks(stack) > 0 || !GalaxyInstability.isFrozenStable(stack)) {
+                if (GalaxyInstability.elapsedTicks(stack, level) > 0 || !GalaxyInstability.isFrozenStable(stack)) {
                     GalaxyInstability.freezeTicks(stack);
                     changed = true;
                 }
                 continue;
             }
 
-            int ticks = Math.min(GalaxyInstability.ticks(stack) + 1, Xavitia.GALAXY_INSTABILITY_DETONATION_TICKS);
-            GalaxyInstability.setTicks(stack, ticks);
-            changed = true;
-            if (ticks >= Xavitia.GALAXY_INSTABILITY_DETONATION_TICKS) {
+            changed |= GalaxyInstability.ensureStarted(stack, level);
+            if (GalaxyInstability.elapsedTicks(stack, level) >= GalaxyInstability.detonationTicks(stack)) {
                 detonate(level, pos, blockEntity);
                 return;
             }
@@ -196,7 +194,6 @@ public class GalaxyFreezerBlockEntity extends BlockEntity implements MenuProvide
         if (occupiedSlots == 1
                 && firstStack.is(Xavitia.GALAXY_INGOT.get())
                 && firstStack.getCount() == totalIngots
-                && GalaxyInstability.ticks(firstStack) == 0
                 && GalaxyInstability.isFrozenStable(firstStack)) {
             return false;
         }
