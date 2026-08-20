@@ -18,6 +18,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 public final class GalaxyInstability {
     private static final int GALAXY_BLOCK_DETONATION_TICKS = 5 * 20;
@@ -25,6 +26,7 @@ public final class GalaxyInstability {
     private static final int GALAXY_INGOT_EXPLOSION_WIDTH = 2;
     private static final int GALAXY_BLOCK_EXPLOSION_WIDTH = 4;
     private static final int GALAXY_FREEZER_EXPLOSION_WIDTH = 8;
+    private static final float TNT_PLUS_HALF_EXPLOSION_RADIUS = 6.0F;
     private static final String TICKS_TAG = "GalaxyInstabilityTicks";
     private static final String START_TICK_TAG = "GalaxyInstabilityStartTick";
     private static final String FROZEN_STABLE_TAG = "GalaxyInstabilityFrozenStable";
@@ -43,7 +45,7 @@ public final class GalaxyInstability {
             }
             player.getInventory().setChanged();
             player.containerMenu.broadcastChanges();
-            removeExplosionBlocks(player.level(), player.getX(), player.getY(), player.getZ(), explosionWidth(detonatingStack));
+            detonateGalaxyExplosion(player.level(), player.getX(), player.getY(), player.getZ(), explosionWidth(detonatingStack));
             player.hurt(player.damageSources().genericKill(), Float.MAX_VALUE);
             return;
         }
@@ -78,7 +80,7 @@ public final class GalaxyInstability {
         double x = holder == null ? 0.0D : holder.getX();
         double y = holder == null ? 0.0D : holder.getY();
         double z = holder == null ? 0.0D : holder.getZ();
-        removeExplosionBlocks(level, x, y, z, explosionWidth(stack));
+        detonateGalaxyExplosion(level, x, y, z, explosionWidth(stack));
         if (holder instanceof LivingEntity livingEntity) {
             livingEntity.hurt(livingEntity.damageSources().genericKill(), Float.MAX_VALUE);
         }
@@ -89,7 +91,7 @@ public final class GalaxyInstability {
             return false;
         }
 
-        removeExplosionBlocks(entity.level(), entity.getX(), entity.getY(), entity.getZ(), explosionWidth(stack));
+        detonateGalaxyExplosion(entity.level(), entity.getX(), entity.getY(), entity.getZ(), explosionWidth(stack));
         stack.setCount(0);
         entity.setItem(ItemStack.EMPTY);
         entity.discard();
@@ -127,11 +129,11 @@ public final class GalaxyInstability {
     }
 
     public static void removeGalaxyBlockExplosion(Level level, BlockPos origin) {
-        removeExplosionBlocks(level, origin.getX() + 0.5D, origin.getY() + 0.5D, origin.getZ() + 0.5D, GALAXY_BLOCK_EXPLOSION_WIDTH);
+        detonateGalaxyExplosion(level, origin.getX() + 0.5D, origin.getY() + 0.5D, origin.getZ() + 0.5D, GALAXY_BLOCK_EXPLOSION_WIDTH);
     }
 
     public static void removeGalaxyFreezerExplosion(Level level, BlockPos origin) {
-        removeExplosionBlocks(level, origin.getX() + 0.5D, origin.getY() + 0.5D, origin.getZ() + 0.5D, GALAXY_FREEZER_EXPLOSION_WIDTH);
+        detonateGalaxyExplosion(level, origin.getX() + 0.5D, origin.getY() + 0.5D, origin.getZ() + 0.5D, GALAXY_FREEZER_EXPLOSION_WIDTH);
     }
 
     public static int detonationTicks(ItemStack stack) {
@@ -175,6 +177,16 @@ public final class GalaxyInstability {
         return stack.is(Xavitia.GALAXY_BLOCK_ITEM.get()) ? GALAXY_BLOCK_EXPLOSION_WIDTH : GALAXY_INGOT_EXPLOSION_WIDTH;
     }
 
+    private static void detonateGalaxyExplosion(Level level, double centerX, double centerY, double centerZ, int width) {
+        if (level.isClientSide) {
+            return;
+        }
+
+        removeExplosionBlocks(level, centerX, centerY, centerZ, width);
+        level.explode(null, centerX, centerY, centerZ, TNT_PLUS_HALF_EXPLOSION_RADIUS, false, Level.ExplosionInteraction.TNT);
+        killEntitiesInExplosion(level, centerX, centerY, centerZ, width);
+    }
+
     private static void removeExplosionBlocks(Level level, double centerX, double centerY, double centerZ, int width) {
         if (level.isClientSide) {
             return;
@@ -194,6 +206,25 @@ public final class GalaxyInstability {
                         level.removeBlock(mutablePos, false);
                     }
                 }
+            }
+        }
+    }
+
+    private static void killEntitiesInExplosion(Level level, double centerX, double centerY, double centerZ, int width) {
+        double halfWidth = width / 2.0D;
+        double halfHeight = EXPLOSION_HEIGHT / 2.0D;
+        AABB bounds = new AABB(
+                centerX - halfWidth,
+                centerY - halfHeight,
+                centerZ - halfWidth,
+                centerX + halfWidth,
+                centerY + halfHeight,
+                centerZ + halfWidth
+        );
+        for (Entity entity : level.getEntities((Entity)null, bounds, entity -> entity.isAlive() || !entity.isRemoved())) {
+            entity.hurt(level.damageSources().genericKill(), Float.MAX_VALUE);
+            if (!entity.isRemoved() && !(entity instanceof ServerPlayer)) {
+                entity.discard();
             }
         }
     }
