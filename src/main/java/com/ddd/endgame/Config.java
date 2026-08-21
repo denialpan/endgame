@@ -101,7 +101,7 @@ public class Config {
             .comment(
                     "Controls the render stage used the galaxy effect.",
                     "AUTO: uses the standard vanilla stencil stage unless Iris reports an active shaderpack.\n",
-                    "VANILLA_STENCIL: renders after block entities and gives the most vanilla-like depth ordering.\n",
+                    "VANILLA_STENCIL: renders after block entities and gives the most compatibility.\n",
                     "IRIS_SAFE: renders after translucent blocks to avoid common shader depth issues, at the cost of being later in the frame.\n",
                     "DISABLED: disables the galaxy effect.")
             .defineEnum("skyboxIrisCompatibilityMode", RenderStageMode.AUTO);
