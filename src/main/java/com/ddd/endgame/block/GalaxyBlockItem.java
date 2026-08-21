@@ -20,9 +20,6 @@ public class GalaxyBlockItem extends EndgameSkyboxBlockItem {
 
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
-        if (!(entity instanceof Player)) {
-            GalaxyInstability.tickStack(stack, level, entity);
-        }
     }
 
     @Override

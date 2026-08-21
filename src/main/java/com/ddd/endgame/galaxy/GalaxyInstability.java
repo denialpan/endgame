@@ -107,11 +107,7 @@ public final class GalaxyInstability {
             return 0;
         }
         CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
-        if (!tag.contains(START_TICK_TAG)) {
-            return Math.max(0, tag.getInt(TICKS_TAG));
-        }
-        long elapsed = level.getGameTime() - tag.getLong(START_TICK_TAG);
-        return Math.max(0, Math.min(detonationTicks(stack), (int)Math.min(Integer.MAX_VALUE, elapsed)));
+        return Math.max(0, Math.min(detonationTicks(stack), tag.getInt(TICKS_TAG)));
     }
 
     public static int remainingSeconds(ItemStack stack) {
@@ -241,15 +237,13 @@ public final class GalaxyInstability {
             return false;
         }
         CompoundTag existing = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
-        if (existing.contains(START_TICK_TAG)) {
-            return false;
-        }
         int elapsedTicks = Math.max(0, existing.getInt(TICKS_TAG));
-        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
-            tag.putLong(START_TICK_TAG, level.getGameTime() - elapsedTicks);
-            tag.remove(TICKS_TAG);
-            tag.remove(FROZEN_STABLE_TAG);
-        });
+        if (existing.contains(START_TICK_TAG)) {
+            long elapsedFromStart = Math.max(0L, level.getGameTime() - existing.getLong(START_TICK_TAG));
+            elapsedTicks = Math.max(elapsedTicks, (int)Math.min(Integer.MAX_VALUE, elapsedFromStart));
+        }
+        int updatedTicks = Math.min(detonationTicks(stack), elapsedTicks + 1);
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> updateTicks(tag, updatedTicks));
         return true;
     }
 

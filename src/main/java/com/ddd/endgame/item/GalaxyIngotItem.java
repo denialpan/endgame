@@ -24,9 +24,6 @@ public class GalaxyIngotItem extends Item {
 
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
-        if (!(entity instanceof Player)) {
-            GalaxyInstability.tickStack(stack, level, entity);
-        }
     }
 
     @Override
