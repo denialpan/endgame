@@ -39,10 +39,6 @@ public class Config {
             .comment("Manual mode: how many millibuckets of each required fluid must be inserted into the galaxy compressor.")
             .defineInRange("fluidRequirementMb", 999L, 1L, Long.MAX_VALUE);
 
-    public static final ModConfigSpec.BooleanValue DEBUG_STONE_ONLY = BUILDER
-            .comment("Debug mode: require only 20 minecraft:stone and ignore generated item/fluid recipe requirements.")
-            .define("debugStoneOnly", false);
-
     public static final ModConfigSpec.EnumValue<RequirementDetectionMode> REQUIREMENT_DETECTION_MODE = BUILDER
             .comment(
                     "Controls how the galaxy compressor determines the amount required for each item and fluid.",
@@ -110,6 +106,11 @@ public class Config {
                     "IRIS_SAFE renders after translucent blocks to avoid common shaderpack depth issues, at the cost of being later in the frame.",
                     "DISABLED skips the in-world skybox window pass.")
             .defineEnum("skyboxIrisCompatibilityMode", RenderStageMode.AUTO);
+
+    public static final ModConfigSpec.BooleanValue DEBUG_STONE_ONLY = BUILDER
+            .comment("Debug mode: require only 20 minecraft:stone and ignore generated item/fluid recipe requirements.")
+            .define("debugStoneOnly", false);
+
 
     static final ModConfigSpec SPEC = BUILDER.build();
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
