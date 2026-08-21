@@ -54,56 +54,56 @@ public class Config {
             .define("theStickGrantsServerCommands", false);
 
     public static final ModConfigSpec.IntValue ENTITY_KILLED_RADIUS = BUILDER
-            .comment("Radius in blocks used by the mob annihilator killed effect.")
+            .comment("Killing radius in blocks used by the mob annihilator.")
             .defineInRange("entityKilledRadius", 32, 1, 1024);
 
     public static final ModConfigSpec.BooleanValue ENTITY_KILLED_KILLS_PLAYERS = BUILDER
-            .comment("Whether the mob annihilator killed effect can kill players other than the user.")
+            .comment("Whether the mob annihilator can kill other players.")
             .define("entityKilledKillsPlayers", false);
 
     public static final ModConfigSpec.DoubleValue PITCH_ROTATION_SPEED = CLIENT_BUILDER
-            .comment("Client-side visual pitch speed for the endgame compressor inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
+            .comment("Client-side visual pitch speed galaxy effect, in degrees per second. Use 0 to disable, negative values reverse direction.")
             .defineInRange("skyboxPitchRotationSpeedDegreesPerSecond", 0.1D, -360.0D, 360.0D);
 
     public static final ModConfigSpec.DoubleValue YAW_ROTATION_SPEED = CLIENT_BUILDER
-            .comment("Client-side visual yaw speed for the endgame compressor inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
+            .comment("Client-side visual yaw speed galaxy effect, in degrees per second. Use 0 to disable, negative values reverse direction.")
             .defineInRange("skyboxYawRotationSpeedDegreesPerSecond", 0.1D, -360.0D, 360.0D);
 
     public static final ModConfigSpec.DoubleValue ROLL_ROTATION_SPEED = CLIENT_BUILDER
-            .comment("Client-side visual roll speed for the endgame compressor inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
+            .comment("Client-side visual roll speed galaxy effect, in degrees per second. Use 0 to disable, negative values reverse direction.")
             .defineInRange("skyboxRollRotationSpeedDegreesPerSecond", 0.1D, -360.0D, 360.0D);
 
     public static final ModConfigSpec.DoubleValue RENDER_DISTANCE = CLIENT_BUILDER
-            .comment("Client-side maximum distance for rendering endgame skybox windows, in blocks. Use 0 to disable distance culling.")
+            .comment("Client-side maximum distance for galaxy effect, in blocks. Use 0 to disable distance culling.")
             .defineInRange("skyboxRenderDistance", 96.0D, 0.0D, 1024.0D);
 
     public static final ModConfigSpec.BooleanValue DROPPED_ITEM_WINDOWS = CLIENT_BUILDER
-            .comment("Whether dropped endgame skybox block items render the animated skybox window effect.")
+            .comment("Whether dropped galaxy block items render the animated skybox window effect.")
             .define("skyboxDroppedItemWindows", true);
 
     public static final ModConfigSpec.IntValue MAX_BLOCK_ENTITY_WINDOWS = CLIENT_BUILDER
-            .comment("Client-side maximum number of in-world endgame block skybox windows rendered per frame. Use 0 to disable this cap.")
+            .comment("Client-side maximum galaxy items rendered per frame. Use 0 to disable this cap.")
             .defineInRange("skyboxMaxBlockEntityWindows", 4096, 0, 262144);
 
     public static final ModConfigSpec.DoubleValue DISTANT_ANIMATION_DISTANCE = CLIENT_BUILDER
-            .comment("Distance in blocks where skybox animation updates at a reduced rate. Use 0 to disable distant animation throttling.")
+            .comment("Distance in blocks where galaxy effect updates at a reduced rate. Use 0 to disable distant animation throttling.")
             .defineInRange("skyboxDistantAnimationDistance", 48.0D, 0.0D, 1024.0D);
 
     public static final ModConfigSpec.IntValue DISTANT_ANIMATION_FRAME_INTERVAL = CLIENT_BUILDER
-            .comment("Render-frame interval for updating distant skybox animation. Higher values reduce animation update rate for distant windows.")
+            .comment("Render-frame interval for updating distant galaxy effect. Higher values reduce animation update rate for distant windows.")
             .defineInRange("skyboxDistantAnimationFrameInterval", 4, 1, 120);
 
     public static final ModConfigSpec.DoubleValue DISABLE_ROTATION_DISTANCE = CLIENT_BUILDER
-            .comment("Distance in blocks where skybox rotation is disabled. Use 0 to keep rotation enabled at all rendered distances.")
+            .comment("Distance in blocks where galaxy rotation rotation is disabled. Use 0 to keep rotation enabled at all rendered distances.")
             .defineInRange("skyboxDisableRotationDistance", 0.0D, 0.0D, 1024.0D);
 
     public static final ModConfigSpec.EnumValue<RenderStageMode> IRIS_COMPATIBILITY_MODE = CLIENT_BUILDER
             .comment(
-                    "Controls the render stage used by in-world endgame skybox stencil windows.",
-                    "AUTO uses the standard vanilla stencil stage unless Iris reports an active shaderpack, then uses the shader-safe late stage.",
-                    "VANILLA_STENCIL renders after block entities and gives the most vanilla-like depth ordering.",
-                    "IRIS_SAFE renders after translucent blocks to avoid common shaderpack depth issues, at the cost of being later in the frame.",
-                    "DISABLED skips the in-world skybox window pass.")
+                    "Controls the render stage used the galaxy effect.",
+                    "AUTO: uses the standard vanilla stencil stage unless Iris reports an active shaderpack.\n",
+                    "VANILLA_STENCIL: renders after block entities and gives the most vanilla-like depth ordering.\n",
+                    "IRIS_SAFE: renders after translucent blocks to avoid common shader depth issues, at the cost of being later in the frame.\n",
+                    "DISABLED: disables the galaxy effect.")
             .defineEnum("skyboxIrisCompatibilityMode", RenderStageMode.AUTO);
 
     public static final ModConfigSpec.BooleanValue DEBUG_STONE_ONLY = BUILDER
