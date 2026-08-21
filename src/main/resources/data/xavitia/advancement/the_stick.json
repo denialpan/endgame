@@ -16,86 +16,6 @@
     "hidden": false
   },
   "criteria": {
-    "has_weather_controller": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "items": "xavitia:weather_cycler"
-          }
-        ]
-      }
-    },
-    "has_day_controller": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "items": "xavitia:day_night_toggle"
-          }
-        ]
-      }
-    },
-    "has_mob_annihilator": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "items": "xavitia:mob_annihilator"
-          }
-        ]
-      }
-    },
-    "has_item_fabricator": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "items": "xavitia:item_fabricator"
-          }
-        ]
-      }
-    },
-    "has_reality_shifter": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "items": "xavitia:reality_restorer"
-          }
-        ]
-      }
-    },
-    "has_free_flight": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "items": "xavitia:survival_flight_core"
-          }
-        ]
-      }
-    },
-    "has_noclip": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "items": "xavitia:spectator_phase_core"
-          }
-        ]
-      }
-    },
-    "has_chunk_destroyer": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "items": "xavitia:chunk_destroyer"
-          }
-        ]
-      }
-    },
     "has_the_stick": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
@@ -108,30 +28,6 @@
     }
   },
   "requirements": [
-    [
-      "has_weather_controller"
-    ],
-    [
-      "has_day_controller"
-    ],
-    [
-      "has_mob_annihilator"
-    ],
-    [
-      "has_item_fabricator"
-    ],
-    [
-      "has_reality_shifter"
-    ],
-    [
-      "has_free_flight"
-    ],
-    [
-      "has_noclip"
-    ],
-    [
-      "has_chunk_destroyer"
-    ],
     [
       "has_the_stick"
     ]
