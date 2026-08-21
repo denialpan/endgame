@@ -23,7 +23,20 @@ public class TheStickItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.xavitia.the_stick.tooltip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        boolean grantsCreative = Config.THE_STICK_GRANTS_CREATIVE.getAsBoolean();
+        boolean grantsCommands = Config.THE_STICK_GRANTS_SERVER_COMMANDS.getAsBoolean();
+        if (!grantsCreative && !grantsCommands) {
+            tooltipComponents.add(Component.translatable("item.xavitia.the_stick.tooltip.automation").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+            return;
+        }
+
+        if (grantsCreative && grantsCommands) {
+            tooltipComponents.add(Component.translatable("item.xavitia.the_stick.tooltip.creative_and_commands").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        } else if (grantsCreative) {
+            tooltipComponents.add(Component.translatable("item.xavitia.the_stick.tooltip.creative").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        } else {
+            tooltipComponents.add(Component.translatable("item.xavitia.the_stick.tooltip.commands").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        }
     }
 
     @Override
