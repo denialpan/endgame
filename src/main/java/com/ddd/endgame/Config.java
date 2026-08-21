@@ -32,18 +32,17 @@ public class Config {
     }
 
     public static final ModConfigSpec.LongValue ITEM_REQUIREMENT = BUILDER
-            .comment("Manual mode: how many of each required item stack must be inserted into the galaxy compressor.")
+            .comment("How many of each item stack is required.")
             .defineInRange("itemRequirement", 999L, 1L, Long.MAX_VALUE);
 
     public static final ModConfigSpec.LongValue FLUID_REQUIREMENT_MB = BUILDER
-            .comment("Manual mode: how many millibuckets of each required fluid must be inserted into the galaxy compressor.")
+            .comment("How many millibuckets of each fluid is required.")
             .defineInRange("fluidRequirementMb", 999L, 1L, Long.MAX_VALUE);
 
     public static final ModConfigSpec.EnumValue<RequirementDetectionMode> REQUIREMENT_DETECTION_MODE = BUILDER
             .comment(
-                    "Controls how the galaxy compressor determines the amount required for each item and fluid.",
-                    "AUTO starts at 999 for vanilla, uses 9999 if AE2 is loaded, multiplies by 100 if Create is loaded, and multiplies by 1000 if Modern Industrialization is loaded.",
-                    "MANUAL uses itemRequirement and fluidRequirementMb.")
+                    "Auto calculates requiresments based on supported installed mods:",
+                    "vanilla: 999\nAE2: 9999\nCreate: x100\nModern Industrialization: 1000")
             .defineEnum("requirementDetectionMode", RequirementDetectionMode.AUTO);
 
     public static final ModConfigSpec.BooleanValue THE_STICK_GRANTS_CREATIVE = BUILDER
