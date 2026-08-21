@@ -5,6 +5,7 @@ import com.ddd.endgame.galaxy.GalaxyInstability;
 import com.ddd.endgame.galaxy.GalaxyFreezerMenu;
 
 import com.ddd.endgame.galaxy.GalaxyCompressorMenu;
+import com.ddd.endgame.galaxy.GalaxyCompressorRequirements;
 
 import com.ddd.endgame.block.GalaxyConnectorBlock;
 import com.ddd.endgame.block.GalaxyConnectorBlockEntity;
@@ -90,10 +91,13 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -686,6 +690,27 @@ public class Xavitia {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("HELLO from server starting");
+    }
+
+    @SubscribeEvent
+    public void onServerStarted(ServerStartedEvent event) {
+        GalaxyCompressorRequirements.warm(event.getServer());
+    }
+
+    @SubscribeEvent
+    public void onDatapackSync(OnDatapackSyncEvent event) {
+        if (event.getPlayer() != null) {
+            return;
+        }
+
+        MinecraftServer server = event.getPlayerList().getServer();
+        GalaxyCompressorRequirements.invalidate(server);
+        GalaxyCompressorRequirements.warm(server);
+    }
+
+    @SubscribeEvent
+    public void onServerStopped(ServerStoppedEvent event) {
+        GalaxyCompressorRequirements.invalidate(event.getServer());
     }
 
     @SubscribeEvent

@@ -3,10 +3,9 @@ package com.ddd.endgame.block;
 import com.ddd.endgame.Config;
 import com.ddd.endgame.galaxy.GalaxyCompressorMenu;
 import com.ddd.endgame.galaxy.GalaxyCompressorNetwork;
+import com.ddd.endgame.galaxy.GalaxyCompressorRequirements;
 import com.ddd.endgame.EndgameRequirement;
 import com.ddd.endgame.Xavitia;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -23,18 +22,16 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -129,29 +126,9 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
             return;
         }
 
-        Map<ResourceLocation, Item> recipeItems = new LinkedHashMap<>();
-        Map<ResourceLocation, Fluid> recipeFluids = new LinkedHashMap<>();
-        if (Config.DEBUG_STONE_ONLY.getAsBoolean()) {
-            recipeItems.put(BuiltInRegistries.ITEM.getKey(Items.STONE), Items.STONE);
-        } else {
-            addRecipeFluid(recipeFluids, Fluids.WATER);
-            addRecipeFluid(recipeFluids, Fluids.LAVA);
-            for (RecipeHolder<?> holder : this.level.getRecipeManager().getRecipes()) {
-                Object recipe = holder.value();
-                addModernIndustrializationMachineOutputs(recipeItems, recipeFluids, recipe);
-                if (holder.value().isSpecial()) {
-                    continue;
-                }
-
-                addRecipeOutputItem(recipeItems, holder.value().getResultItem(this.level.registryAccess()));
-            }
-        }
-
-        List<ResourceLocation> sorted = new ArrayList<>(recipeItems.keySet());
-        sorted.sort(ResourceLocation::compareTo);
-
+        GalaxyCompressorRequirements.Snapshot detected = GalaxyCompressorRequirements.get((ServerLevel)this.level);
         boolean changed = false;
-        for (ResourceLocation itemId : sorted) {
+        for (ResourceLocation itemId : detected.itemIds()) {
             if (!this.remaining.containsKey(itemId)) {
                 this.remaining.put(itemId, Config.itemRequirement());
                 this.markRequirementsDirty();
@@ -159,9 +136,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
             }
         }
 
-        List<ResourceLocation> sortedFluids = new ArrayList<>(recipeFluids.keySet());
-        sortedFluids.sort(ResourceLocation::compareTo);
-        for (ResourceLocation fluidId : sortedFluids) {
+        for (ResourceLocation fluidId : detected.fluidIds()) {
             if (!this.fluidRemaining.containsKey(fluidId)) {
                 this.fluidRemaining.put(fluidId, Config.fluidRequirementMb());
                 this.markRequirementsDirty();
@@ -173,7 +148,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
         changed |= removeModItemRequirements();
 
         if (Config.DEBUG_STONE_ONLY.getAsBoolean()) {
-            changed |= this.remaining.keySet().removeIf(itemId -> !recipeItems.containsKey(itemId));
+            changed |= this.remaining.keySet().removeIf(itemId -> !detected.itemIds().contains(itemId));
             changed |= !this.fluidRemaining.isEmpty();
             this.fluidRemaining.clear();
             ResourceLocation stoneId = BuiltInRegistries.ITEM.getKey(Items.STONE);
@@ -214,62 +189,6 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
             this.markRequirementsDirty();
         }
         return changed;
-    }
-
-    private static void addRecipeOutputItem(Map<ResourceLocation, Item> recipeItems, ItemStack result) {
-        if (result.isEmpty()) {
-            return;
-        }
-
-        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(result.getItem());
-        if (itemId != null && !Xavitia.MODID.equals(itemId.getNamespace())) {
-            recipeItems.putIfAbsent(itemId, result.getItem());
-        }
-    }
-
-    private static void addRecipeFluid(Map<ResourceLocation, Fluid> recipeFluids, Fluid fluid) {
-        if (fluid == Fluids.EMPTY) {
-            return;
-        }
-
-        ResourceLocation fluidId = BuiltInRegistries.FLUID.getKey(fluid);
-        if (fluidId != null) {
-            recipeFluids.putIfAbsent(fluidId, fluid);
-        }
-    }
-
-    private static void addModernIndustrializationMachineOutputs(Map<ResourceLocation, Item> recipeItems, Map<ResourceLocation, Fluid> recipeFluids, Object recipe) {
-        if (!"aztech.modern_industrialization.machines.recipe.MachineRecipe".equals(recipe.getClass().getName())) {
-            return;
-        }
-
-        try {
-            Field itemOutputsField = recipe.getClass().getField("itemOutputs");
-            Object itemOutputs = itemOutputsField.get(recipe);
-            if (itemOutputs instanceof Iterable<?> itemOutputEntries) {
-                for (Object output : itemOutputEntries) {
-                    Method getStack = output.getClass().getMethod("getStack");
-                    Object stack = getStack.invoke(output);
-                    if (stack instanceof ItemStack itemStack) {
-                        addRecipeOutputItem(recipeItems, itemStack);
-                    }
-                }
-            }
-
-            Field fluidOutputsField = recipe.getClass().getField("fluidOutputs");
-            Object fluidOutputs = fluidOutputsField.get(recipe);
-            if (fluidOutputs instanceof Iterable<?> fluidOutputEntries) {
-                for (Object output : fluidOutputEntries) {
-                    Method fluid = output.getClass().getMethod("fluid");
-                    Object fluidOutput = fluid.invoke(output);
-                    if (fluidOutput instanceof Fluid outputFluid) {
-                        addRecipeFluid(recipeFluids, outputFluid);
-                    }
-                }
-            }
-        } catch (ReflectiveOperationException | RuntimeException exception) {
-            Xavitia.LOGGER.debug("Unable to inspect Modern Industrialization machine recipe {}", recipe, exception);
-        }
     }
 
     public int acceptContribution(ItemStack stack) {
