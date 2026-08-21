@@ -82,11 +82,12 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
     private SortMode sortMode = SortMode.NAME;
     private boolean sortAscending = true;
     private EditBox searchBox;
-    private List<RowData> cachedRows = List.of();
-    private SortMode cachedSortMode = null;
-    private boolean cachedSortAscending;
-    private String cachedSearchText = "";
-    private int cachedRequirementsRevision = Integer.MIN_VALUE;
+    private List<RowData> cachedRequirementRows = List.of();
+    private List<RowData> cachedVisibleRows = List.of();
+    private SortMode cachedVisibleSortMode = null;
+    private boolean cachedVisibleSortAscending;
+    private String cachedVisibleSearchText = "";
+    private int cachedBackingRevision = Integer.MIN_VALUE;
     private long cachedTotalRequired;
     private long cachedTotalRemaining;
     private int cachedCompletedStacks;
@@ -119,7 +120,6 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
         this.searchBox.setTextColor(0xFFFFFFFF);
         this.searchBox.setResponder(value -> {
             this.scrollRow = 0;
-            this.cachedRequirementsRevision = Integer.MIN_VALUE;
         });
         this.addRenderableWidget(this.searchBox);
     }
@@ -145,9 +145,10 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
             return;
         }
 
+        List<RowData> rows = this.sortedRows();
         drawTotalProgress(guiGraphics, x, y);
         drawSortButtons(guiGraphics, x, y);
-        drawRequirementGrid(guiGraphics, x, y, this.sortedRows());
+        drawRequirementGrid(guiGraphics, x, y, rows);
         drawScrollbar(guiGraphics, x, y);
     }
 
@@ -269,14 +270,43 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
     private List<RowData> sortedRows() {
         GalaxyCompressorBlockEntity compressor = this.currentController();
         int revision = compressor == null ? -1 : compressor.requirementsRevision();
-        String searchText = normalizedSearchText();
-        if (revision == this.cachedRequirementsRevision
-                && this.sortMode == this.cachedSortMode
-                && this.sortAscending == this.cachedSortAscending
-                && searchText.equals(this.cachedSearchText)) {
-            return this.cachedRows;
+        if (revision != this.cachedBackingRevision) {
+            this.rebuildRequirementRows(compressor, revision);
         }
 
+        String searchText = normalizedSearchText();
+        if (this.sortMode == this.cachedVisibleSortMode
+                && this.sortAscending == this.cachedVisibleSortAscending
+                && searchText.equals(this.cachedVisibleSearchText)) {
+            return this.cachedVisibleRows;
+        }
+
+        List<RowData> rows = new ArrayList<>(this.cachedRequirementRows.size());
+        for (RowData row : this.cachedRequirementRows) {
+            if (matchesSearch(searchText, row.name(), row.namespace(), row.modName())) {
+                rows.add(row);
+            }
+        }
+
+        Comparator<RowData> comparator = switch (this.sortMode) {
+            case NAME -> Comparator.comparing(RowData::name, String.CASE_INSENSITIVE_ORDER).thenComparing(RowData::itemId);
+            case PROGRESS -> Comparator.comparingLong(RowData::contributed).thenComparing(RowData::name, String.CASE_INSENSITIVE_ORDER);
+        };
+
+        if (!this.sortAscending) {
+            comparator = comparator.reversed();
+        }
+
+        rows.sort(comparator);
+        this.cachedVisibleRows = List.copyOf(rows);
+        this.cachedVisibleSortMode = this.sortMode;
+        this.cachedVisibleSortAscending = this.sortAscending;
+        this.cachedVisibleSearchText = searchText;
+        this.scrollRow = Math.min(this.scrollRow, maxScrollRows(rows.size()));
+        return this.cachedVisibleRows;
+    }
+
+    private void rebuildRequirementRows(GalaxyCompressorBlockEntity compressor, int revision) {
         List<EndgameRequirement> requirements = compressor == null ? List.of() : compressor.requirements();
         List<RowData> rows = new ArrayList<>(requirements.size());
         long totalRequired = 0L;
@@ -297,35 +327,18 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
                 completedStacks++;
             }
             completedMods.merge(namespace, requirement.complete(), Boolean::logicalAnd);
-            if (!matchesSearch(searchText, name, namespace, modName)) {
-                continue;
-            }
-            rows.add(new RowData(stack, fluidStack, name, requirement.id().toString(), requirement.fluid(), remaining, required));
+            rows.add(new RowData(stack, fluidStack, name, requirement.id().toString(), namespace, modName, requirement.fluid(), remaining, required));
         }
 
-        Comparator<RowData> comparator = switch (this.sortMode) {
-            case NAME -> Comparator.comparing(RowData::name, String.CASE_INSENSITIVE_ORDER).thenComparing(RowData::itemId);
-            case PROGRESS -> Comparator.comparingLong(RowData::contributed).thenComparing(RowData::name, String.CASE_INSENSITIVE_ORDER);
-        };
-
-        if (!this.sortAscending) {
-            comparator = comparator.reversed();
-        }
-
-        rows.sort(comparator);
-        this.cachedRows = List.copyOf(rows);
-        this.cachedSortMode = this.sortMode;
-        this.cachedSortAscending = this.sortAscending;
-        this.cachedSearchText = searchText;
-        this.cachedRequirementsRevision = revision;
+        this.cachedRequirementRows = List.copyOf(rows);
+        this.cachedBackingRevision = revision;
+        this.cachedVisibleSortMode = null;
         this.cachedTotalRequired = totalRequired;
         this.cachedTotalRemaining = totalRemaining;
         this.cachedCompletedStacks = completedStacks;
         this.cachedTotalStacks = requirements.size();
         this.cachedCompletedMods = (int)completedMods.values().stream().filter(Boolean::booleanValue).count();
         this.cachedTotalMods = completedMods.size();
-        this.scrollRow = Math.min(this.scrollRow, maxScrollRows(rows.size()));
-        return this.cachedRows;
     }
 
     private String normalizedSearchText() {
@@ -357,7 +370,6 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
     private void selectSortMode(SortMode mode) {
         this.sortMode = mode;
         this.scrollRow = 0;
-        this.cachedRequirementsRevision = Integer.MIN_VALUE;
     }
 
     private int maxScrollRows() {
@@ -566,7 +578,7 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
         PROGRESS
     }
 
-    private record RowData(ItemStack stack, FluidStack fluidStack, String name, String itemId, boolean fluid, long remaining, long required) {
+    private record RowData(ItemStack stack, FluidStack fluidStack, String name, String itemId, String namespace, String modName, boolean fluid, long remaining, long required) {
         long contributed() {
             return this.required - this.remaining;
         }
