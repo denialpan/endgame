@@ -48,6 +48,8 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     private static final float ITEM_WINDOW_SCALE = 0.985F;
     private static final int BLOCK_STENCIL_REF = 1;
     private static final int ITEM_STENCIL_REF = 2;
+    private static final double STATIC_CAMERA_EPSILON = 0.000001D;
+    private static final float STATIC_ROTATION_EPSILON = 0.0001F;
     private static final long STATIC_CACHE_PRUNE_INTERVAL_TICKS = 200L;
     private static final long STATIC_CACHE_MAX_IDLE_TICKS = 400L;
     private static final float STATIC_POSE_TRANSLATION_EPSILON = 0.001F;
@@ -592,6 +594,10 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
     }
 
     private static boolean shouldRenderMask(WindowMask mask, RenderLevelStageEvent event, boolean distanceCull) {
+        if (mask instanceof StaticWorldWindowMask staticMask) {
+            return staticMask.shouldRenderCached(event, distanceCull);
+        }
+
         AABB cameraRelativeBounds = mask.cameraRelativeBounds();
         if (distanceCull && tooFar(cameraRelativeBounds)) {
             return false;
@@ -896,6 +902,18 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         private final AABB worldBounds;
         private AABB cameraRelativeBounds;
         private long lastSeenGameTime;
+        private double lastPreparedCameraX = Double.NaN;
+        private double lastPreparedCameraY = Double.NaN;
+        private double lastPreparedCameraZ = Double.NaN;
+        private double lastVisibilityCameraX = Double.NaN;
+        private double lastVisibilityCameraY = Double.NaN;
+        private double lastVisibilityCameraZ = Double.NaN;
+        private float lastVisibilityYaw = Float.NaN;
+        private float lastVisibilityPitch = Float.NaN;
+        private double lastVisibilityRenderDistance = Double.NaN;
+        private boolean lastVisibilityDistanceCull;
+        private boolean lastVisibilityResult;
+        private boolean hasCachedVisibility;
         private float tintGreenBlue = 1.0F;
         private Cubemap cubemap = Cubemap.MAIN;
 
@@ -904,21 +922,68 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         }
 
         private void prepare(Vec3 cameraPosition, long gameTime, float tintGreenBlue, Cubemap cubemap) {
-            double x = this.worldBounds.minX - cameraPosition.x;
-            double y = this.worldBounds.minY - cameraPosition.y;
-            double z = this.worldBounds.minZ - cameraPosition.z;
-            this.pose.translation((float)x, (float)y, (float)z);
-            this.cameraRelativeBounds = new AABB(
-                    this.worldBounds.minX - cameraPosition.x,
-                    this.worldBounds.minY - cameraPosition.y,
-                    this.worldBounds.minZ - cameraPosition.z,
-                    this.worldBounds.maxX - cameraPosition.x,
-                    this.worldBounds.maxY - cameraPosition.y,
-                    this.worldBounds.maxZ - cameraPosition.z
-            );
+            if (!sameCameraPosition(cameraPosition, this.lastPreparedCameraX, this.lastPreparedCameraY, this.lastPreparedCameraZ)) {
+                double x = this.worldBounds.minX - cameraPosition.x;
+                double y = this.worldBounds.minY - cameraPosition.y;
+                double z = this.worldBounds.minZ - cameraPosition.z;
+                this.pose.translation((float)x, (float)y, (float)z);
+                this.cameraRelativeBounds = new AABB(
+                        this.worldBounds.minX - cameraPosition.x,
+                        this.worldBounds.minY - cameraPosition.y,
+                        this.worldBounds.minZ - cameraPosition.z,
+                        this.worldBounds.maxX - cameraPosition.x,
+                        this.worldBounds.maxY - cameraPosition.y,
+                        this.worldBounds.maxZ - cameraPosition.z
+                );
+                this.lastPreparedCameraX = cameraPosition.x;
+                this.lastPreparedCameraY = cameraPosition.y;
+                this.lastPreparedCameraZ = cameraPosition.z;
+            }
+
             this.lastSeenGameTime = gameTime;
             this.tintGreenBlue = tintGreenBlue;
             this.cubemap = cubemap;
+        }
+
+        private boolean shouldRenderCached(RenderLevelStageEvent event, boolean distanceCull) {
+            Vec3 cameraPosition = event.getCamera().getPosition();
+            float yaw = event.getCamera().getYRot();
+            float pitch = event.getCamera().getXRot();
+            double renderDistance = Config.RENDER_DISTANCE.get();
+            if (this.hasCachedVisibility
+                    && this.lastVisibilityDistanceCull == distanceCull
+                    && sameCameraPosition(cameraPosition, this.lastVisibilityCameraX, this.lastVisibilityCameraY, this.lastVisibilityCameraZ)
+                    && Math.abs(this.lastVisibilityYaw - yaw) <= STATIC_ROTATION_EPSILON
+                    && Math.abs(this.lastVisibilityPitch - pitch) <= STATIC_ROTATION_EPSILON
+                    && Double.compare(this.lastVisibilityRenderDistance, renderDistance) == 0) {
+                return this.lastVisibilityResult;
+            }
+
+            boolean result = computeShouldRender(event, distanceCull);
+            this.lastVisibilityCameraX = cameraPosition.x;
+            this.lastVisibilityCameraY = cameraPosition.y;
+            this.lastVisibilityCameraZ = cameraPosition.z;
+            this.lastVisibilityYaw = yaw;
+            this.lastVisibilityPitch = pitch;
+            this.lastVisibilityRenderDistance = renderDistance;
+            this.lastVisibilityDistanceCull = distanceCull;
+            this.lastVisibilityResult = result;
+            this.hasCachedVisibility = true;
+            return result;
+        }
+
+        private boolean computeShouldRender(RenderLevelStageEvent event, boolean distanceCull) {
+            AABB cameraRelativeBounds = this.cameraRelativeBounds();
+            if (distanceCull && tooFar(cameraRelativeBounds)) {
+                return false;
+            }
+
+            Frustum frustum = event.getFrustum();
+            if (frustum == null) {
+                return true;
+            }
+
+            return frustum.isVisible(this.worldBounds);
         }
 
         @Override
@@ -950,6 +1015,12 @@ public class EndgamePortalBlockEntityRenderer<T extends BlockEntity> implements 
         public Cubemap cubemap() {
             return this.cubemap;
         }
+    }
+
+    private static boolean sameCameraPosition(Vec3 cameraPosition, double x, double y, double z) {
+        return Math.abs(cameraPosition.x - x) <= STATIC_CAMERA_EPSILON
+                && Math.abs(cameraPosition.y - y) <= STATIC_CAMERA_EPSILON
+                && Math.abs(cameraPosition.z - z) <= STATIC_CAMERA_EPSILON;
     }
 
     private record MatrixKey(
