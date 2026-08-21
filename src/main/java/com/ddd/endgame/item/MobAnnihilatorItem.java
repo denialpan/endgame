@@ -47,27 +47,27 @@ public class MobAnnihilatorItem extends Item {
             return InteractionResultHolder.sidedSuccess(stack, true);
         }
 
-        int radius = Config.ENTITY_PURGE_RADIUS.get();
-        boolean killsPlayers = Config.ENTITY_PURGE_KILLS_PLAYERS.getAsBoolean();
+        int radius = Config.ENTITY_KILLED_RADIUS.get();
+        boolean killsPlayers = Config.ENTITY_KILLED_KILLS_PLAYERS.getAsBoolean();
         AABB bounds = player.getBoundingBox().inflate(radius);
-        List<Entity> targets = serverLevel.getEntities(player, bounds, entity -> isPurgeTarget(entity, killsPlayers));
+        List<Entity> targets = serverLevel.getEntities(player, bounds, entity -> isKilledTarget(entity, killsPlayers));
         for (Entity target : targets) {
-            purgeTarget(serverLevel, player, target);
+            killTarget(serverLevel, player, target);
         }
 
-        player.displayClientMessage(Component.translatable("message.xavitia.entity_purge", targets.size(), radius), true);
+        player.displayClientMessage(Component.translatable("message.xavitia.entities_killed", targets.size(), radius), true);
         player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
         return InteractionResultHolder.consume(stack);
     }
 
-    private static boolean isPurgeTarget(Entity entity, boolean killsPlayers) {
+    private static boolean isKilledTarget(Entity entity, boolean killsPlayers) {
         return entity.isAlive()
                 && !(entity instanceof ItemEntity)
                 && !entity.hasCustomName()
                 && (killsPlayers || !(entity instanceof Player));
     }
 
-    private static void purgeTarget(ServerLevel level, Player player, Entity target) {
+    private static void killTarget(ServerLevel level, Player player, Entity target) {
         if (target instanceof LivingEntity livingEntity) {
             DamageSource damageSource = level.damageSources().playerAttack(player);
             livingEntity.setLastHurtByPlayer(player);

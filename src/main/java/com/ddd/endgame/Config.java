@@ -42,7 +42,7 @@ public class Config {
     public static final ModConfigSpec.EnumValue<RequirementDetectionMode> REQUIREMENT_DETECTION_MODE = BUILDER
             .comment(
                     "Auto calculates requiresments based on supported installed mods:",
-                    "vanilla: 999\nAE2: 9999\nCreate: x100\nModern Industrialization: 1000")
+                    "vanilla: 999\nAE2: 9999\nCreate: x100\nModern Industrialization: x1000")
             .defineEnum("requirementDetectionMode", RequirementDetectionMode.AUTO);
 
     public static final ModConfigSpec.BooleanValue THE_STICK_GRANTS_CREATIVE = BUILDER
@@ -50,16 +50,16 @@ public class Config {
             .define("theStickGrantsCreative", true);
 
     public static final ModConfigSpec.BooleanValue THE_STICK_GRANTS_SERVER_COMMANDS = BUILDER
-            .comment("Whether holding The Stick in main hand or offhand grants server command permissions.")
+            .comment("Whether holding The Stick in inventory grants server commands.")
             .define("theStickGrantsServerCommands", false);
 
-    public static final ModConfigSpec.IntValue ENTITY_PURGE_RADIUS = BUILDER
-            .comment("Radius in blocks used by the entity purge item.")
-            .defineInRange("entityPurgeRadius", 32, 1, 1024);
+    public static final ModConfigSpec.IntValue ENTITY_KILLED_RADIUS = BUILDER
+            .comment("Radius in blocks used by the mob annihilator killed effect.")
+            .defineInRange("entityKilledRadius", 32, 1, 1024);
 
-    public static final ModConfigSpec.BooleanValue ENTITY_PURGE_KILLS_PLAYERS = BUILDER
-            .comment("Whether the entity purge item can kill players other than the user.")
-            .define("entityPurgeKillsPlayers", false);
+    public static final ModConfigSpec.BooleanValue ENTITY_KILLED_KILLS_PLAYERS = BUILDER
+            .comment("Whether the mob annihilator killed effect can kill players other than the user.")
+            .define("entityKilledKillsPlayers", false);
 
     public static final ModConfigSpec.DoubleValue PITCH_ROTATION_SPEED = CLIENT_BUILDER
             .comment("Client-side visual pitch speed for the endgame compressor inner skybox rotation, in degrees per second. Use 0 to disable; negative values reverse direction.")
@@ -107,7 +107,7 @@ public class Config {
             .defineEnum("skyboxIrisCompatibilityMode", RenderStageMode.AUTO);
 
     public static final ModConfigSpec.BooleanValue DEBUG_STONE_ONLY = BUILDER
-            .comment("Debug mode: require only 20 minecraft:stone and ignore generated item/fluid recipe requirements.")
+            .comment("Debug mode: require only 20 minecraft:stone and ignore all item/fluid recipe requirements.")
             .define("debugStoneOnly", false);
 
 
