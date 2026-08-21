@@ -51,7 +51,7 @@ public class TheStickItem extends Item {
         if (!(entity instanceof ServerPlayer player)) {
             return false;
         }
-        return player.getMainHandItem().is(Xavitia.THE_STICK.get()) || player.getOffhandItem().is(Xavitia.THE_STICK.get());
+        return player.getInventory().contains(stack -> stack.is(Xavitia.THE_STICK.get()));
     }
 
     @Override
