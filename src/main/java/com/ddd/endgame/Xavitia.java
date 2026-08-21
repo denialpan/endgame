@@ -33,6 +33,7 @@ import com.ddd.endgame.item.SurvivalFlightItem;
 import com.ddd.endgame.item.WeatherCycleItem;
 import com.ddd.endgame.payload.ItemFabricatorSelectionPayload;
 import com.ddd.endgame.payload.GalaxyMultitoolSelectionPayload;
+import com.ddd.endgame.payload.GalaxyCompressorRequirementDeltaPayload;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.Holder;
@@ -611,6 +612,11 @@ public class Xavitia {
                 GalaxyMultitoolSelectionPayload.TYPE,
                 GalaxyMultitoolSelectionPayload.STREAM_CODEC,
                 GalaxyMultitoolSelectionPayload::handle
+        );
+        event.registrar("1").playToClient(
+                GalaxyCompressorRequirementDeltaPayload.TYPE,
+                GalaxyCompressorRequirementDeltaPayload.STREAM_CODEC,
+                GalaxyCompressorRequirementDeltaPayload::handle
         );
     }
 

@@ -32,10 +32,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
+import com.ddd.endgame.payload.GalaxyCompressorRequirementDeltaPayload;
 
 public class GalaxyCompressorBlockEntity extends BlockEntity implements Container, MenuProvider {
     private static final int SLOT_INPUT = 0;
@@ -207,10 +210,11 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
         }
 
         int accepted = (int)Math.min((long)stack.getCount(), current);
-        this.remaining.put(itemId, current - accepted);
+        long updated = current - accepted;
+        this.remaining.put(itemId, updated);
         this.markRequirementsDirty();
         stack.shrink(accepted);
-        this.setChangedAndSync();
+        this.setChangedAndSendRequirementDelta(itemId, false, updated);
         return accepted;
     }
 
@@ -265,11 +269,21 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
 
         int accepted = (int)Math.min((long)stack.getAmount(), current);
         if (action.execute()) {
-            this.fluidRemaining.put(fluidId, current - accepted);
+            long updated = current - accepted;
+            this.fluidRemaining.put(fluidId, updated);
             this.markRequirementsDirty();
-            this.setChangedAndSync();
+            this.setChangedAndSendRequirementDelta(fluidId, true, updated);
         }
         return accepted;
+    }
+
+    public void applyRequirementDelta(ResourceLocation id, boolean fluid, long remaining) {
+        if (fluid) {
+            this.fluidRemaining.put(id, remaining);
+        } else {
+            this.remaining.put(id, remaining);
+        }
+        this.markRequirementsDirty();
     }
 
     @Override
@@ -403,6 +417,17 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
         if (this.level != null && !this.level.isClientSide) {
             BlockState state = this.getBlockState();
             this.level.sendBlockUpdated(this.worldPosition, state, state, 3);
+        }
+    }
+
+    private void setChangedAndSendRequirementDelta(ResourceLocation id, boolean fluid, long remaining) {
+        this.setChanged();
+        if (this.level instanceof ServerLevel serverLevel) {
+            PacketDistributor.sendToPlayersTrackingChunk(
+                    serverLevel,
+                    new ChunkPos(this.worldPosition),
+                    new GalaxyCompressorRequirementDeltaPayload(this.worldPosition, id, fluid, remaining)
+            );
         }
     }
 
