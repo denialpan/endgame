@@ -495,11 +495,11 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
         if (isMouseOver(mouseX, mouseY, TOTAL_BAR_X, TOTAL_BAR_Y, TOTAL_BAR_WIDTH, TOTAL_BAR_HEIGHT)) {
             guiGraphics.renderTooltip(this.font, List.of(
                     Component.literal("Total progress"),
-                    Component.literal(NUMBER_FORMAT.format(totalContributed) + " / " + NUMBER_FORMAT.format(this.cachedTotalRequired)),
+                    Component.literal(NUMBER_FORMAT.format(totalContributed) + " / " + NUMBER_FORMAT.format(this.cachedTotalRequired) + " items complete"),
                     Component.literal(formatPercent(totalContributed, this.cachedTotalRequired) + "% complete"),
                     Component.literal("Unique Items: " + NUMBER_FORMAT.format(this.cachedCompletedStacks) + " / " + NUMBER_FORMAT.format(this.cachedTotalStacks) + " complete"),
                     Component.literal("Mods: " + NUMBER_FORMAT.format(this.cachedCompletedMods) + " / " + NUMBER_FORMAT.format(this.cachedTotalMods) + " complete"),
-                    Component.literal(NUMBER_FORMAT.format(this.cachedTotalRemaining) + " remaining")
+                    Component.literal(NUMBER_FORMAT.format(this.cachedTotalRemaining) + " items remaining")
             ), Optional.empty(), mouseX, mouseY);
             return;
         }
