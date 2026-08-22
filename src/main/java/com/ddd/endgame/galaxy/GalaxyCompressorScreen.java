@@ -510,7 +510,7 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
                     ? fluidTooltip(hovered)
                     : new ArrayList<>(Screen.getTooltipFromItem(Minecraft.getInstance(), hovered.stack()));
             tooltip.add(Component.empty());
-            tooltip.add(Component.literal(hovered.fluid() ? "Endgame fluid progress" : "Endgame progress").withStyle(ChatFormatting.GRAY));
+            tooltip.add(Component.literal(hovered.fluid() ? "Fluid Progress" : "Item Progress").withStyle(ChatFormatting.GRAY));
             tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.contributed()) + " / " + NUMBER_FORMAT.format(hovered.required()) + (hovered.fluid() ? " mB" : "")).withStyle(ChatFormatting.DARK_GRAY));
             tooltip.add(Component.literal(formatPercent(hovered.contributed(), hovered.required()) + "% complete").withStyle(ChatFormatting.DARK_GRAY));
             tooltip.add(Component.literal(NUMBER_FORMAT.format(hovered.remaining()) + (hovered.fluid() ? " mB" : "") + " remaining").withStyle(ChatFormatting.DARK_GRAY));
