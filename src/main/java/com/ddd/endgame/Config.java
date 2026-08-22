@@ -1,6 +1,11 @@
 package com.ddd.endgame;
 
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.TranslatableEnum;
@@ -44,6 +49,18 @@ public class Config {
                     "Auto calculates requiresments based on supported installed mods:",
                     "vanilla: 999\nAE2: 9999\nCreate: x100\nModern Industrialization: x1000")
             .defineEnum("requirementDetectionMode", RequirementDetectionMode.AUTO);
+
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> REQUIREMENT_MOD_BLACKLIST = BUILDER
+            .comment("Mod ids whose items and fluids should not be detected as Galaxy Compressor requirements. Example: [\"minecraft\", \"create\"]")
+            .defineListAllowEmpty("requirementModBlacklist", List.of(), () -> "minecraft", Config::isValidModIdConfigValue);
+
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> REQUIREMENT_ITEM_BLACKLIST = BUILDER
+            .comment("Item ids that should not be detected as Galaxy Compressor requirements. Example: [\"minecraft:stone\", \"minecraft:dirt\"]")
+            .defineListAllowEmpty("requirementItemBlacklist", List.of(), () -> "minecraft:stone", Config::isValidResourceLocationConfigValue);
+
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> REQUIREMENT_FLUID_BLACKLIST = BUILDER
+            .comment("Fluid ids that should not be detected as Galaxy Compressor requirements. Example: [\"minecraft:water\", \"minecraft:lava\"]")
+            .defineListAllowEmpty("requirementFluidBlacklist", List.of(), () -> "minecraft:water", Config::isValidResourceLocationConfigValue);
 
     public static final ModConfigSpec.BooleanValue THE_STICK_GRANTS_CREATIVE = BUILDER
             .comment("Whether holding The Stick in inventory sets the player to Creative mode.")
@@ -139,6 +156,62 @@ public class Config {
 
     private static boolean isModLoaded(String modId) {
         return ModList.get().isLoaded(modId);
+    }
+
+    public static boolean isRequirementModBlacklisted(String modId) {
+        return requirementModBlacklist().contains(modId.toLowerCase(Locale.ROOT));
+    }
+
+    public static boolean isRequirementItemBlacklisted(ResourceLocation itemId) {
+        return requirementItemBlacklist().contains(itemId);
+    }
+
+    public static boolean isRequirementFluidBlacklisted(ResourceLocation fluidId) {
+        return requirementFluidBlacklist().contains(fluidId);
+    }
+
+    public static String requirementBlacklistSignature() {
+        return String.join(",", requirementModBlacklist())
+                + "|" + requirementItemBlacklist()
+                + "|" + requirementFluidBlacklist();
+    }
+
+    private static Set<String> requirementModBlacklist() {
+        Set<String> modIds = new LinkedHashSet<>();
+        for (String modId : REQUIREMENT_MOD_BLACKLIST.get()) {
+            modIds.add(modId.toLowerCase(Locale.ROOT));
+        }
+        return modIds;
+    }
+
+    private static Set<ResourceLocation> requirementItemBlacklist() {
+        Set<ResourceLocation> itemIds = new LinkedHashSet<>();
+        for (String id : REQUIREMENT_ITEM_BLACKLIST.get()) {
+            ResourceLocation itemId = ResourceLocation.tryParse(id);
+            if (itemId != null) {
+                itemIds.add(itemId);
+            }
+        }
+        return itemIds;
+    }
+
+    private static Set<ResourceLocation> requirementFluidBlacklist() {
+        Set<ResourceLocation> fluidIds = new LinkedHashSet<>();
+        for (String id : REQUIREMENT_FLUID_BLACKLIST.get()) {
+            ResourceLocation fluidId = ResourceLocation.tryParse(id);
+            if (fluidId != null) {
+                fluidIds.add(fluidId);
+            }
+        }
+        return fluidIds;
+    }
+
+    private static boolean isValidModIdConfigValue(Object value) {
+        return value instanceof String modId && modId.matches("[a-z0-9_.-]+");
+    }
+
+    private static boolean isValidResourceLocationConfigValue(Object value) {
+        return value instanceof String id && ResourceLocation.tryParse(id) != null;
     }
 
     private static long saturatedMultiply(long value, long multiplier) {

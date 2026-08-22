@@ -51,19 +51,20 @@ public final class GalaxyCompressorRequirements {
 
     public static Snapshot get(MinecraftServer server) {
         boolean debugStoneOnly = Config.DEBUG_STONE_ONLY.getAsBoolean();
+        String blacklistSignature = Config.requirementBlacklistSignature();
         synchronized (CACHE) {
             Snapshot snapshot = CACHE.get(server);
-            if (snapshot != null && snapshot.debugStoneOnly() == debugStoneOnly) {
+            if (snapshot != null && snapshot.debugStoneOnly() == debugStoneOnly && snapshot.blacklistSignature().equals(blacklistSignature)) {
                 return snapshot;
             }
 
-            Snapshot built = build(server, debugStoneOnly);
+            Snapshot built = build(server, debugStoneOnly, blacklistSignature);
             CACHE.put(server, built);
             return built;
         }
     }
 
-    private static Snapshot build(MinecraftServer server, boolean debugStoneOnly) {
+    private static Snapshot build(MinecraftServer server, boolean debugStoneOnly, String blacklistSignature) {
         Map<ResourceLocation, Item> recipeItems = new LinkedHashMap<>();
         Map<ResourceLocation, Fluid> recipeFluids = new LinkedHashMap<>();
         if (debugStoneOnly) {
@@ -98,7 +99,7 @@ public final class GalaxyCompressorRequirements {
         List<ResourceLocation> fluidIds = new ArrayList<>(recipeFluids.keySet());
         fluidIds.sort(ResourceLocation::compareTo);
         Xavitia.LOGGER.info("Detected {} recipe output items and {} fluids for galaxy compressor requirements", itemIds.size(), fluidIds.size());
-        return new Snapshot(List.copyOf(itemIds), List.copyOf(fluidIds), debugStoneOnly);
+        return new Snapshot(List.copyOf(itemIds), List.copyOf(fluidIds), debugStoneOnly, blacklistSignature);
     }
 
     private static void addRecipeOutputItem(Map<ResourceLocation, Item> recipeItems, ItemStack result) {
@@ -107,7 +108,7 @@ public final class GalaxyCompressorRequirements {
         }
 
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(result.getItem());
-        if (itemId != null && !Xavitia.MODID.equals(itemId.getNamespace())) {
+        if (itemId != null && shouldIncludeItemRequirement(itemId)) {
             recipeItems.putIfAbsent(itemId, result.getItem());
         }
     }
@@ -119,7 +120,7 @@ public final class GalaxyCompressorRequirements {
                 if (block.defaultBlockState().is(tag)) {
                     Item item = block.asItem();
                     ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
-                    if (itemId != null && item != Items.AIR && !Xavitia.MODID.equals(itemId.getNamespace())) {
+                    if (itemId != null && item != Items.AIR && shouldIncludeItemRequirement(itemId)) {
                         recipeItems.putIfAbsent(itemId, item);
                     }
                     break;
@@ -134,9 +135,20 @@ public final class GalaxyCompressorRequirements {
         }
 
         ResourceLocation fluidId = BuiltInRegistries.FLUID.getKey(fluid);
-        if (fluidId != null) {
+        if (fluidId != null && shouldIncludeFluidRequirement(fluidId)) {
             recipeFluids.putIfAbsent(fluidId, fluid);
         }
+    }
+
+    private static boolean shouldIncludeItemRequirement(ResourceLocation itemId) {
+        return !Xavitia.MODID.equals(itemId.getNamespace())
+                && !Config.isRequirementModBlacklisted(itemId.getNamespace())
+                && !Config.isRequirementItemBlacklisted(itemId);
+    }
+
+    private static boolean shouldIncludeFluidRequirement(ResourceLocation fluidId) {
+        return !Config.isRequirementModBlacklisted(fluidId.getNamespace())
+                && !Config.isRequirementFluidBlacklisted(fluidId);
     }
 
     private static void addModernIndustrializationMachineOutputs(Map<ResourceLocation, Item> recipeItems, Map<ResourceLocation, Fluid> recipeFluids, Object recipe) {
@@ -173,6 +185,6 @@ public final class GalaxyCompressorRequirements {
         }
     }
 
-    public record Snapshot(List<ResourceLocation> itemIds, List<ResourceLocation> fluidIds, boolean debugStoneOnly) {
+    public record Snapshot(List<ResourceLocation> itemIds, List<ResourceLocation> fluidIds, boolean debugStoneOnly, String blacklistSignature) {
     }
 }

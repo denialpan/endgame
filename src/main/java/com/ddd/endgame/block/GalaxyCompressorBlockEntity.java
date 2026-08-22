@@ -148,7 +148,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
         }
 
         changed |= clampRequirementsToConfiguredAmounts();
-        changed |= removeModItemRequirements();
+        changed |= removeBlockedRequirements();
 
         if (Config.DEBUG_STONE_ONLY.getAsBoolean()) {
             changed |= this.remaining.keySet().removeIf(itemId -> !detected.itemIds().contains(itemId));
@@ -201,7 +201,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
 
         this.initializeRequirementsFromRecipes();
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        if (isModItem(itemId)) {
+        if (isBlockedItemRequirement(itemId)) {
             return 0;
         }
         Long current = this.remaining.get(itemId);
@@ -225,7 +225,7 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
 
         this.initializeRequirementsFromRecipes();
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        if (isModItem(itemId)) {
+        if (isBlockedItemRequirement(itemId)) {
             return 0;
         }
         Long current = this.remaining.get(itemId);
@@ -243,16 +243,26 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
         this.setChangedAndSync();
     }
 
-    private boolean removeModItemRequirements() {
-        boolean changed = this.remaining.keySet().removeIf(GalaxyCompressorBlockEntity::isModItem);
+    private boolean removeBlockedRequirements() {
+        boolean changed = this.remaining.keySet().removeIf(GalaxyCompressorBlockEntity::isBlockedItemRequirement);
+        changed |= this.fluidRemaining.keySet().removeIf(GalaxyCompressorBlockEntity::isBlockedFluidRequirement);
         if (changed) {
             this.markRequirementsDirty();
         }
         return changed;
     }
 
-    private static boolean isModItem(@Nullable ResourceLocation itemId) {
-        return itemId != null && Xavitia.MODID.equals(itemId.getNamespace());
+    private static boolean isBlockedItemRequirement(@Nullable ResourceLocation itemId) {
+        return itemId != null
+                && (Xavitia.MODID.equals(itemId.getNamespace())
+                || Config.isRequirementModBlacklisted(itemId.getNamespace())
+                || Config.isRequirementItemBlacklisted(itemId));
+    }
+
+    private static boolean isBlockedFluidRequirement(@Nullable ResourceLocation fluidId) {
+        return fluidId != null
+                && (Config.isRequirementModBlacklisted(fluidId.getNamespace())
+                || Config.isRequirementFluidBlacklisted(fluidId));
     }
 
     private int acceptFluidContribution(FluidStack stack, IFluidHandler.FluidAction action) {
@@ -262,6 +272,9 @@ public class GalaxyCompressorBlockEntity extends BlockEntity implements Containe
 
         this.initializeRequirementsFromRecipes();
         ResourceLocation fluidId = BuiltInRegistries.FLUID.getKey(stack.getFluid());
+        if (isBlockedFluidRequirement(fluidId)) {
+            return 0;
+        }
         Long current = this.fluidRemaining.get(fluidId);
         if (current == null || current <= 0L) {
             return 0;
