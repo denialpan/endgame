@@ -22,6 +22,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 public final class GalaxyCompressorRequirements {
     private static final Map<MinecraftServer, Snapshot> CACHE = new WeakHashMap<>();
@@ -85,6 +86,7 @@ public final class GalaxyCompressorRequirements {
             addRecipeFluid(recipeFluids, Fluids.LAVA);
             for (RecipeHolder<?> holder : server.getRecipeManager().getRecipes()) {
                 Object recipe = holder.value();
+                addCreateRecipeOutputs(recipeItems, recipeFluids, recipe);
                 addModernIndustrializationMachineOutputs(recipeItems, recipeFluids, recipe);
                 if (holder.value().isSpecial()) {
                     continue;
@@ -149,6 +151,87 @@ public final class GalaxyCompressorRequirements {
     private static boolean shouldIncludeFluidRequirement(ResourceLocation fluidId) {
         return !Config.isRequirementModBlacklisted(fluidId.getNamespace())
                 && !Config.isRequirementFluidBlacklisted(fluidId);
+    }
+
+    private static void addCreateRecipeOutputs(Map<ResourceLocation, Item> recipeItems, Map<ResourceLocation, Fluid> recipeFluids, Object recipe) {
+        if (!recipe.getClass().getName().startsWith("com.simibubi.create.")) {
+            return;
+        }
+
+        try {
+            addCreateProcessingOutputs(recipeItems, recipeFluids, recipe);
+            addCreateSequencedAssemblyOutputs(recipeItems, recipeFluids, recipe);
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+            Xavitia.LOGGER.debug("Unable to inspect Create recipe {}", recipe, exception);
+        }
+    }
+
+    private static void addCreateProcessingOutputs(Map<ResourceLocation, Item> recipeItems, Map<ResourceLocation, Fluid> recipeFluids, Object recipe) throws ReflectiveOperationException {
+        Object itemResults = invokeNoArgIfPresent(recipe, "getRollableResultsAsItemStacks");
+        if (itemResults instanceof Iterable<?> stacks) {
+            for (Object stack : stacks) {
+                if (stack instanceof ItemStack itemStack) {
+                    addRecipeOutputItem(recipeItems, itemStack);
+                }
+            }
+        }
+
+        Object fluidResults = invokeNoArgIfPresent(recipe, "getFluidResults");
+        if (fluidResults instanceof Iterable<?> stacks) {
+            for (Object stack : stacks) {
+                if (stack instanceof FluidStack fluidStack) {
+                    addRecipeFluid(recipeFluids, fluidStack.getFluid());
+                }
+            }
+        }
+    }
+
+    private static void addCreateSequencedAssemblyOutputs(Map<ResourceLocation, Item> recipeItems, Map<ResourceLocation, Fluid> recipeFluids, Object recipe) throws ReflectiveOperationException {
+        if (!"com.simibubi.create.content.processing.sequenced.SequencedAssemblyRecipe".equals(recipe.getClass().getName())) {
+            return;
+        }
+
+        Field resultPoolField = recipe.getClass().getField("resultPool");
+        Object resultPool = resultPoolField.get(recipe);
+        addCreateProcessingOutputStacks(recipeItems, resultPool);
+
+        Object transitionalItem = invokeNoArgIfPresent(recipe, "getTransitionalItem");
+        if (transitionalItem instanceof ItemStack stack) {
+            addRecipeOutputItem(recipeItems, stack);
+        }
+
+        Object sequence = invokeNoArgIfPresent(recipe, "getSequence");
+        if (sequence instanceof Iterable<?> sequencedRecipes) {
+            for (Object sequencedRecipe : sequencedRecipes) {
+                Object nestedRecipe = invokeNoArgIfPresent(sequencedRecipe, "getRecipe");
+                if (nestedRecipe != null) {
+                    addCreateProcessingOutputs(recipeItems, recipeFluids, nestedRecipe);
+                }
+            }
+        }
+    }
+
+    private static void addCreateProcessingOutputStacks(Map<ResourceLocation, Item> recipeItems, Object outputs) throws ReflectiveOperationException {
+        if (!(outputs instanceof Iterable<?> outputEntries)) {
+            return;
+        }
+
+        for (Object output : outputEntries) {
+            Method getStack = output.getClass().getMethod("getStack");
+            Object stack = getStack.invoke(output);
+            if (stack instanceof ItemStack itemStack) {
+                addRecipeOutputItem(recipeItems, itemStack);
+            }
+        }
+    }
+
+    private static Object invokeNoArgIfPresent(Object target, String methodName) throws ReflectiveOperationException {
+        try {
+            Method method = target.getClass().getMethod(methodName);
+            return method.invoke(target);
+        } catch (NoSuchMethodException ignored) {
+            return null;
+        }
     }
 
     private static void addModernIndustrializationMachineOutputs(Map<ResourceLocation, Item> recipeItems, Map<ResourceLocation, Fluid> recipeFluids, Object recipe) {
