@@ -50,18 +50,6 @@ public class Config {
                     "vanilla: 999\nAE2: 9999\nCreate: x100\nModern Industrialization: x1000")
             .defineEnum("requirementDetectionMode", RequirementDetectionMode.AUTO);
 
-    public static final ModConfigSpec.ConfigValue<List<? extends String>> REQUIREMENT_MOD_BLACKLIST = BUILDER
-            .comment("Mod ids whose items and fluids should not be detected as Galaxy Compressor requirements. Example: [\"minecraft\", \"create\"]")
-            .defineListAllowEmpty("requirementModBlacklist", List.of(), () -> "minecraft", Config::isValidModIdConfigValue);
-
-    public static final ModConfigSpec.ConfigValue<List<? extends String>> REQUIREMENT_ITEM_BLACKLIST = BUILDER
-            .comment("Item ids that should not be detected as Galaxy Compressor requirements. Example: [\"minecraft:stone\", \"minecraft:dirt\"]")
-            .defineListAllowEmpty("requirementItemBlacklist", List.of(), () -> "minecraft:stone", Config::isValidResourceLocationConfigValue);
-
-    public static final ModConfigSpec.ConfigValue<List<? extends String>> REQUIREMENT_FLUID_BLACKLIST = BUILDER
-            .comment("Fluid ids that should not be detected as Galaxy Compressor requirements. Example: [\"minecraft:water\", \"minecraft:lava\"]")
-            .defineListAllowEmpty("requirementFluidBlacklist", List.of(), () -> "minecraft:water", Config::isValidResourceLocationConfigValue);
-
     public static final ModConfigSpec.BooleanValue THE_STICK_GRANTS_CREATIVE = BUILDER
             .comment("Whether holding The Stick in inventory sets the player to Creative mode.")
             .define("theStickGrantsCreative", true);
@@ -122,6 +110,18 @@ public class Config {
                     "IRIS_SAFE: renders after translucent blocks to avoid common shader depth issues, at the cost of being later in the frame.\n",
                     "DISABLED: disables the galaxy effect.")
             .defineEnum("skyboxIrisCompatibilityMode", RenderStageMode.AUTO);
+
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> REQUIREMENT_MOD_BLACKLIST = BUILDER
+            .comment("Mod ids whose items and fluids should not be detected as Galaxy Compressor requirements. Example: [\"minecraft\", \"create\"]")
+            .defineListAllowEmpty("requirementModBlacklist", List.of(), () -> "minecraft", Config::isValidModIdConfigValue);
+
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> REQUIREMENT_ITEM_BLACKLIST = BUILDER
+            .comment("Item ids that should not be detected as Galaxy Compressor requirements. Example: [\"minecraft:stone\", \"minecraft:dirt\"]")
+            .defineListAllowEmpty("requirementItemBlacklist", List.of(), () -> "minecraft:stone", Config::isValidResourceLocationConfigValue);
+
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> REQUIREMENT_FLUID_BLACKLIST = BUILDER
+            .comment("Fluid ids that should not be detected as Galaxy Compressor requirements. Example: [\"minecraft:water\", \"minecraft:lava\"]")
+            .defineListAllowEmpty("requirementFluidBlacklist", List.of(), () -> "minecraft:water", Config::isValidResourceLocationConfigValue);
 
     public static final ModConfigSpec.BooleanValue DEBUG_STONE_ONLY = BUILDER
             .comment("Debug mode: require only 20 minecraft:stone and ignore all item/fluid recipe requirements.")

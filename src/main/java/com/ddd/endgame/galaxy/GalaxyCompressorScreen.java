@@ -215,8 +215,10 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
                 }
                 RowData clicked = hoveredGridRow((int)mouseX, (int)mouseY);
                 if (clicked != null) {
-                    if (!clicked.fluid()) {
-                        openJeiRecipes(clicked.stack());
+                    if (clicked.fluid()) {
+                        openJeiFluidRecipes(clicked.fluidStack());
+                    } else {
+                        openJeiItemRecipes(clicked.stack());
                     }
                     return true;
                 }
@@ -505,7 +507,7 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
         RowData hovered = hoveredGridRow(mouseX, mouseY);
         if (hovered != null) {
             List<Component> tooltip = hovered.fluid()
-                    ? new ArrayList<>(List.of(Component.literal(hovered.name())))
+                    ? fluidTooltip(hovered)
                     : new ArrayList<>(Screen.getTooltipFromItem(Minecraft.getInstance(), hovered.stack()));
             tooltip.add(Component.empty());
             tooltip.add(Component.literal(hovered.fluid() ? "Endgame fluid progress" : "Endgame progress").withStyle(ChatFormatting.GRAY));
@@ -516,11 +518,31 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
         }
     }
 
-    private static void openJeiRecipes(ItemStack stack) {
+    private static List<Component> fluidTooltip(RowData row) {
+        List<Component> tooltip = new ArrayList<>(List.of(Component.literal(row.name())));
+        if (Minecraft.getInstance().options.advancedItemTooltips) {
+            tooltip.add(Component.literal(row.itemId()).withStyle(ChatFormatting.DARK_GRAY));
+        }
+        return tooltip;
+    }
+
+    private static void openJeiItemRecipes(ItemStack stack) {
         if (stack.isEmpty()) {
             return;
         }
 
+        openJeiRecipes("mezz.jei.api.constants.VanillaTypes", "ITEM_STACK", stack.copy());
+    }
+
+    private static void openJeiFluidRecipes(FluidStack stack) {
+        if (stack.isEmpty()) {
+            return;
+        }
+
+        openJeiRecipes("mezz.jei.api.neoforge.NeoForgeTypes", "FLUID_STACK", stack.copy());
+    }
+
+    private static void openJeiRecipes(String ingredientTypesClassName, String ingredientTypeFieldName, Object ingredient) {
         try {
             Class<?> internalClass = Class.forName("mezz.jei.common.Internal");
             Object runtime = internalClass.getMethod("getJeiRuntime").invoke(null);
@@ -533,12 +555,12 @@ public class GalaxyCompressorScreen extends AbstractContainerScreen<GalaxyCompre
             Object recipesGui = runtime.getClass().getMethod("getRecipesGui").invoke(runtime);
             Class<?> roleClass = Class.forName("mezz.jei.api.recipe.RecipeIngredientRole");
             Class<?> typeClass = Class.forName("mezz.jei.api.ingredients.IIngredientType");
-            Class<?> vanillaTypesClass = Class.forName("mezz.jei.api.constants.VanillaTypes");
+            Class<?> ingredientTypesClass = Class.forName(ingredientTypesClassName);
             Object outputRole = Enum.valueOf((Class<? extends Enum>)roleClass.asSubclass(Enum.class), "OUTPUT");
-            Object itemStackType = vanillaTypesClass.getField("ITEM_STACK").get(null);
+            Object ingredientType = ingredientTypesClass.getField(ingredientTypeFieldName).get(null);
             Object focus = focusFactory.getClass()
                     .getMethod("createFocus", roleClass, typeClass, Object.class)
-                    .invoke(focusFactory, outputRole, itemStackType, stack.copy());
+                    .invoke(focusFactory, outputRole, ingredientType, ingredient);
             recipesGui.getClass().getMethod("show", List.class).invoke(recipesGui, List.of(focus));
         } catch (ReflectiveOperationException | RuntimeException ignored) {
             // JEI is optional; clicks are a no-op if it is not installed or its runtime is unavailable.
