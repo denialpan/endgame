@@ -233,7 +233,7 @@ public final class GalaxyInstability {
     }
 
     public static boolean ensureStarted(ItemStack stack, Level level) {
-        if (stack.isEmpty() || !isGalaxyMaterial(stack) || isFrozenStable(stack)) {
+        if (stack.isEmpty() || !isGalaxyMaterial(stack)) {
             return false;
         }
         CompoundTag existing = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();

@@ -13,10 +13,13 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
@@ -66,6 +69,17 @@ public final class GalaxyCompressorRequirements {
         if (debugStoneOnly) {
             recipeItems.put(BuiltInRegistries.ITEM.getKey(Items.STONE), Items.STONE);
         } else {
+            addTaggedBlockItems(
+                    recipeItems,
+                    BlockTags.BASE_STONE_OVERWORLD,
+                    BlockTags.BASE_STONE_NETHER,
+                    BlockTags.DIRT,
+                    BlockTags.LOGS,
+                    BlockTags.LEAVES,
+                    BlockTags.SAPLINGS,
+                    BlockTags.FLOWERS,
+                    BlockTags.CROPS
+            );
             addRecipeFluid(recipeFluids, Fluids.WATER);
             addRecipeFluid(recipeFluids, Fluids.LAVA);
             for (RecipeHolder<?> holder : server.getRecipeManager().getRecipes()) {
@@ -95,6 +109,22 @@ public final class GalaxyCompressorRequirements {
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(result.getItem());
         if (itemId != null && !Xavitia.MODID.equals(itemId.getNamespace())) {
             recipeItems.putIfAbsent(itemId, result.getItem());
+        }
+    }
+
+    @SafeVarargs
+    private static void addTaggedBlockItems(Map<ResourceLocation, Item> recipeItems, TagKey<Block>... tags) {
+        for (Block block : BuiltInRegistries.BLOCK) {
+            for (TagKey<Block> tag : tags) {
+                if (block.defaultBlockState().is(tag)) {
+                    Item item = block.asItem();
+                    ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+                    if (itemId != null && item != Items.AIR && !Xavitia.MODID.equals(itemId.getNamespace())) {
+                        recipeItems.putIfAbsent(itemId, item);
+                    }
+                    break;
+                }
+            }
         }
     }
 
