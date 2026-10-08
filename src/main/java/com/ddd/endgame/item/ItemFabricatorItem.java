@@ -73,6 +73,9 @@ public class ItemFabricatorItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         ItemStack stack = player.getItemInHand(usedHand);
+        if (usedHand == InteractionHand.MAIN_HAND && player.isShiftKeyDown() && selectOffhandItem(level, player, stack)) {
+            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        }
         return extractSelectedStack(level, player, stack)
                 ? InteractionResultHolder.sidedSuccess(stack, level.isClientSide)
                 : InteractionResultHolder.fail(stack);
@@ -84,6 +87,9 @@ public class ItemFabricatorItem extends Item {
         Player player = context.getPlayer();
         ItemStack stack = context.getItemInHand();
         if (player != null && context.isSecondaryUseActive()) {
+            if (context.getHand() == InteractionHand.MAIN_HAND && selectOffhandItem(level, player, stack)) {
+                return InteractionResult.sidedSuccess(level.isClientSide);
+            }
             return extractSelectedStack(level, player, stack)
                     ? InteractionResult.sidedSuccess(level.isClientSide)
                     : InteractionResult.FAIL;
@@ -226,6 +232,22 @@ public class ItemFabricatorItem extends Item {
         return items.get(index);
     }
 
+    public static Item selectItem(ItemStack stack, Item targetItem) {
+        List<Item> items = selectableItems();
+        if (items.isEmpty() || targetItem == net.minecraft.world.item.Items.AIR) {
+            return net.minecraft.world.item.Items.AIR;
+        }
+
+        ResourceLocation targetId = BuiltInRegistries.ITEM.getKey(targetItem);
+        for (int index = 0; index < items.size(); index++) {
+            if (BuiltInRegistries.ITEM.getKey(items.get(index)).equals(targetId)) {
+                setSelectedIndex(stack, index);
+                return items.get(index);
+            }
+        }
+        return net.minecraft.world.item.Items.AIR;
+    }
+
     private static int selectedIndex(ItemStack stack) {
         CustomData customData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
         if (customData.copyTag().contains(BLOCK_INDEX_TAG)) {
@@ -236,6 +258,23 @@ public class ItemFabricatorItem extends Item {
 
     private static void setSelectedIndex(ItemStack stack, int index) {
         CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putInt(BLOCK_INDEX_TAG, index));
+    }
+
+    private static boolean selectOffhandItem(Level level, Player player, ItemStack fabricatorStack) {
+        ItemStack offhandStack = player.getOffhandItem();
+        if (offhandStack.isEmpty()) {
+            return false;
+        }
+
+        Item selected = selectItem(fabricatorStack, offhandStack.getItem());
+        if (selected == net.minecraft.world.item.Items.AIR) {
+            return false;
+        }
+
+        if (!level.isClientSide) {
+            player.displayClientMessage(Component.translatable("message.xavitia.item_fabricator.selected", selected.getDescription()), true);
+        }
+        return true;
     }
 
     private static BlockState selectedPlaceableState(ItemStack stack, Level level, BlockPos placePos, Player player) {
